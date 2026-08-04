@@ -33,3 +33,6 @@ logs/
 
 # Brand working files — large binaries, source stays in brand/
 brand/logo/_work/
+
+# Playwright MCP scratch
+.playwright-mcp/

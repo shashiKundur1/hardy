@@ -60,7 +60,32 @@ Non-negotiable output rules:
 - Design tokens live in `brand/tokens.css`. Components consume tokens, never raw values.
 - The brand book (`brand/BRAND.md`) is the source of truth for colour, type, and voice.
 
-## Rule 6 — King's audit before building a feature
+## Rule 6 — Zero comments in code
+
+**No comments. None.** Not headers, not section dividers, not "why" notes, not docstrings,
+not `# ponytail:` markers. Code explains itself through naming; anything that genuinely needs
+prose goes in a markdown file under `docs/` or `brand/`, never inline.
+
+This overrides the ponytail convention of marking simplifications with a `ponytail:` comment —
+record those in `docs/DECISIONS.md` instead.
+
+## Rule 7 — Strict organisation
+
+One concept per file, and the file is named for the concept.
+
+- **Types and schemas live together, apart from logic.** Pydantic/SQLAlchemy models in
+  `app/models.py`, request/response schemas in `app/schemas.py`. Never redefine a type
+  next to the function that uses it.
+- **One responsibility per module.** Dual-write lives only in `app/services/products.py`.
+  Every Mesh call lives only in `app/services/mesh.py`. Trigger policy only in
+  `app/services/triggers.py`. If logic needs two homes, it belongs in neither — extract it.
+- **Agent internals stay split**: `graph.py` wires nodes, `nodes.py` implements them,
+  `prompts.py` holds prompt text, `retrieval.py` holds retrieval. A node implementation never
+  contains a prompt string.
+- Route modules contain routing and validation only — no business logic, no SQL, no LLM calls.
+- Repo layout is fixed by `HARDY.md` §21. Do not invent new top-level directories.
+
+## Rule 8 — King's audit before building a feature
 
 For any user-facing system (recommendations, search, product page):
 
