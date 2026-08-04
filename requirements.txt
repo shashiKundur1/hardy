@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+sqlalchemy
+aiosqlite
+passlib[bcrypt]
+itsdangerous
+openai
+qdrant-client
+langgraph
+langchain-core
+langsmith
+apscheduler
+aiosmtplib
+pydantic-settings
+httpx
