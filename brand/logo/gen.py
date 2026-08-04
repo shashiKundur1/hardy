@@ -12,11 +12,15 @@ OUT = pathlib.Path(__file__).parent / "_work"
 STEEL = (
     "Material: solid machined stainless steel with a brushed satin finish, covered in fine "
     "rigid scratches and micro-abrasions from real use. Reflective but not chrome — it catches "
-    "light in soft broad highlights, not mirror glare. Every bevelled edge carries a warm "
-    "golden rim-light that traces the outline like polished brass. "
-    "Lit by a large soft studio softbox from the upper left with a subtle warm bounce from the "
-    "lower right. Background: pure clean white, seamless, no gradient, no floor line, no shadow "
-    "cast onto the backdrop. Product photography, sharp focus, high detail, 3D render quality."
+    "light in soft broad highlights, not mirror glare. Every bevelled edge carries a hot amber "
+    "rim-light that traces the outline like molten brass, bright enough to separate the metal "
+    "from the darkness behind it. "
+    "Lit dramatically from the upper left by a hard key light, with a strong amber rim light "
+    "raking across the top and right edges, and deep shadow filling the lower left. "
+    "Background: pure solid black, #000000, completely seamless and featureless, total void, "
+    "no floor, no horizon line, no shadow cast onto the backdrop, no vignette, no grey. "
+    "The metal must never blend into the background — the amber rim keeps every edge readable. "
+    "Dark moody industrial product photography, sharp focus, high detail, 3D render quality."
 )
 
 VARIANTS = {
