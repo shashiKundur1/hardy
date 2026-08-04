@@ -68,7 +68,30 @@ Treat the demo video as required, not a finalist-only nicety.
 
 Prizes: 1st ₹20,000 · 2nd ₹10,000 · 3rd ₹5,000 · 4th–10th quarterly Projects subscription.
 
-## 2026-08-04 — Still open
+## 2026-08-04 — Credentials in place
 
-- [ ] Add `MESH_API_KEY` + `SUBMISSION_TOKEN` as GitHub Actions secrets (manual, Shashi)
-- [ ] Confirm first CI run is green in the Actions tab
+`MESH_API_KEY` and `SUBMISSION_TOKEN` are set as GitHub Actions secrets. `LANGSMITH_API_KEY`
+verified (`/api/v1/sessions` → 200), so the observability bonus is unblocked.
+All three live in the gitignored, `chmod 600` `.env`. Nothing secret is tracked —
+`git check-ignore` confirms `.env` is caught by line 2 of `.gitignore`.
+
+First CI run failed with `token_missing` because the secrets did not exist yet. That was the
+expected bootstrap failure, not a code problem.
+
+## 2026-08-04 — Revised day plan
+
+`HARDY.md` §23 is built around a 2 Aug start and a 9 Aug deadline. Both are wrong. Actual
+plan, anchored to the real 11 Aug deadline with 10 Aug as the target submission date:
+
+| Day | Date | Deliverable |
+|---|---|---|
+| 1 | **4 Aug** | Repo, CI green, Mesh + embeddings verified, brand book, tokens, King's audit, process map |
+| 2 | 5 Aug | FastAPI skeleton, auth, schema. Admin CRUD. **Dual-write incl. update + delete.** Consistency endpoint. |
+| 3 | 6 Aug | Catalog seeded (~130 products). `tracker.js` + `/api/events` bulk ingest. Storefront pages, all tracked. |
+| 4 | 7 Aug | Qdrant wired, hybrid retrieval, plain agent. **End-to-end loop alive.** LinkedIn + X posts published. |
+| 5 | 8 Aug | LangGraph rewrite, six nodes + refine loop. LangSmith tracing. Re-rank. Trigger policy + cache. |
+| 6 | 9 Aug | APScheduler digest. **`/debug` glass box.** README. Storefront polish against the brand book. |
+| 7 | 10 Aug | Demo video. Final CI green. **Submit.** |
+| — | 11 Aug | Buffer only. The repo URL locks on submit; do not spend this day. |
+
+Registration closes **7 Aug 12:00 IST** — already registered, no action.
