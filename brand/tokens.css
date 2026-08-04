@@ -1,14 +1,14 @@
 :root {
-  --void: #0B0B0C;
-  --steel-900: #16171A;
-  --steel-800: #1F2125;
-  --steel-700: #2C2F35;
-  --steel-600: #3D424A;
-  --steel-500: #6E747E;
-  --steel-400: #8B929C;
-  --steel-300: #A8AEB8;
-  --steel-200: #C9CFD8;
-  --steel-100: #E6E9ED;
+  --void: #100E0C;
+  --steel-900: #1B1815;
+  --steel-800: #241F1B;
+  --steel-700: #332E28;
+  --steel-600: #47403A;
+  --steel-500: #6E655C;
+  --steel-400: #8E8478;
+  --steel-300: #ADA396;
+  --steel-200: #CBC3B8;
+  --steel-100: #E9E4DC;
   --white: #FFFFFF;
 
   --amber: #FFB302;
@@ -30,7 +30,7 @@
   --state-error: #FF6B5A;
   --state-ok: #6BE1A0;
 
-  --font-display: "Archivo Expanded", "Archivo", "Helvetica Neue", sans-serif;
+  --font-display: "Encode Sans Expanded", "Archivo", sans-serif;
   --font-ui: "Archivo", "Inter", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
@@ -51,28 +51,23 @@
   --text-5xl: 3.815rem;
   --text-6xl: 4.768rem;
 
-  --leading-hero: 0.92;
+  --leading-hero: 0.94;
   --leading-tight: 1.1;
   --leading-body: 1.6;
-  --tracking-hero: -0.03em;
+  --tracking-hero: -0.025em;
   --tracking-label: 0.16em;
   --measure: 66ch;
 
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-24: 6rem;
-  --space-32: 8rem;
+  --pad: 1em;
+  --gap: 1em;
+  --space-1: 1em;
+  --space-2: 2em;
+  --space-3: 3em;
+  --space-4: 4em;
 
   --radius-sm: 0.125rem;
   --radius: 0.25rem;
   --edge: 1px solid var(--steel-700);
-  --edge-hot: 1px solid var(--amber);
 
   --container: 78rem;
   --tap-min: 2.75rem;
@@ -111,12 +106,11 @@ body {
 h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
-  font-stretch: expanded;
   color: var(--white);
   text-transform: uppercase;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-hero);
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--gap);
 }
 
 h1 {
@@ -130,7 +124,6 @@ h3 { font-size: var(--text-xl); }
 
 a {
   color: var(--amber);
-  text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
 }
 
@@ -158,29 +151,37 @@ a:hover { color: var(--amber-hot); }
   background: var(--steel-900);
   border: var(--edge);
   border-radius: var(--radius);
+  padding: var(--pad);
 }
 
-.price {
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-xl);
-  color: var(--white);
-  font-variant-numeric: tabular-nums;
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
 }
 
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.price,
 .cost-per-year {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   font-size: var(--text-xl);
-  color: var(--amber);
   font-variant-numeric: tabular-nums;
 }
+
+.price { color: var(--white); }
+.cost-per-year { color: var(--amber); }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  gap: var(--gap);
+  padding: var(--pad);
   border: var(--edge);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
@@ -188,18 +189,6 @@ a:hover { color: var(--amber-hot); }
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--steel-300);
-  background: transparent;
-}
-
-.badge--continuity {
-  border-color: var(--amber);
-  color: var(--amber);
-  background: var(--amber-ghost);
-}
-
-.badge--unknown {
-  border-style: dashed;
-  color: var(--steel-500);
 }
 
 .badge::before {
@@ -209,8 +198,19 @@ a:hover { color: var(--amber-hot); }
   background: currentColor;
 }
 
+.badge--continuity {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-ghost);
+}
+
 .badge--continuity::before {
   clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+.badge--unknown {
+  border-style: dashed;
+  color: var(--steel-500);
 }
 
 .badge--unknown::before {
@@ -230,8 +230,8 @@ a:hover { color: var(--amber-hot); }
   font-size: var(--text-sm);
   color: var(--steel-300);
   border-left: 2px solid var(--amber);
-  padding-left: var(--space-3);
-  margin: var(--space-3) 0;
+  padding-left: var(--pad);
+  margin: var(--gap) 0;
 }
 
 .evidence cite {
@@ -240,5 +240,5 @@ a:hover { color: var(--amber-hot); }
   font-style: normal;
   font-size: var(--text-xs);
   color: var(--steel-500);
-  margin-top: var(--space-1);
+  margin-top: var(--gap);
 }

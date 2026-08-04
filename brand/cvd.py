@@ -66,23 +66,23 @@ def distance(a, b):
 
 
 UI_PAIRS = [
-    ("#FFFFFF", "#0B0B0C", 4.5, "heading on page"),
-    ("#E6E9ED", "#0B0B0C", 4.5, "body on page"),
-    ("#E6E9ED", "#16171A", 4.5, "body on surface"),
-    ("#A8AEB8", "#0B0B0C", 4.5, "secondary on page"),
-    ("#8B929C", "#0B0B0C", 3.0, "muted on page"),
-    ("#FFB302", "#0B0B0C", 4.5, "amber accent on page"),
-    ("#FFB302", "#16171A", 4.5, "amber on surface"),
-    ("#4DA3FF", "#0B0B0C", 4.5, "signal blue on page"),
-    ("#0B0B0C", "#FFB302", 4.5, "ink on amber button"),
+    ("#FFFFFF", "#100E0C", 4.5, "heading on page"),
+    ("#E9E4DC", "#100E0C", 4.5, "body on page"),
+    ("#E9E4DC", "#1B1815", 4.5, "body on surface"),
+    ("#ADA396", "#100E0C", 4.5, "secondary on page"),
+    ("#8E8478", "#100E0C", 3.0, "muted on page"),
+    ("#FFB302", "#100E0C", 4.5, "amber accent on page"),
+    ("#FFB302", "#1B1815", 4.5, "amber on surface"),
+    ("#4DA3FF", "#100E0C", 4.5, "signal blue on page"),
+    ("#100E0C", "#FFB302", 4.5, "ink on amber button"),
 ]
 
 SEMANTIC = {
     "amber": "#FFB302",
     "signal": "#4DA3FF",
-    "surface": "#16171A",
-    "muted": "#8B929C",
-    "body": "#E6E9ED",
+    "surface": "#1B1815",
+    "muted": "#8E8478",
+    "body": "#E9E4DC",
 }
 
 MAP_PALETTE = {
