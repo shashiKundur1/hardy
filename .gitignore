@@ -36,3 +36,8 @@ brand/logo/_work/
 
 # Playwright MCP scratch
 .playwright-mcp/
+
+# Internal working process — not part of the public repo
+CLAUDE.md
+docs/
+brand/research/
