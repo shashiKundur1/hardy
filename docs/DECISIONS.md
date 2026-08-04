@@ -78,6 +78,27 @@ All three live in the gitignored, `chmod 600` `.env`. Nothing secret is tracked 
 First CI run failed with `token_missing` because the secrets did not exist yet. That was the
 expected bootstrap failure, not a code problem.
 
+## 2026-08-04 — ⚠️ CI has **four** critical checks, not two
+
+`HARDY.md` §22.3 lists two critical checks (compiles, requirements). The real run shows **four**:
+
+| Check | What it does |
+|---|---|
+| `compiles` | All Python files free of syntax errors |
+| `requirements` | Web framework **and** LLM client present |
+| **`mesh_used`** | **Greps the repo for actual Mesh API usage.** Undocumented anywhere. |
+| **`mesh_key`** | **Calls the Mesh API with your key to prove it is valid and funded.** |
+
+`mesh_used` is the one that matters: **a repo with no Mesh call in it fails a critical check**,
+so CI cannot be green on scaffolding alone. It was the sole failure once the secrets landed.
+Closed by writing the real `app/services/mesh.py` rather than a placeholder.
+
+`mesh_key` confirms §22.1's warning was right — the organisers make a **live billed call** with
+the key. It must stay funded through 11 Aug, not just at submission time.
+
+A trailing `403 Result not recorded — You have not submitted your entry yet` is expected and
+harmless: check results only get recorded once the dashboard form is submitted.
+
 ## 2026-08-04 — Revised day plan
 
 `HARDY.md` §23 is built around a 2 Aug start and a 9 Aug deadline. Both are wrong. Actual
@@ -95,3 +116,25 @@ plan, anchored to the real 11 Aug deadline with 10 Aug as the target submission 
 | — | 11 Aug | Buffer only. The repo URL locks on submit; do not spend this day. |
 
 Registration closes **7 Aug 12:00 IST** — already registered, no action.
+
+## 2026-08-04 — CI is green on checks, red on the badge, and that is expected
+
+Run 30928964660: **4/4 critical, 3/3 advisory passed.**
+
+```
+[PASS] compiles: all 9 files compile cleanly
+[PASS] requirements: web framework + LLM client present
+[PASS] mesh_used: Mesh API referenced in: test_mesh.py, config.py, mesh.py
+[PASS] mesh_key: Mesh API key is valid
+[PASS] no committed .env file   [PASS] README found   [PASS] .gitignore ignores .env
+```
+
+The workflow still exits 1 on:
+
+> `Result not recorded (403): You have not submitted your entry yet.`
+
+**This cannot be fixed by code.** Results only record once the dashboard form is submitted, and
+the form requires the YouTube video plus LinkedIn and X links, which do not exist yet.
+
+**Do not submit early to clear it** — the GitHub URL locks permanently on submit. Expect a red
+badge in the Actions tab until submission day and read the check lines, not the badge.
