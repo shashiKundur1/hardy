@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Admin · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Admin</p>
+    <h1>Catalog</h1>
+    <p class="section__lede">Signed in as {{ user.email }}.</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <span class="stat__value">{{ product_count }}</span>
+      <span class="stat__label">Products in SQL</span>
+    </div>
+    <div class="stat">
+      <span class="stat__value">{{ sourced }}</span>
+      <span class="stat__label">Sourced ownership claims</span>
+    </div>
+    <div class="stat">
+      <span class="stat__value">{{ categories|length }}</span>
+      <span class="stat__label">Categories</span>
+    </div>
+  </div>
+  <div class="panel">
+    <p class="panel__head">{{ ui.icon("evidence") }} Products by category</p>
+    {% for entry in categories %}
+    <div class="spec">
+      <span class="spec__label">{{ ui.icon(entry.slug) }} {{ entry.label }}</span>
+      <span class="spec__value">{{ entry.total }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
