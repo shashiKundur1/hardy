@@ -64,6 +64,7 @@
   --space-2: 2em;
   --space-3: 3em;
   --space-4: 4em;
+  --space-6: 6em;
 
   --radius-sm: 0.125rem;
   --radius: 0.25rem;
@@ -110,7 +111,7 @@ h1, h2, h3 {
   text-transform: uppercase;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-hero);
-  margin: 0 0 var(--gap);
+  margin: 0;
 }
 
 h1 {
@@ -134,111 +135,7 @@ a:hover { color: var(--amber-hot); }
   outline-offset: var(--focus-offset);
 }
 
-.label {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
-  color: var(--steel-400);
-}
-
 .numeric {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-}
-
-.surface {
-  background: var(--steel-900);
-  border: var(--edge);
-  border-radius: var(--radius);
-  padding: var(--pad);
-}
-
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap);
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  gap: var(--gap);
-}
-
-.price,
-.cost-per-year {
-  font-family: var(--font-display);
-  font-weight: var(--weight-display);
-  font-size: var(--text-xl);
-  font-variant-numeric: tabular-nums;
-}
-
-.price { color: var(--white); }
-.cost-per-year { color: var(--amber); }
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--gap);
-  padding: var(--pad);
-  border: var(--edge);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--steel-300);
-}
-
-.badge::before {
-  content: "";
-  width: 0.5rem;
-  height: 0.5rem;
-  background: currentColor;
-}
-
-.badge--continuity {
-  border-color: var(--amber);
-  color: var(--amber);
-  background: var(--amber-ghost);
-}
-
-.badge--continuity::before {
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
-}
-
-.badge--unknown {
-  border-style: dashed;
-  color: var(--steel-500);
-}
-
-.badge--unknown::before {
-  background: transparent;
-  border: 1px dashed currentColor;
-  border-radius: 50%;
-}
-
-.narrative {
-  font-size: var(--text-lg);
-  line-height: var(--leading-body);
-  max-width: var(--measure);
-  color: var(--steel-100);
-}
-
-.evidence {
-  font-size: var(--text-sm);
-  color: var(--steel-300);
-  border-left: 2px solid var(--amber);
-  padding-left: var(--pad);
-  margin: var(--gap) 0;
-}
-
-.evidence cite {
-  display: block;
-  font-family: var(--font-mono);
-  font-style: normal;
-  font-size: var(--text-xs);
-  color: var(--steel-500);
-  margin-top: var(--gap);
 }
