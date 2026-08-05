@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% set page_id = "catalog" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}{{ product.title }} · Hardy{% endblock %}
+{% block body_data %} data-category="{{ product.category }}" data-product-id="{{ product.id }}"{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <p class="breadcrumb">
+    <a href="/">Hardy</a> <span>/</span>
+    <a href="/category/{{ product.category }}">{{ label }}</a> <span>/</span>
+    <span>{{ product.brand }}</span>
+  </p>
+  <div class="detail">
+    <div class="detail__media">{{ ui.media(product) }}</div>
+    <div class="detail__body">
+      <p class="eyebrow">{{ product.brand }}</p>
+      <h1>{{ product.title }}</h1>
+      <p class="detail__lede">{{ product.description }}</p>
+      <div class="figures">
+        <div class="figure">
+          <span class="figure__label">Price</span>
+          <span class="figure__value">{{ ui.rupees(product.price) }}</span>
+        </div>
+        <div class="figure">
+          <span class="figure__label">Cost per year</span>
+          <span class="figure__value figure__value--derived">{{ ui.rupees(product.cost_per_year) }}</span>
+        </div>
+      </div>
+      {{ ui.ownership(product) }}
+      {{ ui.evidence(product) }}
+      <div class="panel">
+        <p class="panel__head">{{ ui.icon("evidence") }} What is stated, and what is not</p>
+        <div class="spec">
+          <span class="spec__label">{{ ui.icon("cost-per-year") }} Expected life</span>
+          <span class="spec__value">{{ product.expected_life_years }} years</span>
+        </div>
+        <div class="spec">
+          <span class="spec__label">{{ ui.icon("repairability") }} Repairability</span>
+          <span class="spec__value">
+            {% if product.repairability_score is not none %}{{ product.repairability_score }} / 10{% else %}Not stated{% endif %}
+          </span>
+        </div>
+        <div class="spec">
+          <span class="spec__label">{{ ui.icon("tools") }} Parts available until</span>
+          <span class="spec__value">{% if product.parts_until %}{{ product.parts_until }}{% else %}Not stated{% endif %}</span>
+        </div>
+        <div class="spec">
+          <span class="spec__label">{{ ui.icon("ownership") }} Warranty</span>
+          <span class="spec__value">{{ product.warranty or "Not stated" }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if related %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Also in {{ label }}</p>
+    <h2>Compared on the same numbers</h2>
+  </div>
+  <ul class="grid">
+    {% for other in related %}
+      {{ ui.card(other, other.expected_life_years ~ " year life") }}
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

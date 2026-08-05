@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% set page_id = "catalog" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}{{ label }} · Hardy{% endblock %}
+{% block body_data %} data-category="{{ slug }}"{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="breadcrumb"><a href="/">Hardy</a> <span>/</span> <span>{{ label }}</span></p>
+    <h1>{{ label }}</h1>
+    <p class="section__lede">{{ blurb }}</p>
+  </div>
+  {% if products %}
+  <ul class="grid">
+    {% for product in products %}
+      {{ ui.card(product, product.expected_life_years ~ " year life") }}
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">Nothing in this category yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
