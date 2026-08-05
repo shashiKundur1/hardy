@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set page_id = "search" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}{% if query %}{{ query }} · {% endif %}Search · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Search</p>
+    <h1>{% if query %}{{ results|length }} for “{{ query }}”{% else %}Search the catalog{% endif %}</h1>
+    {% if query %}
+    <p class="section__lede">Matched on title, brand and description, ordered by expected life.</p>
+    {% endif %}
+  </div>
+  {% if results %}
+  <ul class="grid">
+    {% for product in results %}
+      {{ ui.card(product, product.expected_life_years ~ " year life") }}
+    {% endfor %}
+  </ul>
+  {% elif query %}
+  <p class="empty">
+    <span>Nothing matched “{{ query }}”.</span>
+    <span>Try a brand, a material, or a category name.</span>
+  </p>
+  {% else %}
+  <p class="empty">Type a brand, a product type, or a material into the search field above.</p>
+  {% endif %}
+</section>
+{% endblock %}

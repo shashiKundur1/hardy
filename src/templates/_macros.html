@@ -1,0 +1,69 @@
+{% macro icon(name, extra="") -%}
+<span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg)" aria-hidden="true"></span>
+{%- endmacro %}
+
+{% macro rupees(amount) -%}
+₹{{ "{:,.0f}".format(amount) }}
+{%- endmacro %}
+
+{% macro ownership(product) -%}
+{% set continuity = ("family", "employee", "trust") %}
+{% set corporate = ("public", "conglomerate", "private_equity") %}
+{% if product.ownership_type in continuity %}
+  <span class="badge badge--continuity">{{ product.ownership_type.replace("_", " ") }} owned</span>
+{% elif product.ownership_type in corporate %}
+  <span class="badge badge--corporate">{{ product.ownership_type.replace("_", " ") }} owned</span>
+{% else %}
+  <span class="badge badge--unknown">Ownership unknown</span>
+{% endif %}
+{%- endmacro %}
+
+{% macro evidence(product) -%}
+{% if product.ownership_note and product.evidence_source %}
+<blockquote class="evidence">
+  <p>“{{ product.ownership_note }}”</p>
+  <cite>{{ product.evidence_source }}</cite>
+</blockquote>
+{% else %}
+<blockquote class="evidence evidence--absent">
+  <p>No ownership record on file.</p>
+  <cite>Not stated by the brand</cite>
+</blockquote>
+{% endif %}
+{%- endmacro %}
+
+{% macro media(product) -%}
+{% if product.image_url %}
+<img src="{{ product.image_url }}" alt="{{ product.title }}" width="720" height="720" loading="lazy">
+{% else %}
+{{ icon(product.category) }}
+{% endif %}
+{%- endmacro %}
+
+{% macro card(product, label) -%}
+<li>
+  <a class="card" href="/product/{{ product.id }}" data-track="product-card"
+     data-product-id="{{ product.id }}" data-category="{{ product.category }}">
+    <span class="card__media">{{ media(product) }}</span>
+    <span class="card__body">
+      <span class="card__overline">{{ label }}</span>
+      <span class="card__title">{{ product.title }}</span>
+      <span class="card__brand">{{ product.brand }}</span>
+      <span class="card__foot">
+        <span class="figures">
+          <span class="figure">
+            <span class="figure__label">Price</span>
+            <span class="figure__value">{{ rupees(product.price) }}</span>
+          </span>
+          <span class="figure">
+            <span class="figure__label">Per year</span>
+            <span class="figure__value figure__value--derived">{{ rupees(product.cost_per_year) }}</span>
+          </span>
+        </span>
+        {{ ownership(product) }}
+        {{ evidence(product) }}
+      </span>
+    </span>
+  </a>
+</li>
+{%- endmacro %}
