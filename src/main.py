@@ -2,8 +2,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -15,6 +16,7 @@ from src.config import settings
 from src.database import create_schema
 from src.debug.router import router as debug_router
 from src.events.router import router as events_router
+from src.exceptions import fault_for
 from src.integrations import vectorstore
 from src.observability import configure_logging, get_logger
 from src.recommendations.router import router as recommendations_router
@@ -34,29 +36,42 @@ async def lifespan(_: FastAPI):
     yield
 
 
+def wants_json(request: Request) -> bool:
+    return request.url.path.startswith("/api")
+
+
+def fault(request: Request, status_code: int, detail: str) -> Response:
+    if wants_json(request):
+        return JSONResponse({"detail": detail}, status_code)
+    return page(
+        request,
+        "error.html",
+        status_code,
+        status=status_code,
+        detail=detail,
+        **fault_for(status_code),
+    )
+
+
 async def to_sign_in(request: Request, exception: Exception) -> Response:
+    if wants_json(request):
+        return JSONResponse({"detail": "Sign in to continue"}, status.HTTP_401_UNAUTHORIZED)
     return RedirectResponse("/login", status.HTTP_303_SEE_OTHER)
 
 
 async def error_page(request: Request, exception: HTTPException) -> Response:
-    return page(
-        request,
-        "error.html",
-        exception.status_code,
-        status=exception.status_code,
-        message=exception.detail,
-    )
+    return fault(request, exception.status_code, exception.detail)
+
+
+async def invalid_request(request: Request, exception: RequestValidationError) -> Response:
+    if wants_json(request):
+        return JSONResponse({"detail": exception.errors()}, status.HTTP_422_UNPROCESSABLE_CONTENT)
+    return fault(request, status.HTTP_422_UNPROCESSABLE_CONTENT, "That request could not be read")
 
 
 async def failure_page(request: Request, exception: Exception) -> Response:
     logger.exception("unhandled request failure", exc_info=exception)
-    return page(
-        request,
-        "error.html",
-        status.HTTP_500_INTERNAL_SERVER_ERROR,
-        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        message="Something broke on our side",
-    )
+    return fault(request, status.HTTP_500_INTERNAL_SERVER_ERROR, "Something broke on our side")
 
 
 def create_app() -> FastAPI:
@@ -90,6 +105,7 @@ def create_app() -> FastAPI:
     app.include_router(storefront_router)
     app.add_exception_handler(NotAuthenticated, to_sign_in)
     app.add_exception_handler(HTTPException, error_page)
+    app.add_exception_handler(RequestValidationError, invalid_request)
     app.add_exception_handler(Exception, failure_page)
     return app
 

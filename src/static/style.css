@@ -831,19 +831,9 @@ body {
   text-align: center;
 }
 
-.fault__mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--gap);
-  color: var(--amber);
-}
-
-.fault__mark .icon {
-  font-size: 4rem;
-}
-
 .fault__code {
+  margin: 0;
+  color: var(--amber);
   font-family: var(--font-display);
   font-size: clamp(var(--text-4xl), 14vw, var(--text-6xl));
   font-weight: var(--weight-hero);
@@ -865,6 +855,14 @@ body {
 .fault__blurb {
   max-width: 46ch;
   color: var(--steel-300);
+}
+
+.fault__detail {
+  padding: var(--pad);
+  border: var(--edge);
+  border-radius: var(--radius);
+  color: var(--steel-300);
+  font-size: var(--text-xs);
 }
 
 .fault__actions {

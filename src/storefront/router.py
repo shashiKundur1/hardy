@@ -18,11 +18,15 @@ from src.rendering import page
 
 router = APIRouter(tags=["storefront"])
 
-NOT_FOUND = {
+AS_A_PAGE = {
     status.HTTP_404_NOT_FOUND: {
         "description": "Nothing lives at this address",
         "content": {"text/html": {}},
-    }
+    },
+    status.HTTP_422_UNPROCESSABLE_CONTENT: {
+        "description": "Part of that request could not be read",
+        "content": {"text/html": {}},
+    },
 }
 
 
@@ -40,7 +44,7 @@ async def home(request: Request, session: SessionDep, user: OptionalUser) -> HTM
     )
 
 
-@router.get("/category/{slug}", response_class=HTMLResponse, responses=NOT_FOUND)
+@router.get("/category/{slug}", response_class=HTMLResponse, responses=AS_A_PAGE)
 async def category(
     request: Request, session: SessionDep, user: OptionalUser, slug: str
 ) -> HTMLResponse:
@@ -58,7 +62,7 @@ async def category(
     )
 
 
-@router.get("/product/{product_id}", response_class=HTMLResponse, responses=NOT_FOUND)
+@router.get("/product/{product_id}", response_class=HTMLResponse, responses=AS_A_PAGE)
 async def product(
     request: Request, session: SessionDep, user: OptionalUser, product_id: ProductId
 ) -> HTMLResponse:

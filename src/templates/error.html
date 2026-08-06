@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% import "_macros.html" as ui %}
 
 {% block title %}{{ status }} · Hardy{% endblock %}
 
@@ -7,24 +6,18 @@
 
 {% block main %}
 <section class="fault container">
-  <div class="fault__mark">
-    {{ ui.icon("evidence" if status == 404 else "repairability") }}
-    <span class="fault__code numeric">{{ status }}</span>
-  </div>
+  <p class="fault__code" aria-hidden="true">{{ status }}</p>
   <div class="fault__text">
-    <h1>{{ message }}</h1>
-    <p class="fault__blurb">
-      {% if status == 404 %}
-        Nothing lives at this address. It may have been renamed, or it never existed.
-      {% else %}
-        Hardy failed on its own side, not yours. The fault has been logged with its stack trace,
-        and nothing you did caused it. Try the page again in a moment.
-      {% endif %}
-    </p>
-    <div class="fault__actions">
-      <a class="button" href="/">Back to the storefront</a>
-      <a class="button button--quiet" href="/search">Search the catalog</a>
-    </div>
+    <h1>{{ headline }}</h1>
+    <p class="fault__blurb">{{ explanation }}</p>
+    <p class="fault__detail mono">{{ status }} · {{ detail }}</p>
+  </div>
+  <div class="fault__actions">
+    {% for action in actions %}
+    <a class="button{{ '' if loop.first else ' button--quiet' }}" href="{{ action.href }}">
+      {{ action.label }}
+    </a>
+    {% endfor %}
   </div>
 </section>
 {% endblock %}
