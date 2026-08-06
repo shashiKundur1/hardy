@@ -63,7 +63,7 @@
   </div>
   <ul class="grid">
     {% for other in related %}
-      {{ ui.card(other, other.expected_life_years ~ " year life") }}
+      {{ ui.card(other) }}
     {% endfor %}
   </ul>
 </section>

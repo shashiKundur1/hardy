@@ -97,6 +97,25 @@
     <div class="panel__body">
       <p class="narrative">{{ recommendation.narrative }}</p>
     </div>
+    {% if chosen %}
+    <ul class="shortlist">
+      {% for product in chosen[:3] %}
+      <li>
+        <a class="shortlist__item" href="/product/{{ product.id }}" data-track="shortlist"
+           data-product-id="{{ product.id }}" data-category="{{ product.category }}">
+          <span class="shortlist__media">{{ ui.media(product) }}</span>
+          <span class="shortlist__body">
+            <span class="shortlist__title">{{ product.title }}</span>
+            <span class="shortlist__rate">{{ ui.rupees(product.cost_per_year) }} per year</span>
+          </span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="panel__foot">
+      <a class="navlink" href="/recommendations">All {{ chosen|length }} picks, with what Hardy has on each</a>
+    </p>
+    {% endif %}
   </div>
   {% else %}
   <p class="empty">
@@ -116,7 +135,7 @@
   {% if featured %}
   <ul class="grid">
     {% for product in featured %}
-      {{ ui.card(product, product.expected_life_years ~ " year life") }}
+      {{ ui.card(product) }}
     {% endfor %}
   </ul>
   {% else %}
