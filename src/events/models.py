@@ -12,6 +12,7 @@ class Event(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    batch: Mapped[str] = mapped_column(String(32), index=True)
     type: Mapped[str] = mapped_column(String(20))
     product_id: Mapped[int | None] = mapped_column(ForeignKey("products.id"))
     category: Mapped[str | None] = mapped_column(String(40))

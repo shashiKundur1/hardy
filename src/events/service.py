@@ -1,6 +1,7 @@
 import json
 from collections import Counter
 from datetime import datetime
+from uuid import uuid4
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,10 +13,12 @@ from src.events.schemas import IncomingEvent
 
 
 async def record(user_id: int, batch: list[IncomingEvent]) -> None:
+    stamp = uuid4().hex
     async with session_factory() as session:
         session.add_all(
             Event(
                 user_id=user_id,
+                batch=stamp,
                 type=incoming.type,
                 product_id=incoming.product_id,
                 category=incoming.category,

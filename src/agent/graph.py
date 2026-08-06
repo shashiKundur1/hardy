@@ -51,6 +51,7 @@ def initial_state(user_id: int, trigger_reason: str, profile_hash: str) -> Agent
         "query": "",
         "candidates_raw": [],
         "candidates": [],
+        "filter_applied": None,
         "evidence_ok": False,
         "refine_count": 0,
         "narrative": "",

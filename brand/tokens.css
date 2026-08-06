@@ -71,6 +71,7 @@
   --edge: 1px solid var(--steel-700);
 
   --container: 78rem;
+  --dock-clearance: 8em;
   --tap-min: 2.75rem;
   --focus-ring: 2px solid var(--amber);
   --focus-offset: 2px;

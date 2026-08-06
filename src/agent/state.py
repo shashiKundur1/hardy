@@ -41,6 +41,7 @@ class AgentState(TypedDict):
     query: str
     candidates_raw: Annotated[list[Candidate], replace]
     candidates: Annotated[list[Candidate], replace]
+    filter_applied: str | None
     evidence_ok: bool
     refine_count: int
     narrative: str
