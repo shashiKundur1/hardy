@@ -16,7 +16,7 @@
   {% if results %}
   <ul class="grid">
     {% for product in results %}
-      {{ ui.card(product, product.expected_life_years ~ " year life") }}
+      {{ ui.card(product) }}
     {% endfor %}
   </ul>
   {% elif query %}

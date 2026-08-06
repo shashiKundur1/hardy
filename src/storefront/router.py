@@ -32,6 +32,7 @@ AS_A_PAGE = {
 
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
+    active = await recommendations.active_for(session, user.id) if user else None
     return page(
         request,
         "home.html",
@@ -40,7 +41,8 @@ async def home(request: Request, session: SessionDep, user: OptionalUser) -> HTM
         featured=await catalog.featured(session, FEATURED_LIMIT),
         catalog_size=await catalog.count(session),
         sourced=await catalog.sourced_count(session),
-        recommendation=await recommendations.active_for(session, user.id) if user else None,
+        recommendation=active,
+        chosen=await recommendations.products_for(session, active) if active else [],
     )
 
 
@@ -97,10 +99,13 @@ async def search(
 
 @router.get("/recommendations", response_class=HTMLResponse)
 async def advice(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
+    active = await recommendations.active_for(session, user.id) if user else None
     return page(
         request,
         "recommendations.html",
         user=user,
         categories=await catalog.navigation(session),
-        recommendation=await recommendations.active_for(session, user.id) if user else None,
+        recommendation=active,
+        chosen=await recommendations.products_for(session, active) if active else [],
+        reasons=recommendations.reasons_for(active) if active else {},
     )

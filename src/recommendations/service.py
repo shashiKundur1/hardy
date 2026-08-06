@@ -38,6 +38,28 @@ async def products_for(session: AsyncSession, recommendation: Recommendation) ->
     return [found[product_id] for product_id in ordered if product_id in found]
 
 
+def reasons_for(recommendation: Recommendation) -> dict[int, dict]:
+    try:
+        trace = json.loads(recommendation.retrieval_trace or "{}")
+    except json.JSONDecodeError:
+        return {}
+    grounds = {}
+    for rank, item in enumerate(trace.get("after_rerank", []), start=1):
+        facts = [f"{item['expected_life_years']} year life"]
+        if item.get("repairability_score"):
+            facts.append(f"repairability {item['repairability_score']:g} of 10")
+        facts.append(
+            "ownership on record" if item.get("evidence_source") else "no ownership record"
+        )
+        grounds[item["product_id"]] = {
+            "rank": rank,
+            "score": item["ranked_score"],
+            "facts": facts,
+            "sourced": bool(item.get("evidence_source")),
+        }
+    return grounds
+
+
 async def record(session: AsyncSession, user_id: int, decision: Decision) -> None:
     session.add(
         TriggerDecision(

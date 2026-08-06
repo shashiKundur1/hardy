@@ -13,11 +13,13 @@
       Hardy reasons over what you actually looked at, and shows the working.
     </p>
   </div>
+
   {% if not user %}
   <p class="empty">
     <span>Sign in to see a recommendation.</span>
     <a class="button" href="/login">Sign in</a>
   </p>
+
   {% elif recommendation %}
   <div class="panel">
     <p class="panel__head">
@@ -29,6 +31,43 @@
       <p class="narrative">{{ recommendation.narrative }}</p>
     </div>
   </div>
+
+  {% if chosen %}
+  <ul class="picks">
+    {% for product in chosen %}
+    {% set ground = reasons.get(product.id) %}
+    <li class="pick">
+      <a class="pick__link" href="/product/{{ product.id }}" data-track="recommendation-pick"
+         data-product-id="{{ product.id }}" data-category="{{ product.category }}">
+        <span class="pick__rank mono" aria-hidden="true">{{ "%02d"|format(ground.rank if ground else loop.index) }}</span>
+        <span class="pick__media">{{ ui.media(product) }}</span>
+        <span class="pick__body">
+          <span class="pick__title">{{ product.title }}</span>
+          <span class="pick__meta">{{ product.brand }} · {{ ui.rupees(product.price) }} once</span>
+          <span class="pick__rate">
+            <span class="pick__rate-value">{{ ui.rupees(product.cost_per_year) }}</span>
+            <span class="pick__rate-unit">per year</span>
+          </span>
+        </span>
+      </a>
+      {% if ground %}
+      <p class="pick__why">
+        <span class="pick__why-label">On record</span>
+        {{ ground.facts|join(" · ") }}
+        <span class="pick__score mono">score {{ "%.4f"|format(ground.score) }}</span>
+      </p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="picks__foot">
+    Order is a blend of how closely each product matched your browsing and how it scores on
+    durability, so it does not simply follow cost per year. The facts above are what Hardy holds
+    on each product, not a claim about why it placed where it did.
+    <a href="/debug">The scores before and after the re-rank are on the glass box</a>.
+  </p>
+  {% endif %}
+
   {% else %}
   <p class="empty">
     <span>Nothing yet.</span>
