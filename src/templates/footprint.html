@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Your footprint · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Your footprint</p>
+    <h1>Everything Hardy read</h1>
+    <p class="section__lede">
+      Every action this site recorded about you, what it concluded from them, and a control that
+      deletes the lot. Nothing here is summarised on the way in — this is the table itself.
+    </p>
+  </div>
+
+  {% if not user %}
+  <p class="empty">
+    <span>Sign in to see your footprint.</span>
+    <a class="button" href="/login">Sign in</a>
+  </p>
+
+  {% elif not total %}
+  <p class="empty">
+    <span>Hardy has recorded nothing about you.</span>
+    <span>Browsing a few products will start the record, and this page will show every entry.</span>
+    <a class="button button--quiet" href="/">Start browsing</a>
+  </p>
+
+  {% else %}
+  <ul class="gauges">
+    {% for row in summary %}
+    <li class="gauge">
+      <span class="gauge__label">{{ row.type|replace("_", " ") }}</span>
+      <span class="gauge__value">{{ row.total|compact }}</span>
+      <span class="gauge__note">
+        last at {{ row.last_seen.strftime("%d %b, %H:%M") }}
+        {%- if row.example.query %} · “{{ row.example.query }}”
+        {%- elif row.example.category %} · {{ row.example.category }}{% endif %}
+      </span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+{% if user and total %}
+<section class="container lane" data-lane="agent">
+    <header class="lane__head">
+      <h2>What Hardy concluded</h2>
+      <p class="lane__note">
+        Derived data, not collected data. This is the part worth checking — it is Hardy's reading
+        of you rather than a record of what you did.
+      </p>
+    </header>
+    {% if intent %}
+    <dl class="pairs">
+      <div class="pair">
+        <dt>Categories</dt>
+        <dd>{{ intent.categories|join(", ") or "none" }}</dd>
+      </div>
+      <div class="pair">
+        <dt>Shopping stage</dt>
+        <dd>{{ intent.stage }}</dd>
+      </div>
+      <div class="pair">
+        <dt>Budget read</dt>
+        <dd>{{ intent.budget_hint }}</dd>
+      </div>
+      <div class="pair">
+        <dt>Priorities</dt>
+        <dd>{{ intent.priorities|join(", ") or "none" }}</dd>
+      </div>
+    </dl>
+    <blockquote class="evidence">
+      <p>“{{ intent.evidence }}”</p>
+      <cite>the reason the model gave, stored when it ran</cite>
+    </blockquote>
+    {% else %}
+    <p class="empty">Hardy has not concluded anything yet.</p>
+    {% endif %}
+</section>
+
+<section class="container lane" data-lane="ingest">
+    <header class="lane__head">
+      <h2>The record itself</h2>
+      <p class="lane__note">
+        {{ total|compact }} actions recorded, grouped by the batch your browser sent. The most
+        recent {{ batches|length }} batches are shown.
+      </p>
+    </header>
+    <div class="stream">
+      {% for group in batches %}
+      <section class="stream__batch">
+        <h3 class="stream__head">
+          <span class="mono">batch {{ group.batch[:8] }}</span>
+          <span class="muted">{{ group.events|length }} actions</span>
+          <time class="mono" datetime="{{ group.at.isoformat() }}">
+            {{ group.at.strftime("%d %b, %H:%M:%S") }}
+          </time>
+        </h3>
+        <ul class="stream__rows">
+          {% for event in group.events %}
+          <li class="stream__row">
+            <span class="tag">{{ event.type|replace("_", " ") }}</span>
+            <span class="stream__what">
+              {% if event.query %}“{{ event.query }}”
+              {% elif event.product_id %}looked at product {{ event.product_id }}
+              {% else %}{{ event.category or "—" }}{% endif %}
+            </span>
+            <span class="stream__meta mono">{{ event.category or "—" }}</span>
+            <span class="stream__meta mono">
+              {{ ("%.1fs"|format(event.dwell_ms / 1000)) if event.dwell_ms else "—" }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endfor %}
+    </div>
+</section>
+
+<section class="container lane" data-lane="store">
+    <header class="lane__head">
+      <h2>Delete all of it</h2>
+      <p class="lane__note">
+        This removes every action above, every recommendation built from them and every trigger
+        decision. It cannot be undone, and Hardy will have nothing to reason from until you
+        browse again.
+      </p>
+    </header>
+    <form method="post" action="/footprint/forget">
+      <button class="button button--quiet" type="submit">
+        Delete {{ total|compact }} recorded actions
+      </button>
+    </form>
+</section>
+{% endif %}
+{% endblock %}
