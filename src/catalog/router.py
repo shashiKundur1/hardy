@@ -1,9 +1,13 @@
-from fastapi import APIRouter, HTTPException, Request, Response, status
-from fastapi.responses import HTMLResponse
+from typing import Annotated
+
+from fastapi import APIRouter, Form, HTTPException, Request, Response, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from src.auth.dependencies import AdminUser
 from src.catalog import service
+from src.catalog.constants import ADMIN_PAGE_SIZE
 from src.catalog.schemas import Consistency, ProductId, ProductRead, ProductWrite
+from src.constants import CATEGORIES, Ownership
 from src.database import SessionDep
 from src.rendering import page
 
@@ -11,16 +15,69 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 api_router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
-@router.get("")
-async def overview(request: Request, session: SessionDep, user: AdminUser) -> HTMLResponse:
+@router.get("", response_class=HTMLResponse)
+async def overview(
+    request: Request, session: SessionDep, user: AdminUser, page_number: int = 1
+) -> HTMLResponse:
+    offset = max(page_number - 1, 0) * ADMIN_PAGE_SIZE
+    total = await service.count(session)
     return page(
         request,
         "admin.html",
         user=user,
         categories=await service.navigation(session),
-        product_count=await service.count(session),
+        product_count=total,
         sourced=await service.sourced_count(session),
+        consistency=await service.consistency(session),
+        products=await service.page_of(session, offset, ADMIN_PAGE_SIZE),
+        page_number=max(page_number, 1),
+        page_count=max((total + ADMIN_PAGE_SIZE - 1) // ADMIN_PAGE_SIZE, 1),
     )
+
+
+@router.get("/products/{product_id}", response_class=HTMLResponse)
+async def edit_form(
+    request: Request, session: SessionDep, user: AdminUser, product_id: ProductId
+) -> HTMLResponse:
+    product = await service.by_id(session, product_id)
+    if product is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such product")
+    return page(
+        request,
+        "admin_product.html",
+        user=user,
+        categories=await service.navigation(session),
+        product=product,
+        ownerships=[option.value for option in Ownership],
+        slugs=CATEGORIES,
+    )
+
+
+@router.post("/products/{product_id}")
+async def save_product(
+    session: SessionDep,
+    user: AdminUser,
+    product_id: ProductId,
+    form: Annotated[ProductWrite, Form()],
+) -> RedirectResponse:
+    if await service.replace(session, product_id, form) is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such product")
+    return RedirectResponse("/admin", status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/products/{product_id}/delete")
+async def delete_product(
+    session: SessionDep, user: AdminUser, product_id: ProductId
+) -> RedirectResponse:
+    if not await service.remove(session, product_id):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such product")
+    return RedirectResponse("/admin", status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/resync")
+async def resync_from_form(session: SessionDep, user: AdminUser) -> RedirectResponse:
+    await service.resync_all(session)
+    return RedirectResponse("/admin", status.HTTP_303_SEE_OTHER)
 
 
 @api_router.get("/consistency")

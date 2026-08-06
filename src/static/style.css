@@ -1793,3 +1793,111 @@ body {
   padding: var(--pad);
   border-top: var(--edge);
 }
+
+.tablewrap {
+  overflow-x: auto;
+  border: var(--edge);
+  border-radius: var(--radius);
+}
+
+.roster {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.roster th,
+.roster td {
+  padding: var(--pad);
+  border-bottom: var(--edge);
+  text-align: start;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.roster thead th {
+  position: sticky;
+  top: 0;
+  background: var(--steel-900);
+  color: var(--steel-400);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.roster tbody tr:last-child th,
+.roster tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.roster tbody tr:hover {
+  background: var(--steel-900);
+}
+
+.roster tbody th {
+  font-weight: var(--weight-body);
+  white-space: normal;
+}
+
+.roster tbody th a {
+  color: var(--white);
+  text-decoration: none;
+}
+
+.roster tbody th a:hover {
+  text-decoration: underline;
+}
+
+.roster__sub {
+  display: block;
+  color: var(--steel-400);
+  font-size: var(--text-xs);
+}
+
+.roster__num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.roster__actions form {
+  display: inline-flex;
+}
+
+.roster__actions .button {
+  vertical-align: middle;
+}
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap);
+  font-size: var(--text-xs);
+  color: var(--steel-400);
+}
+
+.editor {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--gap);
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field__note {
+  max-width: var(--measure);
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--steel-400);
+}
+
+.editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  grid-column: 1 / -1;
+}

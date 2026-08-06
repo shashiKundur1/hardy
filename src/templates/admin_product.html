@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}{{ product.title }} · Admin · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow"><a href="/admin">Admin</a> · edit</p>
+    <h1>{{ product.title }}</h1>
+    <p class="section__lede">
+      Saving rewrites the row and its vector together. If the embedding fails, neither changes.
+    </p>
+  </div>
+
+  <form class="editor" method="post" action="/admin/products/{{ product.id }}">
+    <div class="field">
+      <label class="field__label" for="title">Title</label>
+      <input class="input" id="title" name="title" value="{{ product.title }}" required maxlength="200">
+    </div>
+    <div class="field">
+      <label class="field__label" for="brand">Brand</label>
+      <input class="input" id="brand" name="brand" value="{{ product.brand }}" required maxlength="100">
+    </div>
+    <div class="field">
+      <label class="field__label" for="category">Category</label>
+      <select class="input" id="category" name="category" required>
+        {% for slug in slugs %}
+        <option value="{{ slug }}" {% if slug == product.category %}selected{% endif %}>{{ slug }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label class="field__label" for="price">Price</label>
+      <input class="input" id="price" name="price" type="number" step="0.01" min="0.01"
+             value="{{ product.price }}" required>
+    </div>
+    <div class="field">
+      <label class="field__label" for="expected_life_years">Expected life, years</label>
+      <input class="input" id="expected_life_years" name="expected_life_years" type="number"
+             min="1" max="200" value="{{ product.expected_life_years }}" required>
+    </div>
+    <div class="field">
+      <label class="field__label" for="repairability_score">Repairability, 0 to 10</label>
+      <input class="input" id="repairability_score" name="repairability_score" type="number"
+             step="0.1" min="0" max="10" value="{{ product.repairability_score or '' }}">
+    </div>
+    <div class="field">
+      <label class="field__label" for="ownership_type">Ownership</label>
+      <select class="input" id="ownership_type" name="ownership_type">
+        {% for option in ownerships %}
+        <option value="{{ option }}" {% if option == product.ownership_type %}selected{% endif %}>
+          {{ option.replace("_", " ") }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field field--wide">
+      <label class="field__label" for="evidence_source">Evidence source</label>
+      <input class="input" id="evidence_source" name="evidence_source"
+             value="{{ product.evidence_source or '' }}"
+             aria-describedby="evidence_note">
+      <p class="field__note" id="evidence_note">
+        An ownership claim other than “unknown” is refused without a source. This is enforced in
+        the schema, so the API and this form cannot disagree about it.
+      </p>
+    </div>
+    <div class="field field--wide">
+      <label class="field__label" for="ownership_note">Ownership note</label>
+      <textarea class="input" id="ownership_note" name="ownership_note" rows="2">{{ product.ownership_note or '' }}</textarea>
+    </div>
+    <div class="field field--wide">
+      <label class="field__label" for="description">Description</label>
+      <textarea class="input" id="description" name="description" rows="4" required>{{ product.description }}</textarea>
+    </div>
+    <div class="field">
+      <label class="field__label" for="warranty">Warranty</label>
+      <input class="input" id="warranty" name="warranty" value="{{ product.warranty or '' }}" maxlength="120">
+    </div>
+    <div class="field">
+      <label class="field__label" for="parts_until">Parts available until</label>
+      <input class="input" id="parts_until" name="parts_until" type="number"
+             value="{{ product.parts_until or '' }}">
+    </div>
+    <div class="field field--wide">
+      <label class="field__label" for="image_url">Image URL</label>
+      <input class="input" id="image_url" name="image_url" value="{{ product.image_url or '' }}">
+    </div>
+    <div class="editor__actions">
+      <button class="button" type="submit">Save and re-embed</button>
+      <a class="button button--quiet" href="/admin">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
