@@ -40,10 +40,11 @@ def build():
 graph = build()
 
 
-def initial_state(user_id: int, trigger_reason: str) -> AgentState:
+def initial_state(user_id: int, trigger_reason: str, profile_hash: str) -> AgentState:
     return {
         "user_id": user_id,
         "trigger_reason": trigger_reason,
+        "profile_hash": profile_hash,
         "events": [],
         "behaviour_summary": "",
         "intent": None,
@@ -58,5 +59,5 @@ def initial_state(user_id: int, trigger_reason: str) -> AgentState:
     }
 
 
-async def run(user_id: int, trigger_reason: str) -> AgentState:
-    return await graph.ainvoke(initial_state(user_id, trigger_reason))
+async def run(user_id: int, trigger_reason: str, profile_hash: str) -> AgentState:
+    return await graph.ainvoke(initial_state(user_id, trigger_reason, profile_hash))

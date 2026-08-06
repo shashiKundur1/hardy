@@ -60,6 +60,13 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -m 'not live'"
 asyncio_mode = "auto"
 filterwarnings = ["ignore::DeprecationWarning"]
+markers = [
+    "unit: pure logic, no database and no network",
+    "integration: database, vector store and app wiring, no network",
+    "regression: a defect that was fixed and must not return",
+    "contract: the served OpenAPI schema matches what the routes actually do",
+    "live: needs a real MESH_API_KEY and calls the network",
+]

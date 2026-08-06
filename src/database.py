@@ -1,4 +1,6 @@
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
+from importlib import import_module
 from typing import Annotated
 
 from fastapi import Depends
@@ -23,12 +25,11 @@ async def get_session() -> AsyncIterator[AsyncSession]:
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 
-async def create_schema() -> None:
-    from src.auth.models import User
-    from src.catalog.models import Product
-    from src.events.models import Event
-    from src.recommendations.models import Recommendation
+def utcnow() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
 
-    tables = [model.__table__ for model in (User, Product, Event, Recommendation)]
+
+async def create_schema() -> None:
+    import_module("src.models")
     async with engine.begin() as connection:
-        await connection.run_sync(Base.metadata.create_all, tables=tables)
+        await connection.run_sync(Base.metadata.create_all)

@@ -1,4 +1,3 @@
-import hashlib
 import json
 from collections import Counter
 
@@ -45,14 +44,6 @@ def _summarise(rows: list[dict]) -> str:
     return ". ".join(parts) + "."
 
 
-def _profile_hash(rows: list[dict]) -> str:
-    signature = json.dumps(
-        [[row["type"], row["product_id"], row["category"], row["query"]] for row in rows],
-        sort_keys=True,
-    )
-    return hashlib.sha256(signature.encode()).hexdigest()
-
-
 def _as_candidate(item: retrieval.Retrieved) -> Candidate:
     product = item.product
     return Candidate(
@@ -93,17 +84,7 @@ def _render(candidates: list[Candidate]) -> str:
 
 async def load_behaviour(state: AgentState) -> dict:
     async with session_factory() as session:
-        recent = await events.recent_for(session, state["user_id"], RECENT_LIMIT)
-    rows = [
-        {
-            "type": str(event.type),
-            "product_id": event.product_id,
-            "category": event.category,
-            "query": event.query,
-            "dwell_ms": event.dwell_ms,
-        }
-        for event in recent
-    ]
+        rows = events.as_rows(await events.recent_for(session, state["user_id"], RECENT_LIMIT))
     return {
         "events": rows,
         "behaviour_summary": _summarise(rows),
@@ -241,7 +222,7 @@ async def store(state: AgentState) -> dict:
                 product_ids=json.dumps(state["product_ids"]),
                 interest_profile=json.dumps(state["intent"]),
                 trigger_reason=state["trigger_reason"],
-                profile_hash=_profile_hash(state["events"]),
+                profile_hash=state["profile_hash"],
                 events_covered=len(state["events"]),
                 model_used=settings.mesh_chat_model,
                 tokens_used=sum(call.total_tokens for call in mesh.recent_calls(20)),

@@ -16,6 +16,7 @@ from src.database import create_schema
 from src.events.router import router as events_router
 from src.integrations import vectorstore
 from src.observability import configure_logging, get_logger
+from src.recommendations.router import router as recommendations_router
 from src.rendering import page
 from src.storefront.router import router as storefront_router
 
@@ -83,6 +84,7 @@ def create_app() -> FastAPI:
     app.include_router(catalog_router)
     app.include_router(catalog_api_router)
     app.include_router(events_router)
+    app.include_router(recommendations_router)
     app.include_router(storefront_router)
     app.add_exception_handler(NotAuthenticated, to_sign_in)
     app.add_exception_handler(HTTPException, error_page)

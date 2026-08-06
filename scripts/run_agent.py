@@ -11,6 +11,8 @@ from src.constants import EventType, Role, TriggerReason
 from src.database import create_schema, session_factory
 from src.events.models import Event
 from src.integrations import vectorstore
+from src.recommendations import service as recommendations
+from src.recommendations import triggers
 from src.recommendations.models import Recommendation
 
 DEMO_EMAIL = "demo@hardy.local"
@@ -74,7 +76,20 @@ async def main() -> None:
         seeded = await seed_behaviour(session, user)
 
     print(f"demo user {user.id} with {seeded} behaviour events")
-    state = await graph.run(user.id, TriggerReason.MANUAL)
+
+    async with session_factory() as session:
+        active = await recommendations.active_for(session, user.id)
+        decision = await triggers.decide(session, user.id, active, TriggerReason.MANUAL)
+        await recommendations.record(session, user.id, decision)
+
+    print(f"trigger: {decision.trigger_reason or decision.suppression_reason}")
+    print(f"catalog version: {decision.catalog_version}")
+    print(f"profile hash: {decision.profile_hash[:16]}")
+    if not decision.fired:
+        print("suppressed, no model call made")
+        return
+
+    state = await graph.run(user.id, decision.trigger_reason, decision.profile_hash)
 
     print("nodes visited:", " -> ".join(state["nodes_visited"]))
     print("refine loops:", state["refine_count"])
