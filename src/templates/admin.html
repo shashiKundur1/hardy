@@ -11,28 +11,96 @@
     <h1>Catalog</h1>
     <p class="section__lede">Signed in as {{ user.email }}.</p>
   </div>
-  <div class="stats">
-    <div class="stat">
-      <span class="stat__value">{{ product_count }}</span>
-      <span class="stat__label">Products in SQL</span>
-    </div>
-    <div class="stat">
-      <span class="stat__value">{{ sourced }}</span>
-      <span class="stat__label">Sourced ownership claims</span>
-    </div>
-    <div class="stat">
-      <span class="stat__value">{{ categories|length }}</span>
-      <span class="stat__label">Categories</span>
-    </div>
+  <ul class="gauges">
+    <li class="gauge">
+      <span class="gauge__label">Products</span>
+      <span class="gauge__value">{{ product_count|compact }}</span>
+      <span class="gauge__note">rows in SQLite</span>
+    </li>
+    <li class="gauge">
+      <span class="gauge__label">Vectors</span>
+      <span class="gauge__value">{{ consistency.qdrant_count|compact }}</span>
+      <span class="gauge__note">points in Qdrant</span>
+    </li>
+    <li class="gauge">
+      <span class="gauge__label">Sourced</span>
+      <span class="gauge__value">{{ sourced|compact }}</span>
+      <span class="gauge__note">ownership claims with a source</span>
+    </li>
+    <li class="gauge" data-state="{{ 'ok' if consistency.in_sync else 'error' }}">
+      <span class="gauge__label">In sync</span>
+      <span class="gauge__value">{{ "YES" if consistency.in_sync else "NO" }}</span>
+      <span class="gauge__note">
+        {{ consistency.missing_from_qdrant|length }} missing ·
+        {{ consistency.orphaned_in_qdrant|length }} orphaned
+      </span>
+    </li>
+  </ul>
+  {% if not consistency.in_sync %}
+  <form method="post" action="/admin/resync">
+    <button class="button" type="submit">Re-embed every product and repair the vector store</button>
+  </form>
+  {% endif %}
+</section>
+
+<section class="container lane" data-lane="store">
+  <header class="lane__head">
+    <h2>Products</h2>
+    <p class="lane__note">
+      Newest first. Editing a product rewrites its vector in the same transaction, so the two
+      stores cannot drift apart.
+    </p>
+  </header>
+  <div class="tablewrap">
+    <table class="roster">
+      <thead>
+        <tr>
+          <th scope="col">Product</th>
+          <th scope="col">Category</th>
+          <th scope="col" class="roster__num">Price</th>
+          <th scope="col" class="roster__num">Per year</th>
+          <th scope="col">Ownership</th>
+          <th scope="col">Vector</th>
+          <th scope="col"><span class="skip">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <th scope="row">
+            <a href="/product/{{ product.id }}">{{ product.title }}</a>
+            <span class="roster__sub">{{ product.brand }}</span>
+          </th>
+          <td>{{ product.category }}</td>
+          <td class="roster__num mono">{{ ui.rupees(product.price) }}</td>
+          <td class="roster__num mono">{{ ui.rupees(product.cost_per_year) }}</td>
+          <td>{{ ui.ownership_mark(product) }}</td>
+          <td>
+            {% if product.vector_synced_at %}
+            <span class="tag tag--ok">synced</span>
+            {% else %}
+            <span class="tag tag--absent">never</span>
+            {% endif %}
+          </td>
+          <td class="roster__actions">
+            <a class="button button--quiet" href="/admin/products/{{ product.id }}">Edit</a>
+            <form method="post" action="/admin/products/{{ product.id }}/delete">
+              <button class="button button--quiet" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  <div class="panel">
-    <p class="panel__head">{{ ui.icon("evidence") }} Products by category</p>
-    {% for entry in categories %}
-    <div class="spec">
-      <span class="spec__label">{{ ui.icon(entry.slug) }} {{ entry.label }}</span>
-      <span class="spec__value">{{ entry.total }}</span>
-    </div>
-    {% endfor %}
-  </div>
+  <nav class="pager" aria-label="Product pages">
+    {% if page_number > 1 %}
+    <a class="button button--quiet" href="/admin?page_number={{ page_number - 1 }}">Previous</a>
+    {% endif %}
+    <span class="mono">Page {{ page_number }} of {{ page_count }}</span>
+    {% if page_number < page_count %}
+    <a class="button button--quiet" href="/admin?page_number={{ page_number + 1 }}">Next</a>
+    {% endif %}
+  </nav>
 </section>
 {% endblock %}

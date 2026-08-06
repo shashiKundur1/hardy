@@ -27,6 +27,13 @@ class ProductWrite(BaseModel):
     warranty: str | None = Field(default=None, max_length=120)
     image_url: str | None = None
 
+    @model_validator(mode="before")
+    @classmethod
+    def blank_form_fields_are_absent(cls, data: object) -> object:
+        if not isinstance(data, dict):
+            return data
+        return {key: (None if value == "" else value) for key, value in data.items()}
+
     @field_validator("category")
     @classmethod
     def known_category(cls, value: str) -> str:
