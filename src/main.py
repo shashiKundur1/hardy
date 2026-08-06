@@ -9,10 +9,12 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from src.auth.exceptions import NotAuthenticated
 from src.auth.router import router as auth_router
+from src.catalog.router import api_router as catalog_api_router
 from src.catalog.router import router as catalog_router
 from src.config import settings
 from src.database import create_schema
 from src.events.router import router as events_router
+from src.integrations import vectorstore
 from src.rendering import page
 from src.storefront.router import router as storefront_router
 
@@ -23,6 +25,7 @@ BRAND_DIR = SRC_DIR.parent / "brand"
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await create_schema()
+    await vectorstore.ensure_collection()
     yield
 
 
@@ -66,6 +69,7 @@ def create_app() -> FastAPI:
     app.mount("/brand", StaticFiles(directory=BRAND_DIR), name="brand")
     app.include_router(auth_router)
     app.include_router(catalog_router)
+    app.include_router(catalog_api_router)
     app.include_router(events_router)
     app.include_router(storefront_router)
     app.add_exception_handler(NotAuthenticated, to_sign_in)
