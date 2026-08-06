@@ -30,6 +30,8 @@ class Recommendation(Base):
     narrative: Mapped[str] = mapped_column(Text)
     product_ids: Mapped[str] = mapped_column(Text)
     interest_profile: Mapped[str] = mapped_column(Text)
+    retrieval_trace: Mapped[str] = mapped_column(Text, default="{}")
+    agent_path: Mapped[str] = mapped_column(Text, default="{}")
     trigger_reason: Mapped[str] = mapped_column(String(20))
     profile_hash: Mapped[str] = mapped_column(String(64))
     events_covered: Mapped[int]

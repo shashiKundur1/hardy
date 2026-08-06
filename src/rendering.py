@@ -20,8 +20,19 @@ def asset_version() -> int:
     )
 
 
+def compact(value: float | int | None) -> str:
+    if value is None:
+        return "—"
+    if abs(value) >= 1_000_000:
+        return f"{value / 1_000_000:.1f}M"
+    if abs(value) >= 1_000:
+        return f"{value / 1_000:.1f}K"
+    return f"{value:,.0f}"
+
+
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 templates.env.globals["asset_version"] = asset_version
+templates.env.filters["compact"] = compact
 templates.env.globals["tracking"] = {
     "endpoint": "/api/events",
     "batch_size": EVENT_BATCH_SIZE,

@@ -13,6 +13,7 @@ from src.catalog.router import api_router as catalog_api_router
 from src.catalog.router import router as catalog_router
 from src.config import settings
 from src.database import create_schema
+from src.debug.router import router as debug_router
 from src.events.router import router as events_router
 from src.integrations import vectorstore
 from src.observability import configure_logging, get_logger
@@ -83,6 +84,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(catalog_router)
     app.include_router(catalog_api_router)
+    app.include_router(debug_router)
     app.include_router(events_router)
     app.include_router(recommendations_router)
     app.include_router(storefront_router)

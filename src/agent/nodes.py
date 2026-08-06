@@ -149,9 +149,12 @@ async def retrieve(state: AgentState) -> dict:
         )
     ranked = [_as_candidate(item) for item in found]
     by_semantic = sorted(ranked, key=lambda item: item["semantic_score"], reverse=True)
+    sourced = sum(1 for item in ranked if item["evidence_source"])
     return {
         "candidates_raw": by_semantic,
         "candidates": ranked,
+        "filter_applied": category,
+        "evidence_ok": sourced >= MIN_SOURCED_CANDIDATES,
         "nodes_visited": [*state["nodes_visited"], "retrieve"],
     }
 
@@ -221,6 +224,21 @@ async def store(state: AgentState) -> dict:
                 narrative=state["narrative"],
                 product_ids=json.dumps(state["product_ids"]),
                 interest_profile=json.dumps(state["intent"]),
+                retrieval_trace=json.dumps(
+                    {
+                        "query": state["query"],
+                        "category_filter": state["filter_applied"],
+                        "before_rerank": state["candidates_raw"],
+                        "after_rerank": state["candidates"],
+                    }
+                ),
+                agent_path=json.dumps(
+                    {
+                        "nodes": state["nodes_visited"],
+                        "refine_count": state["refine_count"],
+                        "evidence_ok": state["evidence_ok"],
+                    }
+                ),
                 trigger_reason=state["trigger_reason"],
                 profile_hash=state["profile_hash"],
                 events_covered=len(state["events"]),
@@ -243,10 +261,8 @@ def should_retrieve(state: AgentState) -> str:
 
 
 def grade_evidence(state: AgentState) -> str:
-    candidates = state["candidates"]
-    sourced = sum(1 for item in candidates if item["evidence_source"])
-    if sourced >= MIN_SOURCED_CANDIDATES:
+    if state["evidence_ok"]:
         return "generate"
     if state["refine_count"] < MAX_REFINE_LOOPS:
         return "refine"
-    return "generate" if candidates else "halt"
+    return "generate" if state["candidates"] else "halt"

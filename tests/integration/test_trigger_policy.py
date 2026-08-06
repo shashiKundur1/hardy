@@ -1,6 +1,7 @@
 import json
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from uuid import uuid4
 
 from src.auth.models import User
 from src.catalog import service as catalog
@@ -53,9 +54,11 @@ async def _user(session) -> User:
 
 
 async def _browse(session, user: User, count: int, category: str = "cookware") -> None:
+    stamp = uuid4().hex
     session.add_all(
         Event(
             user_id=user.id,
+            batch=stamp,
             type=EventType.PRODUCT_VIEW,
             product_id=None,
             category=category,
@@ -103,7 +106,7 @@ async def test_page_views_alone_never_reach_the_threshold(offline_mesh):
     async with session_factory() as session:
         user = await _user(session)
         session.add_all(
-            Event(user_id=user.id, type=EventType.PAGE_VIEW, category="cookware")
+            Event(user_id=user.id, batch=uuid4().hex, type=EventType.PAGE_VIEW, category="cookware")
             for _ in range(EVENT_THRESHOLD * 2)
         )
         await session.commit()

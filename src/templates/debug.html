@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Glass box · Hardy{% endblock %}
+
+{% block main %}
+<section class="container stack">
+  <p class="eyebrow">Instrument panel</p>
+  <h1>Glass box</h1>
+  <p class="section__lede">Every claim Hardy makes about itself, with the number behind it. Nothing on this
+    page is computed for display — it is read back out of the same tables the storefront uses.</p>
+  <p class="stamp">
+    <span class="stamp__dot" aria-hidden="true"></span>
+    <span>Snapshot at
+      <time datetime="{{ taken_at.isoformat() }}">{{ taken_at.strftime("%H:%M:%S") }}</time>
+      · refreshes every {{ refresh_seconds }}s</span>
+  </p>
+</section>
+
+{% if efficiency %}
+<section class="container lane" data-lane="trigger">
+  <header class="lane__head">
+    <h2>Efficiency</h2>
+    <p class="lane__note">Whether the model fires on every action, or only when the profile changed.</p>
+  </header>
+  <div class="lead">
+    <span class="lead__label">Model calls per event recorded</span>
+    <span class="lead__value">{{ "%.3f"|format(efficiency.calls_per_event) }}</span>
+    <span class="lead__note">{{ efficiency.llm_calls|compact }} calls across
+      {{ efficiency.events_recorded|compact }} events</span>
+  </div>
+  <ul class="gauges">
+    <li class="gauge">
+      <span class="gauge__label">Decisions</span>
+      <span class="gauge__value">{{ efficiency.decisions|compact }}</span>
+      <span class="gauge__note">every fire and every suppression</span>
+    </li>
+    <li class="gauge">
+      <span class="gauge__label">Fired</span>
+      <span class="gauge__value">{{ efficiency.fired|compact }}</span>
+      <span class="gauge__note">ran the agent</span>
+    </li>
+    <li class="gauge">
+      <span class="gauge__label">Suppressed</span>
+      <span class="gauge__value">{{ efficiency.suppressed|compact }}</span>
+      <span class="gauge__note">served without a model call</span>
+    </li>
+    <li class="gauge">
+      <span class="gauge__label">Cache hit ratio</span>
+      <span class="gauge__value">{{ "%.1f"|format(efficiency.cache_hit_ratio * 100) }}%</span>
+      <span class="gauge__note">profile hash already matched</span>
+    </li>
+  </ul>
+  <dl class="pairs">
+    <div class="pair">
+      <dt>Last trigger</dt>
+      <dd>{{ (efficiency.last_trigger or "none yet")|replace("_", " ") }}</dd>
+    </div>
+    <div class="pair">
+      <dt>Last suppression</dt>
+      <dd>{{ (efficiency.last_suppression or "none yet")|replace("_", " ") }}</dd>
+    </div>
+    <div class="pair">
+      <dt>Catalog version</dt>
+      <dd class="mono">{{ catalog_version }}</dd>
+    </div>
+  </dl>
+</section>
+
+<section class="container lane" data-lane="trigger">
+  <header class="lane__head">
+    <h2>Trigger decisions</h2>
+    <p class="lane__note">Newest first. A suppressed row cost nothing.</p>
+  </header>
+  {% if decisions %}
+  <ol class="ledger">
+    {% for row in decisions %}
+    <li class="ledger__row" data-fired="{{ 'yes' if row.fired else 'no' }}">
+      <span class="ledger__mark" aria-hidden="true">{{ "▲" if row.fired else "•" }}</span>
+      <span class="ledger__what">
+        <strong>{{ "Fired" if row.fired else "Suppressed" }}</strong>
+        <span class="muted">{{ (row.trigger_reason or row.suppression_reason)|replace("_", " ") }}</span>
+      </span>
+      <span class="ledger__meta mono">{{ row.events_considered }} events</span>
+      <span class="ledger__meta mono">{{ row.profile_hash[:10] }}</span>
+      <time class="ledger__time mono" datetime="{{ row.created_at.isoformat() }}">
+        {{ row.created_at.strftime("%H:%M:%S") }}
+      </time>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="empty">No decisions recorded yet. Browse a few products and this fills up.</p>
+  {% endif %}
+</section>
+
+<section class="container lane" data-lane="ingest">
+  <header class="lane__head">
+    <h2>Event stream</h2>
+    <p class="lane__note">Grouped by the batch the browser actually posted, newest batch first.</p>
+  </header>
+  {% if batches %}
+  <div class="stream">
+    {% for group in batches %}
+    <section class="stream__batch">
+      <h3 class="stream__head">
+        <span class="mono">batch {{ group.batch[:8] }}</span>
+        <span class="muted">{{ group.events|length }} events</span>
+        <time class="mono" datetime="{{ group.at.isoformat() }}">{{ group.at.strftime("%H:%M:%S") }}</time>
+      </h3>
+      <ul class="stream__rows">
+        {% for event in group.events %}
+        <li class="stream__row">
+          <span class="tag">{{ event.type|replace("_", " ") }}</span>
+          <span class="stream__what">
+            {% if event.query %}“{{ event.query }}”
+            {% elif event.product_id %}product {{ event.product_id }}
+            {% else %}{{ event.category or "—" }}{% endif %}
+          </span>
+          <span class="stream__meta mono">{{ event.category or "—" }}</span>
+          <span class="stream__meta mono">{{ (event.dwell_ms ~ "ms") if event.dwell_ms else "—" }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty">No events recorded for this account yet.</p>
+  {% endif %}
+</section>
+
+<section class="container lane" data-lane="agent">
+  <header class="lane__head">
+    <h2>Inferred interest</h2>
+    <p class="lane__note">What the model concluded, and the actions it said it concluded it from.</p>
+  </header>
+  {% if intent %}
+  <dl class="pairs">
+    <div class="pair">
+      <dt>Categories</dt>
+      <dd>{{ intent.categories|join(", ") or "none" }}</dd>
+    </div>
+    <div class="pair">
+      <dt>Stage</dt>
+      <dd>{{ intent.stage }}</dd>
+    </div>
+    <div class="pair">
+      <dt>Budget read</dt>
+      <dd>{{ intent.budget_hint }}</dd>
+    </div>
+    <div class="pair">
+      <dt>Priorities</dt>
+      <dd>{{ intent.priorities|join(", ") or "none" }}</dd>
+    </div>
+  </dl>
+  <blockquote class="evidence">
+    <p>“{{ intent.evidence }}”</p>
+    <cite>the model's own citation, stored at generation time</cite>
+  </blockquote>
+  {% else %}
+  <p class="empty">No profile inferred yet.</p>
+  {% endif %}
+</section>
+
+<section class="container lane" data-lane="retrieval">
+  <header class="lane__head">
+    <h2>Retrieval</h2>
+    <p class="lane__note">The same candidates, ordered by semantic score and then by the
+      durability re-rank. Rows that move are the re-rank doing its job.</p>
+  </header>
+  {% if retrieval.after_rerank %}
+  <dl class="pairs">
+    <div class="pair">
+      <dt>Query sent to the vector store</dt>
+      <dd class="mono">{{ retrieval.query }}</dd>
+    </div>
+    <div class="pair">
+      <dt>Metadata filter applied</dt>
+      <dd class="mono">{{ retrieval.category_filter or "none" }}</dd>
+    </div>
+  </dl>
+  <div class="rerank">
+    <div class="rerank__side">
+      <h3>Before re-rank</h3>
+      <ol class="ranked">
+        {% for item in retrieval.before_rerank %}
+        <li class="ranked__row">
+          <span class="ranked__score mono">{{ "%.4f"|format(item.semantic_score) }}</span>
+          <span class="ranked__title">{{ item.title }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+    <div class="rerank__side">
+      <h3>After re-rank</h3>
+      <ol class="ranked">
+        {% for item in retrieval.after_rerank %}
+        <li class="ranked__row">
+          <span class="ranked__score mono">{{ "%.4f"|format(item.ranked_score) }}</span>
+          <span class="ranked__title">{{ item.title }}</span>
+          <span class="tag {{ 'tag--ok' if item.evidence_source else 'tag--absent' }}">
+            {{ "sourced" if item.evidence_source else "no source" }}
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  {% else %}
+  <p class="empty">No retrieval recorded yet.</p>
+  {% endif %}
+</section>
+
+<section class="container lane" data-lane="agent">
+  <header class="lane__head">
+    <h2>Agent path</h2>
+    <p class="lane__note">The nodes the graph actually walked on the run that produced the
+      recommendation currently on file.</p>
+  </header>
+  {% if path.nodes %}
+  <ol class="path">
+    {% for node in path.nodes %}
+    <li class="path__node"><span class="mono">{{ node }}</span></li>
+    {% endfor %}
+  </ol>
+  <dl class="pairs">
+    <div class="pair">
+      <dt>Refine loops</dt>
+      <dd class="mono">{{ path.refine_count }}</dd>
+    </div>
+    <div class="pair">
+      <dt>Evidence grading</dt>
+      <dd>
+        <span class="tag {{ 'tag--ok' if path.evidence_ok else 'tag--absent' }}">
+          {{ "passed" if path.evidence_ok else "did not pass" }}
+        </span>
+      </dd>
+    </div>
+    <div class="pair">
+      <dt>Trigger that ran it</dt>
+      <dd>{{ active.trigger_reason|replace("_", " ") }}</dd>
+    </div>
+  </dl>
+  {% else %}
+  <p class="empty">The agent has not run for this account yet.</p>
+  {% endif %}
+</section>
+{% else %}
+<section class="container lane" data-lane="browser">
+  <header class="lane__head">
+    <h2>Your side of the glass</h2>
+  </header>
+  <p class="empty">Sign in and the behavioural panels fill in: the event stream, the trigger
+    ledger, the inferred profile, the retrieval trace and the agent path. The system panels
+    below are live either way.</p>
+  <a class="button" href="/login">Sign in</a>
+</section>
+{% endif %}
+
+<section class="container lane" data-lane="store">
+  <header class="lane__head">
+    <h2>Dual write</h2>
+    <p class="lane__note">SQLite is the record. Qdrant is derived from it. These two numbers
+      agreeing is the whole claim.</p>
+  </header>
+  <ul class="gauges">
+    <li class="gauge">
+      <span class="gauge__label">SQLite rows</span>
+      <span class="gauge__value">{{ consistency.sqlite_count|compact }}</span>
+      <span class="gauge__note">products table</span>
+    </li>
+    <li class="gauge">
+      <span class="gauge__label">Qdrant points</span>
+      <span class="gauge__value">{{ consistency.qdrant_count|compact }}</span>
+      <span class="gauge__note">vector collection</span>
+    </li>
+    <li class="gauge">
+      <span class="gauge__label">Never synced</span>
+      <span class="gauge__value">{{ consistency.never_synced|compact }}</span>
+      <span class="gauge__note">rows with no vector stamp</span>
+    </li>
+    <li class="gauge" data-state="{{ 'ok' if consistency.in_sync else 'error' }}">
+      <span class="gauge__label">In sync</span>
+      <span class="gauge__value">{{ "YES" if consistency.in_sync else "NO" }}</span>
+      <span class="gauge__note">
+        {{ consistency.missing_from_qdrant|length }} missing ·
+        {{ consistency.orphaned_in_qdrant|length }} orphaned
+      </span>
+    </li>
+  </ul>
+</section>
+
+<section class="container lane" data-lane="mesh">
+  <header class="lane__head">
+    <h2>Mesh</h2>
+    <p class="lane__note">Every AI call this process has made, in order. There is no other path
+      out of this application to a model.</p>
+  </header>
+  {% if mesh_calls %}
+  <ol class="ledger">
+    {% for call in mesh_calls %}
+    <li class="ledger__row">
+      <span class="ledger__mark" aria-hidden="true">•</span>
+      <span class="ledger__what"><strong class="mono">{{ call.model }}</strong></span>
+      <span class="ledger__meta mono">{{ call.total_tokens|compact }} tokens</span>
+      <span class="ledger__meta mono">{{ call.prompt_tokens|compact }} in / {{ call.completion_tokens|compact }} out</span>
+      <span class="ledger__time mono">{{ call.latency_ms }}ms</span>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="stamp">{{ mesh_total }} calls held in the in-process log.</p>
+  {% else %}
+  <p class="empty">No AI calls made since this process started.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,5 +1,6 @@
 import asyncio
 import json
+from uuid import uuid4
 
 from sqlalchemy import delete, select
 
@@ -39,11 +40,13 @@ async def seed_behaviour(session, user: User) -> int:
         await session.scalars(select(Product).where(Product.category == "cookware").limit(3))
     )
     tools = list(await session.scalars(select(Product).where(Product.category == "tools").limit(2)))
-    rows = [Event(user_id=user.id, type=EventType.PAGE_VIEW, category="cookware")]
+    stamp = uuid4().hex
+    rows = [Event(user_id=user.id, batch=stamp, type=EventType.PAGE_VIEW, category="cookware")]
     for product in cookware:
         rows.append(
             Event(
                 user_id=user.id,
+                batch=stamp,
                 type=EventType.PRODUCT_VIEW,
                 product_id=product.id,
                 category="cookware",
@@ -54,14 +57,21 @@ async def seed_behaviour(session, user: User) -> int:
         rows.append(
             Event(
                 user_id=user.id,
+                batch=stamp,
                 type=EventType.PRODUCT_VIEW,
                 product_id=product.id,
                 category="tools",
                 dwell_ms=18_000,
             )
         )
-    rows.append(Event(user_id=user.id, type=EventType.SEARCH, query="pan that lasts a lifetime"))
-    rows.append(Event(user_id=user.id, type=EventType.SEARCH, query="repairable cast iron"))
+    rows.append(
+        Event(
+            user_id=user.id, batch=stamp, type=EventType.SEARCH, query="pan that lasts a lifetime"
+        )
+    )
+    rows.append(
+        Event(user_id=user.id, batch=stamp, type=EventType.SEARCH, query="repairable cast iron")
+    )
     session.add_all(rows)
     await session.commit()
     return len(rows)
