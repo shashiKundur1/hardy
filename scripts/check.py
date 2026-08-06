@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).parent.parent
 SKIP = {".venv", "__pycache__", ".git", "node_modules"}
 
+MANIFESTS = ("requirements.txt", "pyproject.toml", "Pipfile")
 WEB_FRAMEWORKS = ("fastapi", "flask", "django")
 LLM_CLIENTS = ("openai", "anthropic", "litellm", "google-generativeai")
 
@@ -21,13 +22,16 @@ def compiles() -> tuple[bool, str]:
 
 
 def requirements() -> tuple[bool, str]:
-    text = (ROOT / "requirements.txt").read_text().lower()
+    found = [name for name in MANIFESTS if (ROOT / name).exists()]
+    if not found:
+        return False, f"no dependency manifest: expected one of {', '.join(MANIFESTS)}"
+    text = "".join((ROOT / name).read_text().lower() for name in found)
     web = next((name for name in WEB_FRAMEWORKS if name in text), None)
     llm = next((name for name in LLM_CLIENTS if name in text), None)
     if web and llm:
-        return True, f"web framework ({web}) + LLM client ({llm}) present"
+        return True, f"web framework ({web}) + LLM client ({llm}) in {', '.join(found)}"
     missing = "web framework" if not web else "LLM client"
-    return False, f"requirements.txt is missing a {missing}"
+    return False, f"{' and '.join(found)} declare no {missing}"
 
 
 def mesh_used() -> tuple[bool, str]:
