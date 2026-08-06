@@ -1,9 +1,16 @@
+from datetime import UTC, datetime
+
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.catalog.constants import CATEGORY_BLURBS, CATEGORY_LABELS
 from src.catalog.models import Product
+from src.catalog.schemas import ProductWrite
 from src.constants import CATEGORIES
+from src.database import session_factory
+from src.integrations import mesh, vectorstore
+
+EMBED_BATCH = 32
 
 
 async def featured(session: AsyncSession, limit: int) -> list[Product]:
@@ -64,6 +71,148 @@ async def counts_by_category(session: AsyncSession) -> dict[str, int]:
 async def sourced_count(session: AsyncSession) -> int:
     statement = select(func.count()).select_from(Product).where(Product.evidence_source.isnot(None))
     return await session.scalar(statement) or 0
+
+
+def embedding_text(product: Product) -> str:
+    return " · ".join(
+        (
+            product.title,
+            product.brand,
+            CATEGORY_LABELS[product.category],
+            f"{product.expected_life_years} year expected life",
+            product.description,
+        )
+    )
+
+
+def vector_payload(product: Product) -> dict:
+    return {
+        "title": product.title,
+        "brand": product.brand,
+        "category": product.category,
+        "price": float(product.price),
+        "expected_life_years": product.expected_life_years,
+        "ownership_type": str(product.ownership_type),
+        "repairability_score": product.repairability_score,
+        "has_evidence": product.evidence_source is not None,
+    }
+
+
+def _stamped_now() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
+async def _write_vector(product: Product) -> None:
+    embedding = await mesh.embed(embedding_text(product))
+    await vectorstore.upsert(product.id, embedding.vector, vector_payload(product))
+
+
+async def _restore_vector(product_id: int) -> None:
+    async with session_factory() as session:
+        product = await session.get(Product, product_id)
+        if product is None:
+            await vectorstore.delete(product_id)
+            return
+        await _write_vector(product)
+        product.vector_synced_at = _stamped_now()
+        await session.commit()
+
+
+async def _commit_or_restore(session: AsyncSession, product_id: int) -> None:
+    try:
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        await _restore_vector(product_id)
+        raise
+
+
+async def create(session: AsyncSession, data: ProductWrite) -> Product:
+    product = Product(**data.model_dump())
+    session.add(product)
+    await session.flush()
+    try:
+        await _write_vector(product)
+    except Exception:
+        await session.rollback()
+        raise
+    product.vector_synced_at = _stamped_now()
+    await _commit_or_restore(session, product.id)
+    return product
+
+
+async def replace(
+    session: AsyncSession, product_id: int, data: ProductWrite
+) -> Product | None:
+    product = await session.get(Product, product_id)
+    if product is None:
+        return None
+    for field, value in data.model_dump().items():
+        setattr(product, field, value)
+    await session.flush()
+    try:
+        await _write_vector(product)
+    except Exception:
+        await session.rollback()
+        raise
+    product.vector_synced_at = _stamped_now()
+    await _commit_or_restore(session, product_id)
+    return product
+
+
+async def remove(session: AsyncSession, product_id: int) -> bool:
+    product = await session.get(Product, product_id)
+    if product is None:
+        return False
+    await session.delete(product)
+    await session.flush()
+    try:
+        await vectorstore.delete(product_id)
+    except Exception:
+        await session.rollback()
+        raise
+    await _commit_or_restore(session, product_id)
+    return True
+
+
+async def consistency(session: AsyncSession) -> dict:
+    await vectorstore.ensure_collection()
+    stored = set(await session.scalars(select(Product.id)))
+    vectors = await vectorstore.point_ids()
+    never_synced = (
+        await session.scalar(
+            select(func.count())
+            .select_from(Product)
+            .where(Product.vector_synced_at.is_(None))
+        )
+        or 0
+    )
+    missing = sorted(stored - vectors)
+    orphaned = sorted(vectors - stored)
+    return {
+        "sqlite_count": len(stored),
+        "qdrant_count": len(vectors),
+        "missing_from_qdrant": missing,
+        "orphaned_in_qdrant": orphaned,
+        "never_synced": never_synced,
+        "in_sync": not missing and not orphaned and never_synced == 0,
+    }
+
+
+async def resync_all(session: AsyncSession) -> int:
+    await vectorstore.ensure_collection()
+    products = list(await session.scalars(select(Product).order_by(Product.id)))
+    stamped = _stamped_now()
+    for start in range(0, len(products), EMBED_BATCH):
+        window = products[start : start + EMBED_BATCH]
+        embeddings = await mesh.embed_many([embedding_text(item) for item in window])
+        for product, embedding in zip(window, embeddings, strict=True):
+            await vectorstore.upsert(
+                product.id, embedding.vector, vector_payload(product)
+            )
+            product.vector_synced_at = stamped
+    await session.commit()
+    return len(products)
 
 
 async def navigation(session: AsyncSession) -> list[dict]:

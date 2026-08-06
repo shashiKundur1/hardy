@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     mesh_embed_model: str = "openai/text-embedding-3-small"
     mesh_timeout_seconds: int = 60
 
-    qdrant_url: str = "http://localhost:6333"
+    qdrant_url: str = ""
+    qdrant_path: str = "./qdrant_data"
     qdrant_collection: str = "products"
     embedding_dim: int = 1536
 

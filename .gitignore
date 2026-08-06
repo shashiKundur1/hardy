@@ -20,6 +20,7 @@ venv/
 *.sqlite
 *.sqlite3
 qdrant_storage/
+qdrant_data/
 
 # OS / editor
 .DS_Store
