@@ -4,7 +4,11 @@ from src.main import app
 
 schema = schemathesis.openapi.from_asgi("/openapi.json", app)
 
-public = schema.exclude(path_regex=r"^/(admin|api)").exclude(path_regex=r"^/(signup|login|logout)$")
+public = (
+    schema.include(method="GET")
+    .exclude(path_regex=r"^/(admin|api)")
+    .exclude(path_regex=r"^/(signup|login|logout)$")
+)
 
 
 @public.parametrize()

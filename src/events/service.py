@@ -3,7 +3,7 @@ from collections import Counter
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import session_factory
@@ -81,3 +81,35 @@ async def leading_category(session: AsyncSession, user_id: int, window: int) -> 
     if not recent:
         return None
     return Counter(recent).most_common(1)[0][0]
+
+
+async def summary_for(session: AsyncSession, user_id: int) -> list[dict]:
+    statement = (
+        select(Event.type, func.count(), func.max(Event.created_at))
+        .where(Event.user_id == user_id)
+        .group_by(Event.type)
+        .order_by(func.count().desc())
+    )
+    rows = (await session.execute(statement)).all()
+    latest = {
+        event.type: event
+        for event in await session.scalars(
+            select(Event).where(Event.user_id == user_id).order_by(Event.created_at.desc())
+        )
+    }
+    return [
+        {
+            "type": kind,
+            "total": total,
+            "last_seen": last_seen,
+            "example": latest.get(kind),
+        }
+        for kind, total, last_seen in rows
+    ]
+
+
+async def forget(session: AsyncSession, user_id: int) -> int:
+    counted = await count_for(session, user_id)
+    await session.execute(delete(Event).where(Event.user_id == user_id))
+    await session.commit()
+    return counted

@@ -1,6 +1,6 @@
 import json
 
-from sqlalchemy import case, func, select
+from sqlalchemy import case, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.elements import ColumnElement
 
@@ -127,3 +127,9 @@ async def efficiency(session: AsyncSession, user_id: int) -> Efficiency:
         last_trigger=next((row.trigger_reason for row in latest if row.fired), None),
         last_suppression=next((row.suppression_reason for row in latest if not row.fired), None),
     )
+
+
+async def forget(session: AsyncSession, user_id: int) -> None:
+    await session.execute(delete(Recommendation).where(Recommendation.user_id == user_id))
+    await session.execute(delete(TriggerDecision).where(TriggerDecision.user_id == user_id))
+    await session.commit()

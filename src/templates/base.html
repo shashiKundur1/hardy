@@ -26,6 +26,7 @@
       <div class="account">
         {% if user %}
           <a class="navlink" href="/recommendations">For you</a>
+          <a class="navlink" href="/footprint">Footprint</a>
           {% if user.role == "admin" %}<a class="navlink" href="/admin">Admin</a>{% endif %}
           <form method="post" action="/logout">
             <button class="button button--quiet" type="submit">Sign out</button>

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request, status
-from fastapi.responses import HTMLResponse
+import json
 
-from src.auth.dependencies import OptionalUser
+from fastapi import APIRouter, HTTPException, Request, status
+from fastapi.responses import HTMLResponse, RedirectResponse
+
+from src.auth.dependencies import CurrentUser, OptionalUser
 from src.catalog import service as catalog
 from src.catalog.constants import (
     CATEGORY_BLURBS,
@@ -13,6 +15,9 @@ from src.catalog.constants import (
 )
 from src.catalog.schemas import ProductId
 from src.database import SessionDep
+from src.debug import service as debug
+from src.events import service as events
+from src.events.constants import FOOTPRINT_LIMIT
 from src.recommendations import service as recommendations
 from src.rendering import page
 
@@ -109,3 +114,28 @@ async def advice(request: Request, session: SessionDep, user: OptionalUser) -> H
         chosen=await recommendations.products_for(session, active) if active else [],
         reasons=recommendations.reasons_for(active) if active else {},
     )
+
+
+@router.get("/footprint", response_class=HTMLResponse)
+async def footprint(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
+    active = await recommendations.active_for(session, user.id) if user else None
+    return page(
+        request,
+        "footprint.html",
+        user=user,
+        categories=await catalog.navigation(session),
+        summary=await events.summary_for(session, user.id) if user else [],
+        batches=debug.batches(await events.recent_for(session, user.id, FOOTPRINT_LIMIT))
+        if user
+        else [],
+        total=await events.count_for(session, user.id) if user else 0,
+        recommendation=active,
+        intent=json.loads(active.interest_profile) if active else {},
+    )
+
+
+@router.post("/footprint/forget")
+async def forget(session: SessionDep, user: CurrentUser) -> RedirectResponse:
+    await events.forget(session, user.id)
+    await recommendations.forget(session, user.id)
+    return RedirectResponse("/footprint", status.HTTP_303_SEE_OTHER)
