@@ -37,9 +37,7 @@ async def _create() -> int:
 
 
 async def _update(product_id: int) -> None:
-    changed = SAMPLE.model_copy(
-        update={"title": "Renamed skillet", "expected_life_years": 12}
-    )
+    changed = SAMPLE.model_copy(update={"title": "Renamed skillet", "expected_life_years": 12})
     async with session_factory() as session:
         before = (await service.by_id(session, product_id)).vector_synced_at
         product = await service.replace(session, product_id, changed)

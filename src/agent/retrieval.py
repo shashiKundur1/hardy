@@ -75,8 +75,7 @@ async def hybrid(
                 product=product,
                 semantic=hit.score,
                 durability=durability,
-                score=(1 - DURABILITY_WEIGHT) * hit.score
-                + DURABILITY_WEIGHT * durability,
+                score=(1 - DURABILITY_WEIGHT) * hit.score + DURABILITY_WEIGHT * durability,
             )
         )
 

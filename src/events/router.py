@@ -8,9 +8,7 @@ router = APIRouter(prefix="/api/events", tags=["events"])
 
 
 @router.post("", status_code=status.HTTP_202_ACCEPTED)
-async def ingest(
-    batch: EventBatch, background: BackgroundTasks, user: OptionalUser
-) -> Accepted:
+async def ingest(batch: EventBatch, background: BackgroundTasks, user: OptionalUser) -> Accepted:
     if user is None:
         return Accepted(accepted=0)
     background.add_task(service.record, user.id, batch.events)

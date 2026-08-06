@@ -1,6 +1,5 @@
 import asyncio
 import json
-from decimal import Decimal
 
 from sqlalchemy import delete, select
 
@@ -35,15 +34,9 @@ async def demo_user(session) -> User:
 async def seed_behaviour(session, user: User) -> int:
     await session.execute(delete(Event).where(Event.user_id == user.id))
     cookware = list(
-        await session.scalars(
-            select(Product).where(Product.category == "cookware").limit(3)
-        )
+        await session.scalars(select(Product).where(Product.category == "cookware").limit(3))
     )
-    tools = list(
-        await session.scalars(
-            select(Product).where(Product.category == "tools").limit(2)
-        )
-    )
+    tools = list(await session.scalars(select(Product).where(Product.category == "tools").limit(2)))
     rows = [Event(user_id=user.id, type=EventType.PAGE_VIEW, category="cookware")]
     for product in cookware:
         rows.append(
@@ -65,12 +58,8 @@ async def seed_behaviour(session, user: User) -> int:
                 dwell_ms=18_000,
             )
         )
-    rows.append(
-        Event(user_id=user.id, type=EventType.SEARCH, query="pan that lasts a lifetime")
-    )
-    rows.append(
-        Event(user_id=user.id, type=EventType.SEARCH, query="repairable cast iron")
-    )
+    rows.append(Event(user_id=user.id, type=EventType.SEARCH, query="pan that lasts a lifetime"))
+    rows.append(Event(user_id=user.id, type=EventType.SEARCH, query="repairable cast iron"))
     session.add_all(rows)
     await session.commit()
     return len(rows)

@@ -1,6 +1,5 @@
 import hashlib
 import json
-import time
 from collections import Counter
 
 from sqlalchemy import update
@@ -79,9 +78,7 @@ def _render(candidates: list[Candidate]) -> str:
     lines = []
     for item in candidates:
         ownership = (
-            item["ownership_type"]
-            if item["ownership_type"] != "unknown"
-            else "not on record"
+            item["ownership_type"] if item["ownership_type"] != "unknown" else "not on record"
         )
         source = item["evidence_source"] or "no source on file"
         lines.append(
@@ -148,9 +145,7 @@ async def infer_intent(state: AgentState) -> dict:
         parsed = {}
 
     intent = {
-        "categories": [
-            slug for slug in parsed.get("categories", []) if slug in CATEGORY_LABELS
-        ],
+        "categories": [slug for slug in parsed.get("categories", []) if slug in CATEGORY_LABELS],
         "budget_hint": parsed.get("budget_hint", "unknown"),
         "priorities": parsed.get("priorities", []),
         "stage": parsed.get("stage", Stage.BROWSING),

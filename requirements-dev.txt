@@ -1,0 +1,7 @@
+ruff
+pytest
+pytest-asyncio
+pytest-cov
+hypothesis
+schemathesis
+pre-commit

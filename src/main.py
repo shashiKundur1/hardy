@@ -1,8 +1,8 @@
-import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
@@ -15,11 +15,14 @@ from src.config import settings
 from src.database import create_schema
 from src.events.router import router as events_router
 from src.integrations import vectorstore
+from src.observability import configure_logging, get_logger
 from src.rendering import page
 from src.storefront.router import router as storefront_router
 
 SRC_DIR = Path(__file__).parent
 BRAND_DIR = SRC_DIR.parent / "brand"
+
+logger = get_logger("requests")
 
 
 @asynccontextmanager
@@ -44,7 +47,7 @@ async def error_page(request: Request, exception: HTTPException) -> Response:
 
 
 async def failure_page(request: Request, exception: Exception) -> Response:
-    logging.getLogger("hardy").exception("unhandled request failure", exc_info=exception)
+    logger.exception("unhandled request failure", exc_info=exception)
     return page(
         request,
         "error.html",
@@ -55,6 +58,7 @@ async def failure_page(request: Request, exception: Exception) -> Response:
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     if not settings.session_secret:
         raise RuntimeError("SESSION_SECRET is unset; session cookies cannot be signed")
 
@@ -65,6 +69,14 @@ def create_app() -> FastAPI:
         max_age=settings.session_max_age,
         same_site="lax",
     )
+    if settings.allowed_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.allowed_origins,
+            allow_credentials=True,
+            allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            allow_headers=["*"],
+        )
     app.mount("/static", StaticFiles(directory=SRC_DIR / "static"), name="static")
     app.mount("/brand", StaticFiles(directory=BRAND_DIR), name="brand")
     app.include_router(auth_router)

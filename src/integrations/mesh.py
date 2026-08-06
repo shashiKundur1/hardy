@@ -50,9 +50,7 @@ async def chat(
 ) -> MeshCompletion:
     model = model or settings.mesh_chat_model
     started = time.perf_counter()
-    response = await get_client().chat.completions.create(
-        model=model, messages=messages, **kwargs
-    )
+    response = await get_client().chat.completions.create(model=model, messages=messages, **kwargs)
     usage = _log(_usage_from(response, model, started))
     return MeshCompletion(content=response.choices[0].message.content or "", usage=usage)
 
