@@ -1,13 +1,13 @@
 .DEFAULT_GOAL := help
 .PHONY: help install dev seed sync agent test cov load check lint format hooks docker-build docker-up docker-down clean
 
-PYTHON := .venv/bin/python
-PIP := .venv/bin/pip
+PYTHON := poetry run python
 
 help:
 	@echo "Hardy"
 	@echo ""
-	@echo "  make install      create .venv and install runtime and dev dependencies"
+	@echo "  make install      poetry install, into an in-project .venv"
+	@echo "  make install-pip  same thing without poetry, for a judge in a hurry"
 	@echo "  make dev          run on http://127.0.0.1:8000 with hot reload"
 	@echo "  make seed         seed the catalog through Mesh, idempotent on re-run"
 	@echo "  make sync         embed every product and upsert it into Qdrant"
@@ -23,9 +23,12 @@ help:
 	@echo "  make clean        remove caches, the database and the local vector store"
 
 install:
+	poetry install
+
+install-pip:
 	python3 -m venv .venv
-	$(PIP) install --quiet --upgrade pip
-	$(PIP) install --quiet -r requirements.txt -r requirements-dev.txt
+	.venv/bin/pip install --quiet --upgrade pip
+	.venv/bin/pip install --quiet -r requirements.txt -r requirements-dev.txt
 
 dev:
 	$(PYTHON) -m hypercorn src.main:app --bind 127.0.0.1:8000 --reload

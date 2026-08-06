@@ -2,7 +2,7 @@
 name = "hardy"
 version = "0.1.0"
 description = "A storefront for durable goods that argues from evidence"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.15"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
@@ -24,24 +24,27 @@ dependencies = [
     "httpx",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "ruff",
-    "pytest",
-    "pytest-asyncio",
-    "pytest-cov",
-    "hypothesis",
-    "schemathesis",
-    "pre-commit",
-]
-load = ["locust"]
-
 [build-system]
 requires = ["poetry-core>=2.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+ruff = "*"
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+hypothesis = "*"
+schemathesis = "*"
+pre-commit = "*"
+
+[tool.poetry.group.load]
+optional = true
+
+[tool.poetry.group.load.dependencies]
+locust = "*"
 
 [tool.ruff]
 line-length = 100
