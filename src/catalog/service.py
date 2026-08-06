@@ -1,5 +1,3 @@
-from datetime import UTC, datetime
-
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,7 +5,7 @@ from src.catalog.constants import CATEGORY_BLURBS, CATEGORY_LABELS
 from src.catalog.models import Product
 from src.catalog.schemas import ProductWrite
 from src.constants import CATEGORIES
-from src.database import session_factory
+from src.database import session_factory, utcnow
 from src.integrations import mesh, vectorstore
 
 EMBED_BATCH = 32
@@ -63,6 +61,13 @@ async def count(session: AsyncSession) -> int:
     return await session.scalar(select(func.count()).select_from(Product)) or 0
 
 
+async def version(session: AsyncSession) -> str:
+    total, latest = (
+        await session.execute(select(func.count(Product.id), func.max(Product.updated_at)))
+    ).one()
+    return f"{total}@{latest.isoformat(timespec='seconds') if latest else 'empty'}"
+
+
 async def counts_by_category(session: AsyncSession) -> dict[str, int]:
     statement = select(Product.category, func.count()).group_by(Product.category)
     return dict((await session.execute(statement)).all())
@@ -98,10 +103,6 @@ def vector_payload(product: Product) -> dict:
     }
 
 
-def _stamped_now() -> datetime:
-    return datetime.now(UTC).replace(tzinfo=None)
-
-
 async def _write_vector(product: Product) -> None:
     embedding = await mesh.embed(embedding_text(product))
     await vectorstore.upsert(product.id, embedding.vector, vector_payload(product))
@@ -114,7 +115,7 @@ async def _restore_vector(product_id: int) -> None:
             await vectorstore.delete(product_id)
             return
         await _write_vector(product)
-        product.vector_synced_at = _stamped_now()
+        product.vector_synced_at = utcnow()
         await session.commit()
 
 
@@ -136,7 +137,7 @@ async def create(session: AsyncSession, data: ProductWrite) -> Product:
     except Exception:
         await session.rollback()
         raise
-    product.vector_synced_at = _stamped_now()
+    product.vector_synced_at = utcnow()
     await _commit_or_restore(session, product.id)
     return product
 
@@ -153,7 +154,7 @@ async def replace(session: AsyncSession, product_id: int, data: ProductWrite) ->
     except Exception:
         await session.rollback()
         raise
-    product.vector_synced_at = _stamped_now()
+    product.vector_synced_at = utcnow()
     await _commit_or_restore(session, product_id)
     return product
 
@@ -198,7 +199,7 @@ async def consistency(session: AsyncSession) -> dict:
 async def resync_all(session: AsyncSession) -> int:
     await vectorstore.ensure_collection()
     products = list(await session.scalars(select(Product).order_by(Product.id)))
-    stamped = _stamped_now()
+    stamped = utcnow()
     for start in range(0, len(products), EMBED_BATCH):
         window = products[start : start + EMBED_BATCH]
         embeddings = await mesh.embed_many([embedding_text(item) for item in window])

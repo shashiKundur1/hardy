@@ -34,6 +34,7 @@ def replace(_current: list, incoming: list) -> list:
 class AgentState(TypedDict):
     user_id: int
     trigger_reason: str
+    profile_hash: str
     events: Annotated[list[dict], replace]
     behaviour_summary: str
     intent: Intent

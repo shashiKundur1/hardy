@@ -6,6 +6,21 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.database import Base
 
 
+class TriggerDecision(Base):
+    __tablename__ = "trigger_decisions"
+    __table_args__ = (Index("idx_decisions_user", "user_id", "created_at"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    fired: Mapped[bool] = mapped_column(Boolean)
+    trigger_reason: Mapped[str | None] = mapped_column(String(20))
+    suppression_reason: Mapped[str | None] = mapped_column(String(20))
+    profile_hash: Mapped[str] = mapped_column(String(64))
+    catalog_version: Mapped[str] = mapped_column(String(64))
+    events_considered: Mapped[int]
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class Recommendation(Base):
     __tablename__ = "recommendations"
     __table_args__ = (Index("idx_recs_user", "user_id", "created_at"),)

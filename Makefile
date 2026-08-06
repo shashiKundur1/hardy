@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev seed sync agent test cov load check lint format hooks docker-build docker-up docker-down clean
+.PHONY: help install install-pip dev seed sync agent verify test test-unit test-integration test-regression test-contract test-live cov load check lint format hooks docker-build docker-up docker-down clean
 
 PYTHON := poetry run python
 
@@ -12,7 +12,10 @@ help:
 	@echo "  make seed         seed the catalog through Mesh, idempotent on re-run"
 	@echo "  make sync         embed every product and upsert it into Qdrant"
 	@echo "  make agent        run the LangGraph agent end to end"
-	@echo "  make test         run the test suite"
+	@echo "  make verify       the ship gate: lint, every offline test, and the four CI checks"
+	@echo "  make test         unit, integration, regression and contract tests"
+	@echo "  make test-unit    pure logic only, no database and no network"
+	@echo "  make test-live    the tests that need a real MESH_API_KEY"
 	@echo "  make cov          run the test suite with a coverage report"
 	@echo "  make load         drive load at a running app with Locust on :8089"
 	@echo "  make check        run the four checks CI runs, including a live Mesh call"
@@ -42,8 +45,25 @@ sync:
 agent:
 	$(PYTHON) -m scripts.run_agent
 
+verify: lint test check
+
 test:
 	$(PYTHON) -m pytest
+
+test-unit:
+	$(PYTHON) -m pytest -m unit
+
+test-integration:
+	$(PYTHON) -m pytest -m integration
+
+test-regression:
+	$(PYTHON) -m pytest -m regression
+
+test-contract:
+	$(PYTHON) -m pytest -m contract
+
+test-live:
+	$(PYTHON) -m pytest -m live
 
 cov:
 	$(PYTHON) -m pytest --cov=src --cov-report=term-missing
