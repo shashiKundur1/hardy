@@ -1,9 +1,13 @@
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Annotated
 
+from fastapi import Path
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from src.constants import CATEGORIES, Ownership
+from src.constants import CATEGORIES, MAX_SQLITE_INTEGER, Ownership
+
+ProductId = Annotated[int, Path(ge=1, le=MAX_SQLITE_INTEGER)]
 
 
 class ProductWrite(BaseModel):

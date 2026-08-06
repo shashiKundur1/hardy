@@ -65,7 +65,7 @@ async def count(session: AsyncSession) -> int:
 
 async def counts_by_category(session: AsyncSession) -> dict[str, int]:
     statement = select(Product.category, func.count()).group_by(Product.category)
-    return {category: total for category, total in await session.execute(statement)}
+    return dict((await session.execute(statement)).all())
 
 
 async def sourced_count(session: AsyncSession) -> int:
@@ -141,9 +141,7 @@ async def create(session: AsyncSession, data: ProductWrite) -> Product:
     return product
 
 
-async def replace(
-    session: AsyncSession, product_id: int, data: ProductWrite
-) -> Product | None:
+async def replace(session: AsyncSession, product_id: int, data: ProductWrite) -> Product | None:
     product = await session.get(Product, product_id)
     if product is None:
         return None
@@ -181,9 +179,7 @@ async def consistency(session: AsyncSession) -> dict:
     vectors = await vectorstore.point_ids()
     never_synced = (
         await session.scalar(
-            select(func.count())
-            .select_from(Product)
-            .where(Product.vector_synced_at.is_(None))
+            select(func.count()).select_from(Product).where(Product.vector_synced_at.is_(None))
         )
         or 0
     )
@@ -207,9 +203,7 @@ async def resync_all(session: AsyncSession) -> int:
         window = products[start : start + EMBED_BATCH]
         embeddings = await mesh.embed_many([embedding_text(item) for item in window])
         for product, embedding in zip(window, embeddings, strict=True):
-            await vectorstore.upsert(
-                product.id, embedding.vector, vector_payload(product)
-            )
+            await vectorstore.upsert(product.id, embedding.vector, vector_payload(product))
             product.vector_synced_at = stamped
     await session.commit()
     return len(products)
