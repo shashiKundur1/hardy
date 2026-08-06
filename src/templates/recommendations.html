@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}For you · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">For you</p>
+    <h1>What your browsing says</h1>
+    <p class="section__lede">
+      Hardy reasons over what you actually looked at, and shows the working.
+    </p>
+  </div>
+  {% if not user %}
+  <p class="empty">
+    <span>Sign in to see a recommendation.</span>
+    <a class="button" href="/login">Sign in</a>
+  </p>
+  {% elif recommendation %}
+  <div class="panel">
+    <p class="panel__head">
+      {{ ui.icon("evidence") }}
+      {{ recommendation.events_covered }} actions considered · {{ recommendation.model_used }}
+      · {{ recommendation.trigger_reason.replace("_", " ") }}
+    </p>
+    <div class="panel__body">
+      <p class="narrative">{{ recommendation.narrative }}</p>
+    </div>
+  </div>
+  {% else %}
+  <p class="empty">
+    <span>Nothing yet.</span>
+    <span>
+      Hardy reasons about what you are shopping for only once your browsing says something
+      specific. Until then there is nothing honest to recommend.
+    </span>
+    <a class="button button--quiet" href="/">Start browsing</a>
+  </p>
+  {% endif %}
+</section>
+{% endblock %}
