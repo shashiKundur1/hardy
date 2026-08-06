@@ -11,14 +11,22 @@ from src.catalog.constants import (
     RELATED_LIMIT,
     SEARCH_LIMIT,
 )
+from src.catalog.schemas import ProductId
 from src.database import SessionDep
 from src.recommendations import service as recommendations
 from src.rendering import page
 
 router = APIRouter(tags=["storefront"])
 
+NOT_FOUND = {
+    status.HTTP_404_NOT_FOUND: {
+        "description": "Nothing lives at this address",
+        "content": {"text/html": {}},
+    }
+}
 
-@router.get("/")
+
+@router.get("/", response_class=HTMLResponse)
 async def home(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
     return page(
         request,
@@ -32,7 +40,7 @@ async def home(request: Request, session: SessionDep, user: OptionalUser) -> HTM
     )
 
 
-@router.get("/category/{slug}")
+@router.get("/category/{slug}", response_class=HTMLResponse, responses=NOT_FOUND)
 async def category(
     request: Request, session: SessionDep, user: OptionalUser, slug: str
 ) -> HTMLResponse:
@@ -50,9 +58,9 @@ async def category(
     )
 
 
-@router.get("/product/{product_id}")
+@router.get("/product/{product_id}", response_class=HTMLResponse, responses=NOT_FOUND)
 async def product(
-    request: Request, session: SessionDep, user: OptionalUser, product_id: int
+    request: Request, session: SessionDep, user: OptionalUser, product_id: ProductId
 ) -> HTMLResponse:
     found = await catalog.by_id(session, product_id)
     if found is None:
@@ -68,7 +76,7 @@ async def product(
     )
 
 
-@router.get("/search")
+@router.get("/search", response_class=HTMLResponse)
 async def search(
     request: Request, session: SessionDep, user: OptionalUser, q: str = ""
 ) -> HTMLResponse:
@@ -83,7 +91,7 @@ async def search(
     )
 
 
-@router.get("/recommendations")
+@router.get("/recommendations", response_class=HTMLResponse)
 async def advice(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
     return page(
         request,
