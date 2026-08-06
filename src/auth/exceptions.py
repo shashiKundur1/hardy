@@ -5,7 +5,7 @@ from pydantic import ValidationError
 class InvalidForm(HTTPException):
     def __init__(self, error: ValidationError) -> None:
         message = error.errors()[0]["msg"].removeprefix("Value error, ")
-        super().__init__(status.HTTP_422_UNPROCESSABLE_ENTITY, message)
+        super().__init__(status.HTTP_422_UNPROCESSABLE_CONTENT, message)
 
 
 class EmailTaken(HTTPException):
