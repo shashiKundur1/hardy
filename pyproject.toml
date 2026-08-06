@@ -1,0 +1,62 @@
+[project]
+name = "hardy"
+version = "0.1.0"
+description = "A storefront for durable goods that argues from evidence"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "hypercorn",
+    "jinja2",
+    "python-multipart",
+    "sqlalchemy[asyncio]",
+    "aiosqlite",
+    "bcrypt",
+    "itsdangerous",
+    "openai",
+    "qdrant-client",
+    "langgraph",
+    "langchain-core",
+    "langsmith",
+    "apscheduler",
+    "aiosmtplib",
+    "pydantic-settings",
+    "httpx",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "hypothesis",
+    "schemathesis",
+    "pre-commit",
+]
+load = ["locust"]
+
+[build-system]
+requires = ["poetry-core>=2.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "qdrant_data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RET"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+asyncio_mode = "auto"
+filterwarnings = ["ignore::DeprecationWarning"]

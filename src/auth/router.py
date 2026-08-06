@@ -31,9 +31,7 @@ def start_session(request: Request, user: User) -> RedirectResponse:
 
 
 def refused(request: Request, mode: str, email: str, error: HTTPException) -> HTMLResponse:
-    return page(
-        request, "auth.html", error.status_code, mode=mode, email=email, error=error.detail
-    )
+    return page(request, "auth.html", error.status_code, mode=mode, email=email, error=error.detail)
 
 
 @router.get("/signup")

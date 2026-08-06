@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+hypercorn
 jinja2
 python-multipart
 sqlalchemy[asyncio]

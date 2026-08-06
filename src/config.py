@@ -8,10 +8,13 @@ class Settings(BaseSettings):
 
     app_name: str = "Hardy"
     debug: bool = False
+    log_level: str = "INFO"
 
     database_url: str = "sqlite+aiosqlite:///./hardy.db"
     session_secret: str = ""
     session_max_age: int = 60 * 60 * 24 * 14
+
+    cors_origins: str = ""
 
     mesh_api_key: str = ""
     mesh_base_url: str = "https://api.meshapi.ai/v1"
@@ -34,6 +37,10 @@ class Settings(BaseSettings):
     smtp_pass: str = ""
     digest_hour: int = 8
     digest_timezone: str = "Asia/Kolkata"
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 @lru_cache

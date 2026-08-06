@@ -34,9 +34,7 @@ async def ensure_collection() -> None:
         return
     await client.create_collection(
         settings.qdrant_collection,
-        vectors_config=VectorParams(
-            size=settings.embedding_dim, distance=Distance.COSINE
-        ),
+        vectors_config=VectorParams(size=settings.embedding_dim, distance=Distance.COSINE),
     )
 
 
@@ -59,13 +57,9 @@ async def search(
 ) -> list[ScoredPoint]:
     conditions = []
     if category:
-        conditions.append(
-            FieldCondition(key="category", match=MatchValue(value=category))
-        )
+        conditions.append(FieldCondition(key="category", match=MatchValue(value=category)))
     if minimum_life:
-        conditions.append(
-            FieldCondition(key="expected_life_years", range=Range(gte=minimum_life))
-        )
+        conditions.append(FieldCondition(key="expected_life_years", range=Range(gte=minimum_life)))
     response = await get_client().query_points(
         settings.qdrant_collection,
         query=vector,
