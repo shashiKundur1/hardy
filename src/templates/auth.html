@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% set signing_up = mode == "signup" %}
+
+{% block title %}{{ "Create account" if signing_up else "Sign in" }} · Hardy{% endblock %}
+
+{% block main_class %}authpage{% endblock %}
+
+{% block main %}
+<div class="auth">
+  <div class="auth__intro">
+    <p class="eyebrow">{{ "Join Hardy" if signing_up else "Welcome back" }}</p>
+    <h1>{{ "Create account" if signing_up else "Sign in" }}</h1>
+    <p class="auth__blurb">
+      {% if signing_up %}
+        Hardy watches what you browse and argues for the things that outlast their category.
+      {% else %}
+        Your recommendation picks up where your browsing left off.
+      {% endif %}
+    </p>
+  </div>
+
+  {% if error %}
+  <p class="notice" role="alert">{{ error }}</p>
+  {% endif %}
+
+  <form class="form" method="post" action="{{ '/signup' if signing_up else '/login' }}">
+    <div class="field">
+      <label class="field__label" for="email">Email</label>
+      <input class="input" id="email" name="email" type="email" value="{{ email or '' }}"
+             autocomplete="username" inputmode="email" required autofocus>
+    </div>
+    <div class="field">
+      <label class="field__label" for="password">Password</label>
+      <input class="input" id="password" name="password" type="password"
+             autocomplete="{{ 'new-password' if signing_up else 'current-password' }}"
+             minlength="8" required
+             {% if signing_up %}aria-describedby="password-hint"{% endif %}>
+      {% if signing_up %}
+      <span class="hint" id="password-hint">At least 8 characters.</span>
+      {% endif %}
+    </div>
+    <button class="button button--full" type="submit">
+      {{ "Create account" if signing_up else "Sign in" }}
+    </button>
+  </form>
+
+  <p class="auth__alternate">
+    {% if signing_up %}
+      Already have an account? <a href="/login">Sign in</a>
+    {% else %}
+      No account yet? <a href="/signup">Create one</a>
+    {% endif %}
+  </p>
+</div>
+{% endblock %}

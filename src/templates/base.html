@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Hardy{% endblock %}</title>
+  <meta name="description" content="Durable goods, argued from evidence. Cost per year beside the price, who owns the brand now, and how long the parts stay available.">
+  <link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/static/favicon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Encode+Sans+Expanded:wght@800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/brand/tokens.css?v={{ asset_version() }}">
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_version() }}">
+</head>
+<body{% block body_data %}{% endblock %}>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="masthead">
+    <div class="masthead__inner container">
+      <a class="wordmark" href="/"><img src="/brand/logo/hardy-wordmark.png" alt="Hardy"></a>
+      <form class="findbar" role="search" action="/search" method="get">
+        <label class="skip" for="q">Search the catalog</label>
+        <input class="input" id="q" name="q" type="search" placeholder="Search durable goods"
+               value="{{ query|default('', true) }}" autocomplete="off">
+      </form>
+      <div class="account">
+        {% if user %}
+          <a class="navlink" href="/recommendations">For you</a>
+          {% if user.role == "admin" %}<a class="navlink" href="/admin">Admin</a>{% endif %}
+          <form method="post" action="/logout">
+            <button class="button button--quiet" type="submit">Sign out</button>
+          </form>
+        {% else %}
+          <a class="navlink" href="/login">Sign in</a>
+          <a class="button" href="/signup" data-track="signup-masthead">Create account</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  {% if categories %}
+  <nav class="strip" aria-label="Categories">
+    <div class="strip__inner container">
+      {% for entry in categories %}
+      <a class="striplink" href="/category/{{ entry.slug }}" data-track="category-strip"
+         data-category="{{ entry.slug }}"
+         {% if entry.slug == slug|default('') %}aria-current="page"{% endif %}>
+        <span class="icon" style="--icon:url(/static/icons/{{ entry.slug }}.svg)" aria-hidden="true"></span>
+        {{ entry.label }}
+      </a>
+      {% endfor %}
+    </div>
+  </nav>
+  {% endif %}
+  <main id="main" class="{% block main_class %}sections{% endblock %}">
+    {% block main %}{% endblock %}
+  </main>
+  <nav class="dock" aria-label="Primary">
+    <a class="dock__link" href="/" {% if page_id|default('') == 'home' %}aria-current="page"{% endif %}
+       data-track="dock-home">
+      <span class="icon" style="--icon:url(/static/icons/nav-home.svg)" aria-hidden="true"></span>
+      <span class="dock__label">Home</span>
+    </a>
+    <a class="dock__link" href="/category/tools" {% if page_id|default('') == 'catalog' %}aria-current="page"{% endif %}
+       data-track="dock-catalog">
+      <span class="icon" style="--icon:url(/static/icons/nav-catalog.svg)" aria-hidden="true"></span>
+      <span class="dock__label">Catalog</span>
+    </a>
+    <a class="dock__link" href="/search" {% if page_id|default('') == 'search' %}aria-current="page"{% endif %}
+       data-track="dock-search">
+      <span class="icon" style="--icon:url(/static/icons/evidence.svg)" aria-hidden="true"></span>
+      <span class="dock__label">Search</span>
+    </a>
+    <a class="dock__link" href="{{ '/recommendations' if user else '/login' }}"
+       {% if page_id|default('') == 'account' %}aria-current="page"{% endif %} data-track="dock-account">
+      <span class="icon" style="--icon:url(/static/icons/nav-account.svg)" aria-hidden="true"></span>
+      <span class="dock__label">{{ "For you" if user else "Sign in" }}</span>
+    </a>
+  </nav>
+  <footer class="colophon">
+    <div class="colophon__inner container">
+      <span>Hardy · durable goods, argued from evidence</span>
+      <span>Every claim carries its source</span>
+    </div>
+  </footer>
+  <script src="/static/tracker.js?v={{ asset_version() }}" defer
+          data-endpoint="{{ tracking.endpoint }}"
+          data-batch-size="{{ tracking.batch_size }}"
+          data-flush-ms="{{ tracking.flush_ms }}"
+          data-debounce-ms="{{ tracking.debounce_ms }}"></script>
+</body>
+</html>
