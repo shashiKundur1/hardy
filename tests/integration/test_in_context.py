@@ -53,10 +53,18 @@ async def test_the_recommendation_surfaces_while_browsing_not_only_on_its_own_pa
     await _person("browsing@hardy.test")
     async with _client() as client:
         await _signed_in(client, "browsing@hardy.test")
-        for path in ("/category/cookware", "/search?q=pan"):
+        response = await client.get("/category/cookware")
+    assert 'class="nudge"' in response.text
+    assert "Three cookware views" in response.text
+
+
+async def test_it_stays_out_of_the_way_where_the_shopper_has_stated_their_intent():
+    await _person("deliberate@hardy.test")
+    async with _client() as client:
+        await _signed_in(client, "deliberate@hardy.test")
+        for path in ("/search?q=pan", "/product/1"):
             response = await client.get(path)
-            assert 'class="nudge"' in response.text, path
-            assert "Three cookware views" in response.text
+            assert 'class="nudge"' not in response.text, path
 
 
 async def test_it_says_which_behaviour_earned_it():
