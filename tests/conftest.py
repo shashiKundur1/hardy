@@ -9,13 +9,17 @@ os.environ["QDRANT_URL"] = ""
 os.environ.setdefault("SESSION_SECRET", "hardy-test-secret")
 
 import pytest
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import delete
 
 from src.database import Base, create_schema, engine, session_factory
 from src.integrations import mesh, vectorstore
+from src.main import app
 from tests.fakes import OfflineMesh
 
 LAYERS = ("unit", "integration", "regression", "contract", "live")
+SHOPPER_EMAIL = "shopper@hardy.test"
+SHOPPER_PASSWORD = "keep-it-long-1"
 
 
 def pytest_collection_modifyitems(items):
@@ -39,6 +43,15 @@ async def clean_state(request):
     mesh.reset_call_log()
     yield
     await engine.dispose()
+
+
+@pytest.fixture
+async def shopper():
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://hardy.test"
+    ) as client:
+        await client.post("/signup", data={"email": SHOPPER_EMAIL, "password": SHOPPER_PASSWORD})
+        yield client
 
 
 @pytest.fixture

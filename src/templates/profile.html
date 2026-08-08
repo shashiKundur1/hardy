@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}{{ user.shown_name }} · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="identity">
+    <span class="identity__mark">{{ avatar(user, 96) }}</span>
+    <div class="identity__text">
+      <p class="eyebrow">{{ "Administrator" if user.role == "admin" else "Shopper" }}</p>
+      <h1>{{ user.shown_name }}</h1>
+      <p class="identity__email">{{ user.email }}</p>
+    </div>
+  </div>
+  <ul class="stats">
+    <li class="stat">
+      <span class="stat__label">Joined</span>
+      <span class="stat__value">{{ user.created_at.strftime("%d %b %Y") if user.created_at else "—" }}</span>
+    </li>
+    <li class="stat">
+      <span class="stat__label">Actions recorded</span>
+      <span class="stat__value">{{ events_recorded|compact }}</span>
+    </li>
+    <li class="stat">
+      <span class="stat__label">Recommendation</span>
+      <span class="stat__value">{{ "On file" if recommendation else "None yet" }}</span>
+    </li>
+  </ul>
+</section>
+
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">What you told Hardy</p>
+    <h2>Declared interests</h2>
+    <p class="section__lede">
+      Given at sign-up, and used as a starting point before your browsing says anything.
+    </p>
+  </div>
+  {% if interests %}
+  <ul class="chips">
+    {% for slug in interests %}
+    <li><a class="chip" href="/category/{{ slug }}">{{ labels[slug] }}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">Nothing declared. Hardy is working from your browsing alone.</p>
+  {% endif %}
+  {% if user.shopping_for %}
+  <blockquote class="evidence">
+    <p>“{{ user.shopping_for }}”</p>
+    <cite>Stated during onboarding</cite>
+  </blockquote>
+  {% endif %}
+</section>
+
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Your record</p>
+    <h2>What Hardy holds, and how to remove it</h2>
+  </div>
+  <ul class="pairs">
+    <li class="pair">
+      <a class="navlink" href="/recommendations">Your recommendation, with the evidence behind each pick</a>
+    </li>
+    <li class="pair">
+      <a class="navlink" href="/footprint">Every action recorded, and the control that deletes it</a>
+    </li>
+    <li class="pair">
+      <a class="navlink" href="/debug">The glass box: retrieval scores, node path, and AI calls</a>
+    </li>
+  </ul>
+  <form method="post" action="/logout">
+    <button class="button button--quiet" type="submit">Sign out</button>
+  </form>
+</section>
+{% endblock %}

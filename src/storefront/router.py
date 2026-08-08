@@ -1,19 +1,23 @@
 import json
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from src.auth import service as accounts
 from src.auth.dependencies import CurrentUser, OptionalUser
 from src.catalog import service as catalog
 from src.catalog.constants import (
     CATEGORY_BLURBS,
     CATEGORY_LABELS,
     FEATURED_LIMIT,
+    LIFE_FLOORS,
     PAGE_SIZE,
+    RATE_CEILINGS,
     RELATED_LIMIT,
     SEARCH_LIMIT,
+    SORT_LABELS,
 )
-from src.catalog.schemas import ProductId
+from src.catalog.schemas import BrowseQuery, ProductId
 from src.database import SessionDep
 from src.debug import service as debug
 from src.events import service as events
@@ -23,7 +27,14 @@ from src.rendering import page
 
 router = APIRouter(tags=["storefront"])
 
-AS_A_PAGE = {
+NEEDS_SIGN_IN = {
+    status.HTTP_303_SEE_OTHER: {
+        "description": "Signed-out visitors are sent to sign in and returned here after",
+        "content": {"text/html": {}},
+    },
+}
+
+AS_A_PAGE = NEEDS_SIGN_IN | {
     status.HTTP_404_NOT_FOUND: {
         "description": "Nothing lives at this address",
         "content": {"text/html": {}},
@@ -34,18 +45,34 @@ AS_A_PAGE = {
     },
 }
 
+BrowseParams = Depends(BrowseQuery)
+
 
 @router.get("/", response_class=HTMLResponse)
-async def home(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
-    active = await recommendations.active_for(session, user.id) if user else None
+async def landing(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
     return page(
         request,
-        "home.html",
+        "landing.html",
+        user=user,
+        catalog_size=await catalog.count(session),
+        sourced=await catalog.sourced_count(session),
+        labels=CATEGORY_LABELS,
+    )
+
+
+@router.get("/shop", response_class=HTMLResponse, responses=NEEDS_SIGN_IN)
+async def shop(request: Request, session: SessionDep, user: CurrentUser) -> HTMLResponse:
+    active = await recommendations.active_for(session, user.id)
+    return page(
+        request,
+        "shop.html",
         user=user,
         categories=await catalog.navigation(session),
         featured=await catalog.featured(session, FEATURED_LIMIT),
         catalog_size=await catalog.count(session),
         sourced=await catalog.sourced_count(session),
+        interests=accounts.declared_interests(user),
+        labels=CATEGORY_LABELS,
         recommendation=active,
         chosen=await recommendations.products_for(session, active) if active else [],
     )
@@ -53,10 +80,15 @@ async def home(request: Request, session: SessionDep, user: OptionalUser) -> HTM
 
 @router.get("/category/{slug}", response_class=HTMLResponse, responses=AS_A_PAGE)
 async def category(
-    request: Request, session: SessionDep, user: OptionalUser, slug: str
+    request: Request,
+    session: SessionDep,
+    user: CurrentUser,
+    slug: str,
+    query: BrowseQuery = BrowseParams,
 ) -> HTMLResponse:
     if slug not in CATEGORY_LABELS:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No such category")
+    products, total = await catalog.browse(session, slug, query)
     return page(
         request,
         "category.html",
@@ -65,13 +97,19 @@ async def category(
         slug=slug,
         label=CATEGORY_LABELS[slug],
         blurb=CATEGORY_BLURBS[slug],
-        products=await catalog.by_category(session, slug, PAGE_SIZE),
+        products=products,
+        total=total,
+        query=query,
+        pages=max(1, -(-total // PAGE_SIZE)),
+        sort_labels=SORT_LABELS,
+        life_floors=LIFE_FLOORS,
+        rate_ceilings=RATE_CEILINGS,
     )
 
 
 @router.get("/product/{product_id}", response_class=HTMLResponse, responses=AS_A_PAGE)
 async def product(
-    request: Request, session: SessionDep, user: OptionalUser, product_id: ProductId
+    request: Request, session: SessionDep, user: CurrentUser, product_id: ProductId
 ) -> HTMLResponse:
     found = await catalog.by_id(session, product_id)
     if found is None:
@@ -87,9 +125,9 @@ async def product(
     )
 
 
-@router.get("/search", response_class=HTMLResponse)
+@router.get("/search", response_class=HTMLResponse, responses=NEEDS_SIGN_IN)
 async def search(
-    request: Request, session: SessionDep, user: OptionalUser, q: str = ""
+    request: Request, session: SessionDep, user: CurrentUser, q: str = ""
 ) -> HTMLResponse:
     query = q.strip()
     return page(
@@ -102,9 +140,9 @@ async def search(
     )
 
 
-@router.get("/recommendations", response_class=HTMLResponse)
-async def advice(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
-    active = await recommendations.active_for(session, user.id) if user else None
+@router.get("/recommendations", response_class=HTMLResponse, responses=NEEDS_SIGN_IN)
+async def advice(request: Request, session: SessionDep, user: CurrentUser) -> HTMLResponse:
+    active = await recommendations.active_for(session, user.id)
     return page(
         request,
         "recommendations.html",
@@ -116,19 +154,31 @@ async def advice(request: Request, session: SessionDep, user: OptionalUser) -> H
     )
 
 
-@router.get("/footprint", response_class=HTMLResponse)
-async def footprint(request: Request, session: SessionDep, user: OptionalUser) -> HTMLResponse:
-    active = await recommendations.active_for(session, user.id) if user else None
+@router.get("/profile", response_class=HTMLResponse, responses=NEEDS_SIGN_IN)
+async def profile(request: Request, session: SessionDep, user: CurrentUser) -> HTMLResponse:
+    return page(
+        request,
+        "profile.html",
+        user=user,
+        categories=await catalog.navigation(session),
+        interests=accounts.declared_interests(user),
+        labels=CATEGORY_LABELS,
+        events_recorded=await events.count_for(session, user.id),
+        recommendation=await recommendations.active_for(session, user.id),
+    )
+
+
+@router.get("/footprint", response_class=HTMLResponse, responses=NEEDS_SIGN_IN)
+async def footprint(request: Request, session: SessionDep, user: CurrentUser) -> HTMLResponse:
+    active = await recommendations.active_for(session, user.id)
     return page(
         request,
         "footprint.html",
         user=user,
         categories=await catalog.navigation(session),
-        summary=await events.summary_for(session, user.id) if user else [],
-        batches=debug.batches(await events.recent_for(session, user.id, FOOTPRINT_LIMIT))
-        if user
-        else [],
-        total=await events.count_for(session, user.id) if user else 0,
+        summary=await events.summary_for(session, user.id),
+        batches=debug.batches(await events.recent_for(session, user.id, FOOTPRINT_LIMIT)),
+        total=await events.count_for(session, user.id),
         recommendation=active,
         intent=json.loads(active.interest_profile) if active else {},
     )

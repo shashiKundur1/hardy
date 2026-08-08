@@ -1,8 +1,21 @@
+from src.constants import SortOrder
+
 FEATURED_LIMIT = 8
 PAGE_SIZE = 24
 SEARCH_LIMIT = 40
 RELATED_LIMIT = 4
 ADMIN_PAGE_SIZE = 25
+MAX_PAGE = 500
+
+SORT_LABELS = {
+    SortOrder.LIFE: "Longest life",
+    SortOrder.RATE: "Lowest cost per year",
+    SortOrder.PRICE: "Lowest price",
+    SortOrder.NEWEST: "Recently added",
+}
+
+LIFE_FLOORS = (10, 20, 30)
+RATE_CEILINGS = (250, 500, 1000)
 
 CATEGORY_LABELS = {
     "cookware": "Cookware",

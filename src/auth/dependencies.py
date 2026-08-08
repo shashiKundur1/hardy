@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, Request
 
 from src.auth.constants import SESSION_USER_KEY
-from src.auth.exceptions import AdminOnly, NotAuthenticated
+from src.auth.exceptions import AdminOnly, AdminSignInRequired, NotAuthenticated
 from src.auth.models import User
 from src.constants import Role
 from src.database import SessionDep
@@ -28,7 +28,9 @@ async def required_user(user: OptionalUser) -> User:
 CurrentUser = Annotated[User, Depends(required_user)]
 
 
-async def required_admin(user: CurrentUser) -> User:
+async def required_admin(user: OptionalUser) -> User:
+    if user is None:
+        raise AdminSignInRequired()
     if user.role != Role.ADMIN:
         raise AdminOnly()
     return user

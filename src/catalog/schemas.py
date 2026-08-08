@@ -5,9 +5,31 @@ from typing import Annotated
 from fastapi import Path
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from src.constants import CATEGORIES, MAX_SQLITE_INTEGER, Ownership
+from src.catalog.constants import MAX_PAGE
+from src.constants import CATEGORIES, MAX_SQLITE_INTEGER, Ownership, SortOrder
 
 ProductId = Annotated[int, Path(ge=1, le=MAX_SQLITE_INTEGER)]
+
+
+class BrowseQuery(BaseModel):
+    page: int = Field(default=1, ge=1, le=MAX_PAGE)
+    sort: SortOrder = SortOrder.LIFE
+    sourced: bool = False
+    continuity: bool = False
+    min_life: int = Field(default=0, ge=0, le=200)
+    max_rate: int = Field(default=0, ge=0, le=10_000_000)
+
+    @property
+    def is_filtered(self) -> bool:
+        return self.sourced or self.continuity or bool(self.min_life) or bool(self.max_rate)
+
+    def link(self, **overrides: object) -> str:
+        blank = BrowseQuery()
+        fields = self.model_dump() | overrides
+        kept = [
+            f"{name}={value}" for name, value in fields.items() if value != getattr(blank, name)
+        ]
+        return f"?{'&'.join(kept)}" if kept else ""
 
 
 class ProductWrite(BaseModel):

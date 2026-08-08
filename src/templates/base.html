@@ -13,24 +13,48 @@
   <link rel="stylesheet" href="/brand/tokens.css?v={{ asset_version() }}">
   <link rel="stylesheet" href="/static/style.css?v={{ asset_version() }}">
 </head>
+{% set surface = page_id|default('') %}
+{% set marketing = surface in ('landing', 'auth') %}
 <body{% block body_data %}{% endblock %}>
   <a class="skip" href="#main">Skip to content</a>
   <header class="masthead">
     <div class="masthead__inner container">
-      <a class="wordmark" href="/"><img src="/brand/logo/hardy-wordmark.png" alt="Hardy"></a>
+      <a class="wordmark" href="{{ '/shop' if user else '/' }}"><img src="/brand/logo/hardy-wordmark.png" alt="Hardy"></a>
+      {% if marketing %}
+      <nav class="promo" aria-label="About Hardy">
+        <a class="navlink" href="/#argument">How it argues</a>
+        <a class="navlink" href="/#coverage">What it covers</a>
+        <a class="navlink" href="/debug">Glass box</a>
+      </nav>
+      {% else %}
       <form class="findbar" role="search" action="/search" method="get">
         <label class="skip" for="q">Search the catalog</label>
         <input class="input" id="q" name="q" type="search" placeholder="Search durable goods"
-               value="{{ query|default('', true) }}" autocomplete="off">
+               value="{{ query if query is string else '' }}" autocomplete="off">
       </form>
+      {% endif %}
       <div class="account">
         {% if user %}
-          <a class="navlink" href="/recommendations">For you</a>
-          <a class="navlink" href="/footprint">Footprint</a>
-          {% if user.role == "admin" %}<a class="navlink" href="/admin">Admin</a>{% endif %}
-          <form method="post" action="/logout">
-            <button class="button button--quiet" type="submit">Sign out</button>
-          </form>
+          <details class="menu">
+            <summary class="menu__trigger" aria-haspopup="menu">
+              {{ avatar(user, 32) }}
+              <span class="menu__name">{{ user.shown_name }}</span>
+            </summary>
+            <div class="menu__panel" role="menu">
+              {% if user.role == "admin" %}
+              <span class="menu__badge">Administrator</span>
+              {% endif %}
+              <a class="menu__item" role="menuitem" href="/profile">Profile</a>
+              <a class="menu__item" role="menuitem" href="/recommendations">For you</a>
+              <a class="menu__item" role="menuitem" href="/footprint">Footprint</a>
+              {% if user.role == "admin" %}
+              <a class="menu__item" role="menuitem" href="/admin">Catalog admin</a>
+              {% endif %}
+              <form method="post" action="/logout">
+                <button class="menu__item menu__item--action" role="menuitem" type="submit">Sign out</button>
+              </form>
+            </div>
+          </details>
         {% else %}
           <a class="navlink" href="/login">Sign in</a>
           <a class="button" href="/signup" data-track="signup-masthead">Create account</a>
@@ -38,7 +62,7 @@
       </div>
     </div>
   </header>
-  {% if categories %}
+  {% if categories and not marketing %}
   <nav class="strip" aria-label="Categories">
     <div class="strip__inner container">
       {% for entry in categories %}
@@ -55,28 +79,30 @@
   <main id="main" class="{% block main_class %}sections{% endblock %}">
     {% block main %}{% endblock %}
   </main>
+  {% if not marketing %}
   <nav class="dock" aria-label="Primary">
-    <a class="dock__link" href="/" {% if page_id|default('') == 'home' %}aria-current="page"{% endif %}
-       data-track="dock-home">
+    <a class="dock__link" href="/shop" {% if surface == 'shop' %}aria-current="page"{% endif %}
+       data-track="dock-shop">
       <span class="icon" style="--icon:url(/static/icons/nav-home.svg)" aria-hidden="true"></span>
-      <span class="dock__label">Home</span>
+      <span class="dock__label">Shop</span>
     </a>
-    <a class="dock__link" href="/category/tools" {% if page_id|default('') == 'catalog' %}aria-current="page"{% endif %}
+    <a class="dock__link" href="/category/tools" {% if surface == 'catalog' %}aria-current="page"{% endif %}
        data-track="dock-catalog">
       <span class="icon" style="--icon:url(/static/icons/nav-catalog.svg)" aria-hidden="true"></span>
       <span class="dock__label">Catalog</span>
     </a>
-    <a class="dock__link" href="/search" {% if page_id|default('') == 'search' %}aria-current="page"{% endif %}
+    <a class="dock__link" href="/search" {% if surface == 'search' %}aria-current="page"{% endif %}
        data-track="dock-search">
       <span class="icon" style="--icon:url(/static/icons/evidence.svg)" aria-hidden="true"></span>
       <span class="dock__label">Search</span>
     </a>
-    <a class="dock__link" href="{{ '/recommendations' if user else '/login' }}"
-       {% if page_id|default('') == 'account' %}aria-current="page"{% endif %} data-track="dock-account">
+    <a class="dock__link" href="{{ '/profile' if user else '/login' }}"
+       {% if surface == 'account' %}aria-current="page"{% endif %} data-track="dock-account">
       <span class="icon" style="--icon:url(/static/icons/nav-account.svg)" aria-hidden="true"></span>
-      <span class="dock__label">{{ "For you" if user else "Sign in" }}</span>
+      <span class="dock__label">{{ "Account" if user else "Sign in" }}</span>
     </a>
   </nav>
+  {% endif %}
   <footer class="colophon">
     <div class="colophon__inner container">
       <span>Hardy · durable goods, argued from evidence</span>
@@ -84,10 +110,13 @@
       <span>Every claim carries its source</span>
     </div>
   </footer>
+  <script src="/static/ui.js?v={{ asset_version() }}" defer></script>
+  {% if not marketing %}
   <script src="/static/tracker.js?v={{ asset_version() }}" defer
           data-endpoint="{{ tracking.endpoint }}"
           data-batch-size="{{ tracking.batch_size }}"
           data-flush-ms="{{ tracking.flush_ms }}"
           data-debounce-ms="{{ tracking.debounce_ms }}"></script>
+  {% endif %}
 </body>
 </html>

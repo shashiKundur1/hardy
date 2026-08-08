@@ -1,6 +1,13 @@
 from pydantic import BaseModel, field_validator
 
-from src.auth.constants import MAX_EMAIL_LENGTH, MAX_PASSWORD_BYTES, MIN_PASSWORD_LENGTH
+from src.auth.constants import (
+    MAX_DISPLAY_NAME,
+    MAX_EMAIL_LENGTH,
+    MAX_PASSWORD_BYTES,
+    MAX_SHOPPING_FOR,
+    MIN_PASSWORD_LENGTH,
+)
+from src.constants import CATEGORIES
 
 
 class Credentials(BaseModel):
@@ -30,3 +37,32 @@ class Credentials(BaseModel):
         if len(value.encode()) > MAX_PASSWORD_BYTES:
             raise ValueError(f"Keep the password under {MAX_PASSWORD_BYTES} bytes")
         return value
+
+
+class OnboardingChoices(BaseModel):
+    interests: list[str] = []
+    shopping_for: str = ""
+    display_name: str = ""
+
+    @field_validator("interests")
+    @classmethod
+    def known_categories(cls, value: list[str]) -> list[str]:
+        if any(slug not in CATEGORIES for slug in value):
+            raise ValueError("Choose categories from the list shown")
+        return list(dict.fromkeys(value))
+
+    @field_validator("shopping_for")
+    @classmethod
+    def brief_enough(cls, value: str) -> str:
+        text = " ".join(value.split())
+        if len(text) > MAX_SHOPPING_FOR:
+            raise ValueError(f"Keep this under {MAX_SHOPPING_FOR} characters")
+        return text
+
+    @field_validator("display_name")
+    @classmethod
+    def short_enough(cls, value: str) -> str:
+        name = " ".join(value.split())
+        if len(name) > MAX_DISPLAY_NAME:
+            raise ValueError(f"Keep the name under {MAX_DISPLAY_NAME} characters")
+        return name

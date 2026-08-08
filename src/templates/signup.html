@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set page_id = "auth" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Create your account · Hardy{% endblock %}
+
+{% block main_class %}authpage{% endblock %}
+
+{% block main %}
+<div class="auth auth--signup">
+  <div class="auth__intro">
+    <p class="eyebrow">New to Hardy</p>
+    <h1>Create your account</h1>
+    <p class="auth__blurb">
+      Hardy reads what you browse and argues for the things that outlast their category. Two
+      fields, then a short walk through how it reasons.
+    </p>
+  </div>
+
+  {% if error and error_field == "form" %}
+  <p class="notice" role="alert">{{ error }}</p>
+  {% endif %}
+
+  <form class="form" method="post" action="/signup" novalidate>
+    {{ ui.email_field(email, error if error_field == "email" else "") }}
+    {{ ui.password_field("new-password", "At least 8 characters. Anything you can remember beats anything you cannot.", error if error_field == "password" else "") }}
+    <button class="button button--full" type="submit">Create account</button>
+  </form>
+
+  <p class="auth__alternate">
+    Already have an account? <a href="/login">Sign in</a>
+  </p>
+  <p class="auth__aside">
+    Administrators sign in at <a href="/admin/login">the admin door</a>.
+  </p>
+</div>
+{% endblock %}

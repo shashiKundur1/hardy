@@ -4,7 +4,9 @@ from typing import Any
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from markupsafe import Markup
 
+from src.auth import avatar as avatars
 from src.constants import EVENT_BATCH_SIZE, EVENT_FLUSH_MS, SEARCH_DEBOUNCE_MS
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -30,8 +32,13 @@ def compact(value: float | int | None) -> str:
     return f"{value:,.0f}"
 
 
+def avatar(user, size: int = 48) -> Markup:
+    return Markup(avatars.for_user(user, size))
+
+
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 templates.env.globals["asset_version"] = asset_version
+templates.env.globals["avatar"] = avatar
 templates.env.filters["compact"] = compact
 templates.env.globals["tracking"] = {
     "endpoint": "/api/events",

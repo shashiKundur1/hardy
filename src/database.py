@@ -4,8 +4,10 @@ from importlib import import_module
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.schema import CreateColumn
 
 from src.config import settings
 
@@ -29,7 +31,19 @@ def utcnow() -> datetime:
     return datetime.now(UTC).replace(tzinfo=None)
 
 
+def add_missing_columns(connection) -> None:
+    inspector = inspect(connection)
+    for table in Base.metadata.sorted_tables:
+        present = {column["name"] for column in inspector.get_columns(table.name)}
+        for column in table.columns:
+            if column.name in present:
+                continue
+            spec = CreateColumn(column).compile(dialect=connection.dialect)
+            connection.exec_driver_sql(f"ALTER TABLE {table.name} ADD COLUMN {spec}")
+
+
 async def create_schema() -> None:
     import_module("src.models")
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
+        await connection.run_sync(add_missing_columns)

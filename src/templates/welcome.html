@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Welcome · Hardy{% endblock %}
+
+{% block main_class %}authpage{% endblock %}
+
+{% block main %}
+<div class="onboard">
+  <div class="onboard__head">
+    <p class="eyebrow">Step {{ step }} of {{ steps }}</p>
+    <ol class="progress">
+      {% for index in range(1, steps + 1) %}
+      <li class="progress__step" data-state="{{ 'done' if index < step else ('now' if index == step else 'next') }}">
+        <span class="skip">{{ "Completed" if index < step else ("Current" if index == step else "Upcoming") }}</span>
+        <span aria-hidden="true">{{ "%02d"|format(index) }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+
+  {% if step == 1 %}
+  <div class="onboard__body">
+    <h1>Hardy argues from evidence</h1>
+    <p class="onboard__lede">
+      Most shops tell you what a thing costs. Hardy tells you what it costs to keep, who stands
+      behind it now, and where that came from. Here is how to read a product card.
+    </p>
+    <ul class="teach">
+      <li class="teach__item">
+        <span class="teach__demo">
+          <span class="card__rate">
+            <span class="card__rate-value">₹467</span>
+            <span class="card__rate-unit">per year</span>
+          </span>
+        </span>
+        <div>
+          <h2>Cost per year leads</h2>
+          <p>Price divided by expected service life. A cheap thing replaced often is not cheap.</p>
+        </div>
+      </li>
+      <li class="teach__item">
+        <span class="teach__demo">
+          <span class="mark mark--continuity"><span aria-hidden="true">◆</span>family owned</span>
+        </span>
+        <div>
+          <h2>Ownership is stated, and sourced</h2>
+          <p>Where Hardy holds a record of who owns the brand, it shows it and quotes the source.</p>
+        </div>
+      </li>
+      <li class="teach__item">
+        <span class="teach__demo">
+          <span class="mark mark--unknown"><span aria-hidden="true">–</span>owner unrecorded</span>
+        </span>
+        <div>
+          <h2>Absence is shown, not hidden</h2>
+          <p>No record means no claim. Hardy will not invent one to make a card look complete.</p>
+        </div>
+      </li>
+    </ul>
+    <div class="onboard__actions">
+      <a class="button" href="/welcome?step=2">Continue</a>
+      <form method="post" action="/welcome/skip">
+        <button class="button button--quiet" type="submit">Skip for now</button>
+      </form>
+    </div>
+  </div>
+
+  {% elif step == 2 %}
+  <form class="onboard__body" method="post" action="/welcome/interests">
+    <h1>What are you shopping for?</h1>
+    <p class="onboard__lede">
+      Pick any categories you care about. This gives Hardy somewhere to start before your
+      browsing says anything. You can change it later, and picking nothing is fine.
+    </p>
+    <fieldset class="picker">
+      <legend class="skip">Categories</legend>
+      {% for entry in categories %}
+      <label class="picker__option">
+        <input type="checkbox" name="interests" value="{{ entry.slug }}"
+               {% if entry.slug in chosen %}checked{% endif %}>
+        {{ ui.icon(entry.slug) }}
+        <span class="picker__name">{{ entry.label }}</span>
+        <span class="picker__count">{{ entry.total }}</span>
+      </label>
+      {% endfor %}
+    </fieldset>
+    <div class="onboard__actions">
+      <button class="button" type="submit">Continue</button>
+      <a class="button button--quiet" href="/welcome?step=1">Back</a>
+    </div>
+  </form>
+
+  {% else %}
+  <form class="onboard__body" method="post" action="/welcome/finish">
+    <h1>Anything specific?</h1>
+    <p class="onboard__lede">
+      One line about what you are actually after. Hardy passes it to the agent alongside what it
+      reads from your browsing.
+    </p>
+    <div class="field">
+      <label class="field__label" for="shopping_for">What you are looking for</label>
+      <input class="input" id="shopping_for" name="shopping_for" type="text" maxlength="240"
+             placeholder="a pan that outlives the kitchen" value="{{ user.shopping_for or '' }}">
+      <span class="hint">Optional. Up to 240 characters.</span>
+    </div>
+    <div class="field">
+      <label class="field__label" for="display_name">What should we call you?</label>
+      <input class="input" id="display_name" name="display_name" type="text" maxlength="80"
+             autocomplete="nickname" value="{{ user.display_name or '' }}">
+      <span class="hint">Optional. Shown in your account menu.</span>
+    </div>
+    <div class="onboard__actions">
+      <button class="button" type="submit">Start browsing</button>
+      <a class="button button--quiet" href="/welcome?step=2">Back</a>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

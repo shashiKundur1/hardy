@@ -41,18 +41,16 @@ async def test_a_missing_page_returns_404_and_not_a_soft_200():
     assert response.status_code == 404
 
 
-async def test_a_missing_product_renders_the_designed_page():
-    async with _client() as client:
-        response = await client.get("/product/999999")
+async def test_a_missing_product_renders_the_designed_page(shopper):
+    response = await shopper.get("/product/999999")
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("text/html")
     assert "Nothing lives at this address" in response.text
     assert "Back to the storefront" in response.text
 
 
-async def test_an_unreadable_product_id_renders_the_designed_page():
-    async with _client() as client:
-        response = await client.get(f"/product/{MAX_SQLITE_INTEGER + 1}")
+async def test_an_unreadable_product_id_renders_the_designed_page(shopper):
+    response = await shopper.get(f"/product/{MAX_SQLITE_INTEGER + 1}")
     assert response.status_code == 422
     assert response.headers["content-type"].startswith("text/html")
     assert "could not be read" in response.text
@@ -65,8 +63,14 @@ async def test_an_unauthenticated_api_call_gets_json_not_a_redirect_to_a_page():
     assert response.headers["content-type"].startswith("application/json")
 
 
-async def test_a_missing_category_renders_the_designed_page():
-    async with _client() as client:
-        response = await client.get("/category/not-a-category")
+async def test_a_missing_category_renders_the_designed_page(shopper):
+    response = await shopper.get("/category/not-a-category")
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("text/html")
+
+
+async def test_a_signed_out_visitor_is_sent_to_sign_in_and_returned_after():
+    async with _client() as client:
+        response = await client.get("/category/cookware")
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=/category/cookware"

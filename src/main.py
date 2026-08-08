@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
@@ -8,7 +9,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from src.auth.exceptions import NotAuthenticated
+from src.auth.exceptions import AdminSignInRequired, NotAuthenticated
 from src.auth.router import router as auth_router
 from src.catalog.router import api_router as catalog_api_router
 from src.catalog.router import router as catalog_router
@@ -59,7 +60,15 @@ def fault(request: Request, status_code: int, detail: str) -> Response:
 async def to_sign_in(request: Request, exception: Exception) -> Response:
     if wants_json(request):
         return JSONResponse({"detail": "Sign in to continue"}, status.HTTP_401_UNAUTHORIZED)
-    return RedirectResponse("/login", status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(f"/login?next={quote(request.url.path)}", status.HTTP_303_SEE_OTHER)
+
+
+async def to_admin_sign_in(request: Request, exception: Exception) -> Response:
+    if wants_json(request):
+        return JSONResponse(
+            {"detail": "Sign in as an administrator to continue"}, status.HTTP_401_UNAUTHORIZED
+        )
+    return RedirectResponse("/admin/login", status.HTTP_303_SEE_OTHER)
 
 
 async def error_page(request: Request, exception: HTTPException) -> Response:
@@ -107,6 +116,7 @@ def create_app() -> FastAPI:
     app.include_router(recommendations_router)
     app.include_router(storefront_router)
     app.add_exception_handler(NotAuthenticated, to_sign_in)
+    app.add_exception_handler(AdminSignInRequired, to_admin_sign_in)
     app.add_exception_handler(HTTPException, error_page)
     app.add_exception_handler(RequestValidationError, invalid_request)
     app.add_exception_handler(Exception, failure_page)

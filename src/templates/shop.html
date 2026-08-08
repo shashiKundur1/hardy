@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% set page_id = "shop" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Shop · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="welcome-bar">
+    <div class="welcome-bar__text">
+      <p class="eyebrow">Signed in as {{ user.shown_name }}</p>
+      <h1>What are you keeping for good?</h1>
+      {% if user.shopping_for %}
+      <p class="section__lede">You told Hardy you were looking for {{ user.shopping_for }}.</p>
+      {% else %}
+      <p class="section__lede">
+        {{ catalog_size }} products, {{ sourced }} of them with a sourced ownership record.
+      </p>
+      {% endif %}
+    </div>
+    {{ avatar(user, 64) }}
+  </div>
+  {% if interests %}
+  <ul class="chips">
+    {% for slug in interests %}
+    <li><a class="chip" href="/category/{{ slug }}" data-track="interest-chip" data-category="{{ slug }}">{{ labels[slug] }}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">For you</p>
+    <h2>What your browsing says</h2>
+  </div>
+  {% if recommendation %}
+  <div class="panel">
+    <p class="panel__head">{{ recommendation.events_covered }} actions considered · {{ recommendation.model_used }}</p>
+    <div class="panel__body">
+      <p class="narrative">{{ recommendation.narrative }}</p>
+    </div>
+    {% if chosen %}
+    <ul class="shortlist">
+      {% for product in chosen[:3] %}
+      <li>
+        <a class="shortlist__item" href="/product/{{ product.id }}" data-track="shortlist"
+           data-product-id="{{ product.id }}" data-category="{{ product.category }}">
+          <span class="shortlist__media">{{ ui.media(product) }}</span>
+          <span class="shortlist__body">
+            <span class="shortlist__title">{{ product.title }}</span>
+            <span class="shortlist__rate">{{ ui.rupees(product.cost_per_year) }} per year</span>
+          </span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="panel__foot">
+      <a class="navlink" href="/recommendations">All {{ chosen|length }} picks, with what Hardy has on each</a>
+    </p>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="empty">
+    Nothing yet. Hardy reasons about what you are shopping for only once your browsing says
+    something specific — until then there is nothing honest to recommend.
+  </p>
+  {% endif %}
+</section>
+
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">What Hardy covers</p>
+    <h2>Browse by category</h2>
+  </div>
+  <ul class="tiles">
+    {% for entry in categories %}
+    <li>
+      <a class="tile" href="/category/{{ entry.slug }}" data-track="category-tile" data-category="{{ entry.slug }}">
+        {{ ui.icon(entry.slug) }}
+        <span class="tile__text">
+          <span class="tile__name">{{ entry.label }}</span>
+          <span class="tile__count">{{ entry.total }} products</span>
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Built to outlast</p>
+    <h2>Longest service life</h2>
+    <p class="section__lede">The {{ catalog_size }} products in the catalog, ordered by expected life.</p>
+  </div>
+  {% if featured %}
+  <ul class="grid">
+    {% for product in featured %}
+      {{ ui.card(product) }}
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">
+    The catalog is not seeded yet. Products arrive with their evidence attached — expected life,
+    ownership, repairability and warranty — or they do not arrive at all.
+  </p>
+  {% endif %}
+</section>
+{% endblock %}
