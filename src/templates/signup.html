@@ -7,6 +7,8 @@
 {% block main_class %}authpage{% endblock %}
 
 {% block main %}
+<div class="auth-split">
+  {{ ui.auth_aside("Three numbers, on every product", "Each one is stated with the record it came from, or it is marked unknown. Nothing is inferred from marketing copy.") }}
 <div class="auth auth--signup">
   <div class="auth__intro">
     <p class="eyebrow">New to Hardy</p>
@@ -30,8 +32,9 @@
   <p class="auth__alternate">
     Already have an account? <a href="/login">Sign in</a>
   </p>
-  <p class="auth__aside">
+  <p class="auth__admin">
     Administrators sign in at <a href="/admin/login">the admin door</a>.
   </p>
+</div>
 </div>
 {% endblock %}

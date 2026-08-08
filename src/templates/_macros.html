@@ -2,6 +2,27 @@
 <span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg)" aria-hidden="true"></span>
 {%- endmacro %}
 
+{% macro auth_aside(heading, lede) -%}
+<aside class="auth-aside">
+  <h2>{{ heading }}</h2>
+  <p class="auth-aside__lede">{{ lede }}</p>
+  <ul class="proofs">
+    <li class="proof">
+      <span class="proof__figure">₹467<span class="skip"> per year</span></span>
+      <span class="proof__text">Cost per year, printed as loud as the price.</span>
+    </li>
+    <li class="proof">
+      <span class="proof__figure">◆ owned</span>
+      <span class="proof__text">Who owns the brand today, quoted from the record.</span>
+    </li>
+    <li class="proof">
+      <span class="proof__figure">– unknown</span>
+      <span class="proof__text">Where there is no record, Hardy says so instead of guessing.</span>
+    </li>
+  </ul>
+</aside>
+{%- endmacro %}
+
 {% macro email_field(value="", error="") -%}
 <div class="field">
   <label class="field__label" for="email">Email</label>
