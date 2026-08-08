@@ -1,3 +1,30 @@
+name: hardy
+
+x-app: &app
+  build:
+    context: .
+  image: hardy-app:${HARDY_TAG:-0.1.0}
+  env_file:
+    - .env
+  environment:
+    QDRANT_URL: http://qdrant:6333
+    DATABASE_URL: sqlite+aiosqlite:////data/hardy.db
+    PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+    SCHEDULER_ENABLED: "false"
+  volumes:
+    - app_data:/data
+  depends_on:
+    qdrant:
+      condition: service_healthy
+  restart: unless-stopped
+
+x-task: &task
+  <<: *app
+  profiles: ["tasks"]
+  restart: "no"
+  healthcheck:
+    disable: true
+
 services:
   qdrant:
     image: qdrant/qdrant:v1.12.4
@@ -10,21 +37,40 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   app:
-    build: .
+    <<: *app
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+
+  scheduler:
+    <<: *app
+    command: ["python", "-m", "scripts.run_scheduler"]
     environment:
       QDRANT_URL: http://qdrant:6333
       DATABASE_URL: sqlite+aiosqlite:////data/hardy.db
-    volumes:
-      - app_data:/data
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+      SCHEDULER_ENABLED: "true"
+    healthcheck:
+      disable: true
     depends_on:
       qdrant:
         condition: service_healthy
+      app:
+        condition: service_healthy
+
+  seed:
+    <<: *task
+    command: ["python", "-m", "scripts.seed_catalog"]
+
+  sync:
+    <<: *task
+    command: ["python", "-m", "scripts.sync_vectors"]
+
+  digest:
+    <<: *task
+    command: ["python", "-m", "scripts.send_digest"]
 
 volumes:
   qdrant_storage:

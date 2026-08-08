@@ -5,11 +5,13 @@ from httpx import ASGITransport, AsyncClient
 
 from src.catalog import service as catalog
 from src.catalog.schemas import ProductWrite
+from src.config import settings
 from src.constants import MAX_SQLITE_INTEGER
 from src.database import Base, session_factory
 from src.integrations import vectorstore
 from src.main import app, lifespan
 from src.models import TriggerDecision
+from src.recommendations import schedule
 
 SAMPLE = ProductWrite(
     title="Regression skillet",
@@ -79,6 +81,26 @@ async def test_the_glass_box_renders_when_the_vector_store_is_unreachable(monkey
     async with _client() as client:
         response = await client.get("/debug")
     assert response.status_code == 200, response.text
+
+
+def test_a_worker_process_does_not_start_a_second_copy_of_the_scheduler(monkeypatch):
+    monkeypatch.setattr(settings, "scheduler_enabled", False)
+    assert schedule.start_if_enabled() is None
+
+
+def test_the_digest_is_registered_exactly_once():
+    assert [job.id for job in schedule.build().get_jobs()] == [schedule.DIGEST_JOB_ID]
+
+
+async def test_the_health_check_answers_even_with_no_vector_store(monkeypatch):
+    async def refuse():
+        raise ConnectionError("all connection attempts failed")
+
+    monkeypatch.setattr(vectorstore, "count", refuse)
+    async with _client() as client:
+        response = await client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "database": True, "vector_store": False}
 
 
 async def test_consistency_reports_an_unreachable_vector_store_rather_than_raising(monkeypatch):

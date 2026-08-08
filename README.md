@@ -77,20 +77,78 @@ that proves nothing bypasses the gateway.
 | Scheduler | APScheduler |
 | Tracing | LangSmith |
 
+## The flow
+
+```
+/                 landing. What Hardy argues and why. No catalog, no tracker.
+/signup → /welcome  three steps: how to read a card, categories, what you are after
+/login            returns you to wherever you were headed
+/shop             the storefront, behind sign-in
+/category/{slug}  paged, sorted, filtered on Hardy's terms: has a source,
+                  ownership continuity, expected life, cost per year
+/product/{id}     the four fields nobody else surfaces
+/recommendations  the agent's case, and the evidence under each pick
+/footprint        every action Hardy recorded, and the control that deletes it
+/profile          who you are, what you declared, what Hardy holds
+/debug            the glass box: retrieval scores, node path, every AI call
+/admin/login      a separate door; /admin refuses a shopper with a designed 403
+/health           liveness plus vector-store reachability
+```
+
+Behavioural tracking loads on the storefront and **never on the landing page** — page
+views on a marketing page are not shopping intent, and recording them poisons the signal
+the agent reasons over.
+
 ## Setup
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env          # add your MESH_API_KEY
-uvicorn src.main:app --reload
+make install                  # poetry, into an in-project .venv
+cp .env.example .env          # add your MESH_API_KEY and SESSION_SECRET
+make seed                     # build the catalog through Mesh, idempotent
+make dev                      # http://localhost:8000
 ```
+
+No Poetry? `make install-pip` does the same with a plain venv.
 
 Verify the gateway is reachable and funded:
 
 ```bash
-python -m tests.test_mesh
+make test-live                # the tests that need a real MESH_API_KEY
 ```
+
+`make verify` is the ship gate: ruff, every offline test, and the four organiser checks.
+The default test run needs no Mesh key, so a judge can run it on a fresh clone.
+
+## Running it in containers
+
+```bash
+make docker-up                # qdrant + app + digest scheduler
+make docker-seed              # seed and sync inside the container network
+make docker-digest            # send one digest now
+```
+
+Four services, each with one job: `qdrant` holds the vectors, `app` serves the site,
+`scheduler` is the single process that owns the daily digest, and the profile-gated
+`seed` / `sync` / `digest` tasks run one-shot jobs against the same image and network.
+
+The scheduler is a **separate service on purpose**. The web container runs multiple
+workers; an in-process scheduler would fire the digest once per worker.
+
+## Bonus features
+
+All four of the challenge's highlighted bonuses are implemented and running:
+
+| Bonus | Where |
+|---|---|
+| **Structured agent framework** | LangGraph, six nodes with conditional edges and a bounded refine loop — `src/agent/graph.py` |
+| **Scheduled proactive delivery** | APScheduler cron in its own service, emailing a daily digest of the day's activity — `src/recommendations/schedule.py`, `digest.py` |
+| **Observability** | LangSmith tracing over the whole graph — `src/agent/graph.py` |
+| **Retrieval polish** | Metadata-filtered vector search with a durability re-rank, and the before/after of that re-rank shown on `/debug` — `src/agent/retrieval.py` |
+
+Beyond the list, the trigger policy in `src/recommendations/triggers.py` decides when an AI
+call is worth making at all: it suppresses on too-few events, a rate floor, and a profile
+hash that covers the catalog version, so an unchanged profile serves cache. A scheduled
+digest over unchanged behaviour costs **zero** LLM calls, and there is a test asserting it.
 
 ## Design
 

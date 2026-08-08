@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hardy</title>
+</head>
+<body style="margin:0;padding:0;background:#100E0C;color:#E9E4DC;font-family:Archivo,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#100E0C;">
+    <tr>
+      <td align="center" style="padding:24px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+          <tr>
+            <td style="padding:24px;">
+              <p style="margin:0;font-family:'IBM Plex Mono',Menlo,monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#FFB302;">
+                Hardy · durable goods, argued from evidence
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              <h1 style="margin:0;font-size:24px;line-height:1.2;color:#FFFFFF;">
+                Hello {{ user.shown_name }}, here is what your browsing says
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;background:#1B1815;border:1px solid #332E28;border-radius:4px;">
+              <p style="margin:0;font-size:15px;line-height:1.6;color:#E9E4DC;">
+                {{ recommendation.narrative }}
+              </p>
+            </td>
+          </tr>
+          {% for product in products %}
+          <tr>
+            <td style="padding:24px;border-bottom:1px solid #332E28;">
+              <p style="margin:0;font-family:'IBM Plex Mono',Menlo,monospace;font-size:18px;color:#FFB302;">
+                ₹{{ "{:,.0f}".format(product.cost_per_year) }}
+                <span style="font-size:12px;color:#ADA396;">per year</span>
+              </p>
+              <p style="margin:0;font-size:16px;color:#FFFFFF;">
+                <a href="{{ link('/product/' ~ product.id) }}" style="color:#FFFFFF;text-decoration:none;">{{ product.title }}</a>
+              </p>
+              <p style="margin:0;font-size:13px;color:#ADA396;">
+                {{ product.brand }} · {{ product.expected_life_years }} year expected life
+                {%- if product.evidence_source %} · ownership on record{% else %} · owner unrecorded{% endif %}
+              </p>
+            </td>
+          </tr>
+          {% endfor %}
+          <tr>
+            <td style="padding:24px;">
+              <a href="{{ link('/recommendations') }}"
+                 style="display:inline-block;padding:14px 20px;background:#FFB302;color:#100E0C;font-weight:600;font-size:14px;text-decoration:none;border-radius:4px;">
+                Read the full case
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#ADA396;">
+                Hardy read {{ recommendation.events_covered }} of your actions to write this, using
+                {{ recommendation.model_used }}. Everything it holds, and the control that deletes
+                it, is at <a href="{{ link('/footprint') }}" style="color:#FFB302;">your footprint</a>.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

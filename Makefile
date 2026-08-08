@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install install-pip dev seed sync agent verify test test-unit test-integration test-regression test-contract test-live cov load check lint format hooks docker-build docker-up docker-down clean
+.PHONY: help install install-pip dev seed sync agent digest verify test test-unit test-integration test-regression test-contract test-live cov load check lint format hooks docker-build docker-up docker-down docker-seed docker-digest docker-logs clean
 
 PYTHON := poetry run python
 
@@ -8,10 +8,11 @@ help:
 	@echo ""
 	@echo "  make install      poetry install, into an in-project .venv"
 	@echo "  make install-pip  same thing without poetry, for a judge in a hurry"
-	@echo "  make dev          run on http://127.0.0.1:8000 with hot reload"
+	@echo "  make dev          run on http://localhost:8000 with hot reload"
 	@echo "  make seed         seed the catalog through Mesh, idempotent on re-run"
 	@echo "  make sync         embed every product and upsert it into Qdrant"
 	@echo "  make agent        run the LangGraph agent end to end"
+	@echo "  make digest       run the daily digest now, without waiting for its hour"
 	@echo "  make verify       the ship gate: lint, every offline test, and the four CI checks"
 	@echo "  make test         unit, integration, regression and contract tests"
 	@echo "  make test-unit    pure logic only, no database and no network"
@@ -22,7 +23,10 @@ help:
 	@echo "  make lint         ruff check"
 	@echo "  make format       ruff format"
 	@echo "  make hooks        install the pre-commit hooks"
-	@echo "  make docker-up    run the app and a Qdrant server in containers"
+	@echo "  make docker-up    run Qdrant, the app and the digest scheduler in containers"
+	@echo "  make docker-seed  seed and sync the catalog inside the container network"
+	@echo "  make docker-digest  run one digest inside the container network"
+	@echo "  make docker-logs  follow the app and scheduler logs"
 	@echo "  make clean        remove caches, the database and the local vector store"
 
 install:
@@ -44,6 +48,9 @@ sync:
 
 agent:
 	$(PYTHON) -m scripts.run_agent
+
+digest:
+	$(PYTHON) -m scripts.send_digest
 
 verify: lint test check
 
@@ -93,6 +100,16 @@ docker-up:
 
 docker-down:
 	docker compose down
+
+docker-seed:
+	docker compose --profile tasks run --rm seed
+	docker compose --profile tasks run --rm sync
+
+docker-digest:
+	docker compose --profile tasks run --rm digest
+
+docker-logs:
+	docker compose logs -f app scheduler
 
 clean:
 	rm -rf .ruff_cache .pytest_cache qdrant_data hardy.db
