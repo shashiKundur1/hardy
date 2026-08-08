@@ -5,6 +5,7 @@
 {% block title %}{% if query %}{{ query }} · {% endif %}Search · Hardy{% endblock %}
 
 {% block main %}
+  {{ ui.nudge(nudge, nudge_picks, nudge_because, full_path(request)) }}
 <section class="container section">
   <div class="section__head">
     <p class="eyebrow">Search</p>

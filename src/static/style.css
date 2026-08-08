@@ -2521,3 +2521,124 @@ body {
     display: none;
   }
 }
+
+.nudge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: var(--pad);
+  background: var(--steel-900);
+  border: var(--edge);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--radius);
+  animation: nudge-in var(--duration) var(--ease) both;
+}
+
+@keyframes nudge-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+.nudge__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.nudge__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.nudge__why {
+  font-size: var(--text-sm);
+  color: var(--steel-300);
+}
+
+.nudge__narrative {
+  max-width: var(--measure);
+  color: var(--steel-100);
+}
+
+.nudge__picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--gap);
+  list-style: none;
+}
+
+.nudge__pick {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  min-height: var(--tap-min);
+  padding: var(--pad);
+  border: var(--edge);
+  border-radius: var(--radius);
+  color: var(--steel-100);
+  text-decoration: none;
+  transition: border-color var(--duration) var(--ease);
+}
+
+.nudge__pick:hover {
+  border-color: var(--steel-500);
+  color: var(--white);
+}
+
+.nudge__media {
+  display: block;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+}
+
+.nudge__media img {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.nudge__media .icon {
+  font-size: 2rem;
+  color: var(--steel-400);
+}
+
+.nudge__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.nudge__title {
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nudge__rate {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--amber);
+}
+
+.nudge__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nudge {
+    animation: none;
+  }
+}

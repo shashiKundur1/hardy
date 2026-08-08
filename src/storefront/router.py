@@ -1,6 +1,7 @@
 import json
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from src.auth import service as accounts
@@ -23,6 +24,8 @@ from src.debug import service as debug
 from src.events import service as events
 from src.events.constants import FOOTPRINT_LIMIT
 from src.recommendations import service as recommendations
+from src.recommendations.constants import DISMISSED_KEY, NUDGE_PICKS, TRIGGER_PHRASES
+from src.redirects import safe_path
 from src.rendering import page
 
 router = APIRouter(tags=["storefront"])
@@ -46,6 +49,18 @@ AS_A_PAGE = NEEDS_SIGN_IN | {
 }
 
 BrowseParams = Depends(BrowseQuery)
+
+
+async def in_context(request: Request, session, user) -> dict:
+    active = await recommendations.active_for(session, user.id)
+    if active is None or request.session.get(DISMISSED_KEY) == active.id:
+        return {"nudge": None, "nudge_picks": [], "nudge_because": ""}
+    picks = await recommendations.products_for(session, active)
+    return {
+        "nudge": active,
+        "nudge_picks": picks[:NUDGE_PICKS],
+        "nudge_because": TRIGGER_PHRASES.get(active.trigger_reason, "what you have been reading"),
+    }
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -104,6 +119,7 @@ async def category(
         sort_labels=SORT_LABELS,
         life_floors=LIFE_FLOORS,
         rate_ceilings=RATE_CEILINGS,
+        **await in_context(request, session, user),
     )
 
 
@@ -122,6 +138,7 @@ async def product(
         product=found,
         label=CATEGORY_LABELS[found.category],
         related=await catalog.related(session, found, RELATED_LIMIT),
+        **await in_context(request, session, user),
     )
 
 
@@ -137,6 +154,7 @@ async def search(
         categories=await catalog.navigation(session),
         query=query,
         results=await catalog.search(session, query, SEARCH_LIMIT) if query else [],
+        **await in_context(request, session, user),
     )
 
 
@@ -189,3 +207,16 @@ async def forget(session: SessionDep, user: CurrentUser) -> RedirectResponse:
     await events.forget(session, user.id)
     await recommendations.forget(session, user.id)
     return RedirectResponse("/footprint", status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/recommendations/dismiss")
+async def dismiss(
+    request: Request,
+    session: SessionDep,
+    user: CurrentUser,
+    back: Annotated[str, Form()] = "",
+) -> RedirectResponse:
+    active = await recommendations.active_for(session, user.id)
+    if active is not None:
+        request.session[DISMISSED_KEY] = active.id
+    return RedirectResponse(safe_path(back), status.HTTP_303_SEE_OTHER)
