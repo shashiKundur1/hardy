@@ -49,6 +49,14 @@ class Role(StrEnum):
     ADMIN = "admin"
 
 
+class Stance(StrEnum):
+    THE_PICK = "the_pick"
+    STRONGER = "stronger"
+    LEVEL = "level"
+    WEAKER = "weaker"
+    ADRIFT = "adrift"
+
+
 class Wear(StrEnum):
     HOLDING = "holding_up"
     WORN = "worn"
@@ -84,6 +92,10 @@ MAX_REFINE_LOOPS = 2
 MAX_SQLITE_INTEGER = 2**63 - 1
 
 MIN_SOURCED_CANDIDATES = 2
+
+DURABILITY_TIE = 0.05
+RATE_TOLERANCE_LOW = 0.8
+RATE_TOLERANCE_HIGH = 1.25
 
 DURABILITY_WEIGHT = 0.4
 LIFE_CEILING_YEARS = 30

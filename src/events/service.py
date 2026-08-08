@@ -6,6 +6,7 @@ from uuid import uuid4
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.constants import EventType
 from src.database import session_factory
 from src.events.constants import MEANINGFUL_TYPES
 from src.events.models import Event
@@ -81,6 +82,16 @@ async def leading_category(session: AsyncSession, user_id: int, window: int) -> 
     if not recent:
         return None
     return Counter(recent).most_common(1)[0][0]
+
+
+async def distinct_products_seen(session: AsyncSession, user_id: int, category: str) -> int:
+    statement = select(func.count(func.distinct(Event.product_id))).where(
+        Event.user_id == user_id,
+        Event.category == category,
+        Event.product_id.is_not(None),
+        Event.type == EventType.PRODUCT_VIEW,
+    )
+    return await session.scalar(statement) or 0
 
 
 async def summary_for(session: AsyncSession, user_id: int) -> list[dict]:
