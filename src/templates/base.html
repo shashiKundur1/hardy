@@ -49,6 +49,8 @@
               <span class="menu__badge">Administrator</span>
               {% endif %}
               <a class="menu__item" role="menuitem" href="/profile">Profile</a>
+              <a class="menu__item" role="menuitem" href="/shelf">Your shelf</a>
+              <a class="menu__item" role="menuitem" href="/orders">Orders</a>
               <a class="menu__item" role="menuitem" href="/recommendations">For you</a>
               <a class="menu__item" role="menuitem" href="/footprint">Footprint</a>
               {% if user.role == "admin" %}
@@ -99,6 +101,11 @@
        data-track="dock-search">
       <span class="icon" style="--icon:url(/static/icons/evidence.svg)" aria-hidden="true"></span>
       <span class="dock__label">Search</span>
+    </a>
+    <a class="dock__link" href="/cart" {% if surface == 'cart' %}aria-current="page"{% endif %}
+       data-track="dock-cart">
+      <span class="icon" style="--icon:url(/static/icons/bags-luggage.svg)" aria-hidden="true"></span>
+      <span class="dock__label">Basket</span>
     </a>
     <a class="dock__link" href="{{ '/profile' if user else '/login' }}"
        {% if surface == 'account' %}aria-current="page"{% endif %} data-track="dock-account">

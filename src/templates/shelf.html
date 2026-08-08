@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Your shelf · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">The shelf</p>
+    <h1>What you own, and how the claim is holding up</h1>
+    <p class="section__lede">
+      Every thing here made a claim about how long it would last. This is how far through that
+      claim it has got.
+    </p>
+  </div>
+
+  {% if owned %}
+  <ul class="lines">
+    {% for entry in owned %}
+    <li class="line">
+      <a class="line__media" href="/product/{{ entry.line.product_id }}">
+        {% if entry.line.image_url %}
+        <img src="{{ entry.line.image_url }}" alt="{{ entry.line.title }}" width="720" height="720" loading="lazy">
+        {% else %}{{ ui.icon(entry.line.category) }}{% endif %}
+      </a>
+      <div class="line__body">
+        <a class="line__title" href="/product/{{ entry.line.product_id }}">{{ entry.line.title }}</a>
+        <p class="line__meta">
+          {{ entry.line.brand }} · {{ labels[entry.line.category] }} ·
+          owned since {{ entry.bought_on.strftime("%B %Y") }}
+        </p>
+        <p class="wear">
+          <span class="wear__track">
+            <span class="wear__fill" style="--used:{{ (entry.life_used * 100)|round(1) }}%"></span>
+          </span>
+          <span class="wear__label">
+            {{ entry.years_owned }} of {{ entry.line.expected_life_years }} years claimed
+          </span>
+        </p>
+      </div>
+      <div class="line__figures">
+        <p class="line__rate">{{ ui.rupees(entry.line.cost_per_year) }} <span>per year</span></p>
+        <p class="line__once">{{ ui.rupees(entry.line.price) }} paid</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">
+    The shelf is empty. Once you own something, Hardy tracks how far through its claimed life it
+    has got — which is the only honest way to find out whether the claim was true.
+  </p>
+  <a class="button" href="/shop">Back to the shop</a>
+  {% endif %}
+</section>
+{% endblock %}

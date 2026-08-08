@@ -29,6 +29,15 @@
           <span class="figure__value figure__value--derived">{{ ui.rupees(product.cost_per_year) }}</span>
         </div>
       </div>
+      <form class="buy" method="post" action="/cart/add">
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <input type="hidden" name="back" value="{{ full_path(request) }}">
+        <button class="button" type="submit" data-track="add-to-cart"
+                data-product-id="{{ product.id }}" data-category="{{ product.category }}">
+          Add to basket
+        </button>
+        <a class="navlink" href="/cart">View basket</a>
+      </form>
       {{ ui.ownership(product) }}
       {{ ui.evidence(product) }}
       <div class="panel">

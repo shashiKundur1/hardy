@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% set page_id = "cart" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Basket · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Basket</p>
+    <h1>What you are about to keep</h1>
+    <p class="section__lede">
+      Hardy shows the yearly cost of the whole basket, because that is the number that decides
+      whether this was a good idea.
+    </p>
+  </div>
+
+  {% if lines %}
+  <ul class="lines">
+    {% for line in lines %}
+    <li class="line">
+      <a class="line__media" href="/product/{{ line.product.id }}">{{ ui.media(line.product) }}</a>
+      <div class="line__body">
+        <a class="line__title" href="/product/{{ line.product.id }}">{{ line.product.title }}</a>
+        <p class="line__meta">
+          {{ line.product.brand }} · {{ line.product.expected_life_years }} year expected life
+        </p>
+        {{ ui.ownership_mark(line.product) }}
+      </div>
+      <div class="line__figures">
+        <p class="line__rate">{{ ui.rupees(line.product.cost_per_year) }} <span>per year</span></p>
+        <p class="line__once">{{ ui.rupees(line.product.price) }} once{% if line.quantity > 1 %} × {{ line.quantity }}{% endif %}</p>
+      </div>
+      <form method="post" action="/cart/remove">
+        <input type="hidden" name="product_id" value="{{ line.product.id }}">
+        <button class="button button--quiet" type="submit">Remove</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="reckoning">
+    <div class="reckoning__figures">
+      <p class="reckoning__lead">
+        <span class="reckoning__value">{{ ui.rupees(yearly) }}</span>
+        <span class="reckoning__unit">per year, all of it</span>
+      </p>
+      <p class="reckoning__once">{{ ui.rupees(total) }} once</p>
+    </div>
+    <form method="post" action="/checkout">
+      <button class="button" type="submit">Place the order</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="empty">
+    The basket is empty. Nothing here is urgent — the things Hardy sells are meant to be bought
+    once, so taking your time is the point.
+  </p>
+  <a class="button" href="/shop">Back to the shop</a>
+  {% endif %}
+</section>
+{% endblock %}

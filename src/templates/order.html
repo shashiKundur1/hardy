@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Order {{ order.id }} · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Order {{ "%05d"|format(order.id) }}</p>
+    <h1>That is yours now</h1>
+    <p class="section__lede">
+      Placed {{ order.created_at.strftime("%d %B %Y") }}. Hardy keeps what each thing claimed on
+      the day you bought it, so the claim can be held to account later.
+    </p>
+  </div>
+
+  <ul class="stats">
+    <li class="stat">
+      <span class="stat__label">Paid once</span>
+      <span class="stat__value">{{ ui.rupees(order.total) }}</span>
+    </li>
+    <li class="stat">
+      <span class="stat__label">Cost per year</span>
+      <span class="stat__value">{{ ui.rupees(order.cost_per_year) }}</span>
+    </li>
+    <li class="stat">
+      <span class="stat__label">Things</span>
+      <span class="stat__value">{{ order.lines|length }}</span>
+    </li>
+  </ul>
+
+  <ul class="lines">
+    {% for line in order.lines %}
+    <li class="line">
+      <a class="line__media" href="/product/{{ line.product_id }}">
+        {% if line.image_url %}
+        <img src="{{ line.image_url }}" alt="{{ line.title }}" width="720" height="720" loading="lazy">
+        {% else %}{{ ui.icon(line.category) }}{% endif %}
+      </a>
+      <div class="line__body">
+        <a class="line__title" href="/product/{{ line.product_id }}">{{ line.title }}</a>
+        <p class="line__meta">
+          {{ line.brand }} · {{ labels[line.category] }} · {{ line.expected_life_years }} year expected life
+        </p>
+      </div>
+      <div class="line__figures">
+        <p class="line__rate">{{ ui.rupees(line.cost_per_year) }} <span>per year</span></p>
+        <p class="line__once">{{ ui.rupees(line.price) }} once{% if line.quantity > 1 %} × {{ line.quantity }}{% endif %}</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <p class="panel__foot">
+    <a class="navlink" href="/shelf">See it on your shelf, and how the claim is holding up</a>
+  </p>
+</section>
+{% endblock %}
