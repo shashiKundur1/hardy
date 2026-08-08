@@ -1,10 +1,10 @@
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.catalog.constants import CATEGORY_BLURBS, CATEGORY_LABELS
+from src.catalog.constants import CATEGORY_BLURBS, CATEGORY_LABELS, PAGE_SIZE
 from src.catalog.models import Product
-from src.catalog.schemas import ProductWrite
-from src.constants import CATEGORIES
+from src.catalog.schemas import BrowseQuery, ProductWrite
+from src.constants import CATEGORIES, CONTINUITY_OWNERSHIP, SortOrder
 from src.database import session_factory, utcnow
 from src.integrations import mesh, vectorstore
 from src.observability import get_logger
@@ -19,14 +19,43 @@ async def featured(session: AsyncSession, limit: int) -> list[Product]:
     return list(await session.scalars(statement))
 
 
-async def by_category(session: AsyncSession, category: str, limit: int) -> list[Product]:
-    statement = (
-        select(Product)
-        .where(Product.category == category)
-        .order_by(Product.expected_life_years.desc())
-        .limit(limit)
-    )
-    return list(await session.scalars(statement))
+def cost_per_year_column():
+    return Product.price / Product.expected_life_years
+
+
+def browse_conditions(category: str | None, query: BrowseQuery) -> list:
+    conditions = []
+    if category:
+        conditions.append(Product.category == category)
+    if query.sourced:
+        conditions.append(Product.evidence_source.is_not(None))
+    if query.continuity:
+        conditions.append(Product.ownership_type.in_(tuple(CONTINUITY_OWNERSHIP)))
+    if query.min_life:
+        conditions.append(Product.expected_life_years >= query.min_life)
+    if query.max_rate:
+        conditions.append(cost_per_year_column() <= query.max_rate)
+    return conditions
+
+
+def browse_order(statement, order: SortOrder):
+    if order is SortOrder.RATE:
+        return statement.order_by(cost_per_year_column().asc(), Product.id.asc())
+    if order is SortOrder.PRICE:
+        return statement.order_by(Product.price.asc(), Product.id.asc())
+    if order is SortOrder.NEWEST:
+        return statement.order_by(Product.created_at.desc(), Product.id.desc())
+    return statement.order_by(Product.expected_life_years.desc(), Product.id.asc())
+
+
+async def browse(
+    session: AsyncSession, category: str | None, query: BrowseQuery
+) -> tuple[list[Product], int]:
+    conditions = browse_conditions(category, query)
+    total = await session.scalar(select(func.count(Product.id)).where(*conditions)) or 0
+    statement = browse_order(select(Product).where(*conditions), query.sort)
+    found = await session.scalars(statement.offset((query.page - 1) * PAGE_SIZE).limit(PAGE_SIZE))
+    return list(found), total
 
 
 async def by_id(session: AsyncSession, product_id: int) -> Product | None:

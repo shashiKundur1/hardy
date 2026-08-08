@@ -47,6 +47,13 @@ class Role(StrEnum):
     ADMIN = "admin"
 
 
+class SortOrder(StrEnum):
+    LIFE = "life"
+    RATE = "rate"
+    PRICE = "price"
+    NEWEST = "newest"
+
+
 CATEGORIES = (
     "cookware",
     "tools",

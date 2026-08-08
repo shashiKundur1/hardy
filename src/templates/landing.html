@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% set page_id = "landing" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Hardy · Buy it once{% endblock %}
+
+{% block main %}
+<section class="hero">
+  <img class="hero__image" src="/static/img/hero.webp" alt="" width="1536" height="658" fetchpriority="high">
+  <div class="hero__body container">
+    <div class="hero__text">
+      <p class="eyebrow">Durable goods, argued from evidence</p>
+      <h1>Buy it once</h1>
+      <p class="hero__lede">
+        Cost per year beside the price. Who owns the brand now. How long the parts stay
+        available. Every claim carries the record it came from, or it is marked unknown.
+      </p>
+      <div class="hero__actions">
+        {% if user %}
+          <a class="button" href="/shop">Go to the shop</a>
+        {% else %}
+          <a class="button" href="/signup">Create an account</a>
+          <a class="button button--quiet" href="/login">Sign in</a>
+        {% endif %}
+      </div>
+      <p class="hero__note">
+        {{ sourced }} of {{ catalog_size }} products carry a sourced ownership record.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="container section" id="argument">
+  <div class="section__head">
+    <p class="eyebrow">How Hardy argues</p>
+    <h2>Three numbers, on every product</h2>
+    <p class="section__lede">
+      Each one is stated or it is marked unknown. Nothing is inferred from marketing copy.
+    </p>
+  </div>
+  <ul class="claims">
+    <li class="claim">
+      <span class="claim__mark">{{ ui.icon("cost-per-year") }}<span class="claim__index">01</span></span>
+      <h3>Cost per year, not price</h3>
+      <p class="claim__body">
+        A ₹14,000 pan that lasts thirty years costs less than a ₹2,000 pan replaced every other
+        winter. Hardy prints that number in the same weight as the price.
+      </p>
+      <p class="claim__proof">₹14,000 <em>₹467 / year</em></p>
+    </li>
+    <li class="claim">
+      <span class="claim__mark">{{ ui.icon("ownership") }}<span class="claim__index">02</span></span>
+      <h3>Who owns the brand now</h3>
+      <p class="claim__body">
+        Reputations outlive the companies that earned them. Where ownership has changed hands,
+        Hardy says so and quotes the record.
+      </p>
+      <p class="claim__proof">{{ sourced }} <em>sourced claims</em></p>
+    </li>
+    <li class="claim">
+      <span class="claim__mark">{{ ui.icon("repairability") }}<span class="claim__index">03</span></span>
+      <h3>How long it stays fixable</h3>
+      <p class="claim__body">
+        Parts availability and repairability decide whether a thing lasts. Both are stated, and
+        both are cited — never guessed.
+      </p>
+      <p class="claim__proof">8.4 <em>parts to 2039</em></p>
+    </li>
+  </ul>
+</section>
+
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">How it works</p>
+    <h2>It reads what you do, then argues</h2>
+  </div>
+  <ol class="steps">
+    <li class="step">
+      <span class="step__index">01</span>
+      <h3>You browse</h3>
+      <p>Views, searches, clicks and dwell are recorded in batches, without slowing the page.</p>
+    </li>
+    <li class="step">
+      <span class="step__index">02</span>
+      <h3>An agent reads the pattern</h3>
+      <p>A LangGraph agent infers what you are shopping for and retrieves against the catalog.</p>
+    </li>
+    <li class="step">
+      <span class="step__index">03</span>
+      <h3>It argues from evidence</h3>
+      <p>You get a written case and the products behind it, each with the record it rests on.</p>
+    </li>
+    <li class="step">
+      <span class="step__index">04</span>
+      <h3>You can check the work</h3>
+      <p>The glass box shows every event, every retrieval score and every AI call it made.</p>
+    </li>
+  </ol>
+</section>
+
+<section class="container section" id="coverage">
+  <div class="section__head">
+    <p class="eyebrow">What Hardy covers</p>
+    <h2>Eight categories of things worth keeping</h2>
+  </div>
+  <ul class="coverage">
+    {% for slug, label in labels.items() %}
+    <li class="coverage__item">{{ ui.icon(slug) }}<span>{{ label }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="container section">
+  <div class="closing">
+    <h2>See what it makes of you</h2>
+    <p class="closing__lede">
+      Create an account, browse for a few minutes, and read the case it builds. Nothing is
+      recommended until your browsing says something specific.
+    </p>
+    <a class="button" href="{{ '/shop' if user else '/signup' }}">
+      {{ "Go to the shop" if user else "Create an account" }}
+    </a>
+  </div>
+</section>
+{% endblock %}

@@ -33,9 +33,8 @@ async def test_counts_by_category_returns_a_dict_not_a_result_proxy(offline_mesh
     assert counts == {"cookware": 1}
 
 
-async def test_a_product_id_beyond_sqlites_range_is_rejected_not_a_server_error():
-    async with _client() as client:
-        response = await client.get(f"/product/{MAX_SQLITE_INTEGER + 1}")
+async def test_a_product_id_beyond_sqlites_range_is_rejected_not_a_server_error(shopper):
+    response = await shopper.get(f"/product/{MAX_SQLITE_INTEGER + 1}")
     assert response.status_code == 422, response.text
 
 
@@ -46,9 +45,8 @@ async def test_storefront_pages_are_served_as_html():
     assert response.headers["content-type"].startswith("text/html")
 
 
-async def test_a_missing_product_renders_a_page_not_a_json_error():
-    async with _client() as client:
-        response = await client.get("/product/999999")
+async def test_a_missing_product_renders_a_page_not_a_json_error(shopper):
+    response = await shopper.get("/product/999999")
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("text/html")
 

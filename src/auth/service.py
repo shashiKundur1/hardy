@@ -1,11 +1,14 @@
+import json
+
 import bcrypt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.exceptions import EmailTaken, InvalidCredentials
 from src.auth.models import User
-from src.auth.schemas import Credentials
-from src.constants import Role
+from src.auth.schemas import Credentials, OnboardingChoices
+from src.constants import CATEGORIES, Role
+from src.database import utcnow
 
 
 def hash_password(password: str) -> str:
@@ -41,3 +44,30 @@ async def authenticate(session: AsyncSession, credentials: Credentials) -> User:
     if user is None or not password_matches(credentials.password, user.password_hash):
         raise InvalidCredentials()
     return user
+
+
+def declared_interests(user: User) -> list[str]:
+    try:
+        chosen = json.loads(user.interests or "[]")
+    except json.JSONDecodeError:
+        return []
+    return [slug for slug in chosen if slug in CATEGORIES]
+
+
+async def save_interests(session: AsyncSession, user: User, interests: list[str]) -> None:
+    user.interests = json.dumps(interests)
+    await session.commit()
+
+
+async def complete_onboarding(
+    session: AsyncSession, user: User, choices: OnboardingChoices
+) -> None:
+    user.shopping_for = choices.shopping_for
+    user.display_name = choices.display_name or None
+    user.onboarded_at = utcnow()
+    await session.commit()
+
+
+async def skip_onboarding(session: AsyncSession, user: User) -> None:
+    user.onboarded_at = utcnow()
+    await session.commit()

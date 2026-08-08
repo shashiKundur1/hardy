@@ -2,6 +2,33 @@
 <span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg)" aria-hidden="true"></span>
 {%- endmacro %}
 
+{% macro email_field(value="", error="") -%}
+<div class="field">
+  <label class="field__label" for="email">Email</label>
+  <input class="input" id="email" name="email" type="email" value="{{ value or '' }}"
+         autocomplete="username" inputmode="email" required autofocus
+         {% if error %}aria-invalid="true" aria-describedby="email-error"{% endif %}>
+  {% if error %}<span class="field__error" id="email-error">{{ error }}</span>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro password_field(autocomplete, hint="", error="") -%}
+<div class="field">
+  <label class="field__label" for="password">Password</label>
+  <span class="reveal">
+    <input class="input" id="password" name="password" type="password"
+           autocomplete="{{ autocomplete }}" minlength="8" required
+           aria-describedby="{{ 'password-hint' if hint else '' }}{{ ' password-error' if error else '' }}"
+           {% if error %}aria-invalid="true"{% endif %}>
+    <button class="reveal__toggle" type="button" data-reveal="password" aria-pressed="false">
+      <span class="reveal__label">Show</span>
+    </button>
+  </span>
+  {% if hint %}<span class="hint" id="password-hint">{{ hint }}</span>{% endif %}
+  {% if error %}<span class="field__error" id="password-error">{{ error }}</span>{% endif %}
+</div>
+{%- endmacro %}
+
 {% macro rupees(amount) -%}
 ₹{{ "{:,.0f}".format(amount) }}
 {%- endmacro %}

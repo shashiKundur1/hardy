@@ -65,8 +65,8 @@ async def _signed_in(client: AsyncClient, email: str) -> None:
 async def test_a_signed_out_visitor_is_asked_to_sign_in():
     async with _client() as client:
         response = await client.get("/footprint")
-    assert response.status_code == 200
-    assert "Sign in to see your footprint" in response.text
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login?next=/footprint"
 
 
 async def test_the_footprint_counts_each_kind_of_action():
