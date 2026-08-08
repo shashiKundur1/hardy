@@ -2,12 +2,13 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import quote
 
-from fastapi import FastAPI, HTTPException, Request, Response, status
+from fastapi import FastAPI, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
+from starlette.exceptions import HTTPException
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.auth.exceptions import AdminSignInRequired, NotAuthenticated
@@ -51,10 +52,10 @@ def wants_json(request: Request) -> bool:
     return request.url.path.startswith("/api")
 
 
-def fault(request: Request, status_code: int, detail: str) -> Response:
+def fault(request: Request, status_code: int, detail: str, headers: dict | None = None) -> Response:
     if wants_json(request):
-        return JSONResponse({"detail": detail}, status_code)
-    return page(
+        return JSONResponse({"detail": detail}, status_code, headers=headers)
+    written = page(
         request,
         "error.html",
         status_code,
@@ -62,6 +63,9 @@ def fault(request: Request, status_code: int, detail: str) -> Response:
         detail=detail,
         **fault_for(status_code),
     )
+    for name, value in (headers or {}).items():
+        written.headers[name] = value
+    return written
 
 
 async def to_sign_in(request: Request, exception: Exception) -> Response:
@@ -79,7 +83,7 @@ async def to_admin_sign_in(request: Request, exception: Exception) -> Response:
 
 
 async def error_page(request: Request, exception: HTTPException) -> Response:
-    return fault(request, exception.status_code, exception.detail)
+    return fault(request, exception.status_code, exception.detail, exception.headers)
 
 
 async def invalid_request(request: Request, exception: RequestValidationError) -> Response:
@@ -91,6 +95,10 @@ async def invalid_request(request: Request, exception: RequestValidationError) -
 async def failure_page(request: Request, exception: Exception) -> Response:
     logger.exception("unhandled request failure", exc_info=exception)
     return fault(request, status.HTTP_500_INTERNAL_SERVER_ERROR, "Something broke on our side")
+
+
+async def favicon() -> FileResponse:
+    return FileResponse(SRC_DIR / "static" / "favicon-32.png", media_type="image/png")
 
 
 async def health(session: SessionDep) -> JSONResponse:
@@ -126,6 +134,7 @@ def create_app() -> FastAPI:
     app.mount("/static", StaticFiles(directory=SRC_DIR / "static"), name="static")
     app.mount("/brand", StaticFiles(directory=BRAND_DIR), name="brand")
     app.add_api_route("/health", health, methods=["GET"], tags=["ops"])
+    app.add_api_route("/favicon.ico", favicon, methods=["GET"], include_in_schema=False)
     app.include_router(auth_router)
     app.include_router(catalog_router)
     app.include_router(catalog_api_router)

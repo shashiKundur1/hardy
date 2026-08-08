@@ -56,6 +56,22 @@ async def test_an_unreadable_product_id_renders_the_designed_page(shopper):
     assert "could not be read" in response.text
 
 
+async def test_the_wrong_method_renders_the_designed_page_not_a_bare_json_body():
+    async with _client() as client:
+        response = await client.get("/logout")
+    assert response.status_code == 405
+    assert response.headers["content-type"].startswith("text/html")
+    assert "does not take this kind of request" in response.text
+    assert "POST" in response.headers["allow"]
+
+
+async def test_a_browser_asking_for_the_root_favicon_gets_one():
+    async with _client() as client:
+        response = await client.get("/favicon.ico")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/png"
+
+
 async def test_an_unauthenticated_api_call_gets_json_not_a_redirect_to_a_page():
     async with _client() as client:
         response = await client.get("/api/admin/consistency")
