@@ -49,6 +49,11 @@ class Role(StrEnum):
     ADMIN = "admin"
 
 
+class SearchMode(StrEnum):
+    WORDS = "words"
+    MEANING = "meaning"
+
+
 class Stance(StrEnum):
     THE_PICK = "the_pick"
     STRONGER = "stronger"

@@ -12,6 +12,7 @@ from src.catalog.constants import (
     CATEGORY_LABELS,
     FEATURED_LIMIT,
     LIFE_FLOORS,
+    MEANING_SEARCH_LIMIT,
     PAGE_SIZE,
     RATE_CEILINGS,
     RELATED_LIMIT,
@@ -19,6 +20,7 @@ from src.catalog.constants import (
     SORT_LABELS,
 )
 from src.catalog.schemas import BrowseQuery, ProductId
+from src.constants import SearchMode
 from src.database import SessionDep
 from src.debug import service as debug
 from src.events import service as events
@@ -158,16 +160,31 @@ async def product(
 
 @router.get("/search", response_class=HTMLResponse, responses=NEEDS_SIGN_IN)
 async def search(
-    request: Request, session: SessionDep, user: CurrentUser, q: str = ""
+    request: Request,
+    session: SessionDep,
+    user: CurrentUser,
+    q: str = "",
+    mode: SearchMode = SearchMode.WORDS,
 ) -> HTMLResponse:
     query = q.strip()
+    meaning = {"available": False, "hits": [], "categories": []}
+    results = []
+    if query and mode is SearchMode.MEANING:
+        meaning = await catalog.semantic_search(session, query, MEANING_SEARCH_LIMIT)
+        if not meaning["available"]:
+            results = await catalog.search(session, query, SEARCH_LIMIT)
+    elif query:
+        results = await catalog.search(session, query, SEARCH_LIMIT)
     return page(
         request,
         "search.html",
         user=user,
         categories=await catalog.navigation(session),
         query=query,
-        results=await catalog.search(session, query, SEARCH_LIMIT) if query else [],
+        mode=mode,
+        results=results,
+        meaning=meaning,
+        labels=CATEGORY_LABELS,
         **await in_context(request, session, user),
     )
 
