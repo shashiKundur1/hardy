@@ -2531,7 +2531,7 @@ body {
   border: var(--edge);
   border-left: 3px solid var(--amber);
   border-radius: var(--radius);
-  animation: nudge-in var(--duration) var(--ease) both;
+  animation: nudge-in var(--duration) var(--ease-enter) both;
 }
 
 @keyframes nudge-in {
@@ -2640,5 +2640,49 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .nudge {
     animation: none;
+  }
+}
+
+.card,
+.tile,
+.chip,
+.nudge__pick,
+.shortlist__item,
+.coverage__item {
+  will-change: auto;
+}
+
+.card:hover,
+.card:focus-visible,
+.tile:hover,
+.tile:focus-visible,
+.chip:hover,
+.chip:focus-visible,
+.nudge__pick:hover,
+.nudge__pick:focus-visible,
+.shortlist__item:hover,
+.shortlist__item:focus-visible {
+  transform: translateY(var(--lift));
+}
+
+.card,
+.chip,
+.nudge__pick,
+.shortlist__item {
+  transition:
+    transform var(--duration-fast) var(--ease),
+    border-color var(--duration-fast) var(--ease),
+    background var(--duration-fast) var(--ease),
+    color var(--duration-fast) var(--ease);
+}
+
+.menu[open] .menu__panel {
+  animation: panel-in var(--duration) var(--ease-enter) both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
   }
 }

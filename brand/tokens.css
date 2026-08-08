@@ -77,14 +77,20 @@
   --focus-offset: 2px;
 
   --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
   --duration-fast: 90ms;
   --duration: 160ms;
+  --duration-slow: 260ms;
+  --lift: -2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration-fast: 0ms;
     --duration: 0ms;
+    --duration-slow: 0ms;
+    --lift: 0px;
   }
 }
 
