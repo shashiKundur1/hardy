@@ -2,6 +2,48 @@
 <span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg)" aria-hidden="true"></span>
 {%- endmacro %}
 
+{% macro reading(verdict) -%}
+{% if verdict %}
+<aside class="reading" data-stance="{{ verdict.stance }}" role="status">
+  <p class="reading__eyebrow">
+    <span class="reading__mark" aria-hidden="true">{{ {"the_pick": "★", "stronger": "▲", "level": "=", "weaker": "▼", "adrift": "→"}[verdict.stance] }}</span>
+    Hardy is watching this
+    {%- if verdict.seen_here %} · {{ verdict.seen_here }} in this category so far{% endif %}
+  </p>
+  <h2 class="reading__headline">{{ verdict.headline }}</h2>
+  <p class="reading__body">{{ verdict.body }}</p>
+  {% if verdict.lines %}
+  <table class="reading__table">
+    <caption class="skip">This product compared with {{ verdict.pick.title }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">On</th>
+        <th scope="col">This one</th>
+        <th scope="col">{{ verdict.pick.title }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in verdict.lines %}
+      <tr data-favours="{{ row.favours }}">
+        <th scope="row">{{ row.label }}</th>
+        <td>
+          <span class="reading__flag" aria-hidden="true">{{ "✓" if row.favours == "viewed" else ("=" if row.favours == "level" else "–") }}</span>
+          {{ row.viewed }}
+          <span class="skip">{{ "better" if row.favours == "viewed" else ("level" if row.favours == "level" else "worse") }}</span>
+        </td>
+        <td>{{ row.pick }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="reading__foot">
+    <a class="navlink" href="/product/{{ verdict.pick.id }}">Look at {{ verdict.pick.title }}</a>
+  </p>
+  {% endif %}
+</aside>
+{% endif %}
+{%- endmacro %}
+
 {% macro gallery(product, shots) -%}
 <div class="gallery">
   <div class="detail__media">

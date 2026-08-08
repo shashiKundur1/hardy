@@ -23,6 +23,7 @@ from src.database import SessionDep
 from src.debug import service as debug
 from src.events import service as events
 from src.events.constants import FOOTPRINT_LIMIT
+from src.recommendations import comparison
 from src.recommendations import service as recommendations
 from src.recommendations.constants import DISMISSED_KEY, NUDGE_PICKS, TRIGGER_PHRASES
 from src.redirects import safe_path
@@ -49,6 +50,17 @@ AS_A_PAGE = NEEDS_SIGN_IN | {
 }
 
 BrowseParams = Depends(BrowseQuery)
+
+
+async def reading_on(session, user, viewed) -> dict | None:
+    active = await recommendations.active_for(session, user.id)
+    if active is None:
+        return None
+    picks = await recommendations.products_for(session, active)
+    if not picks:
+        return None
+    seen = await events.distinct_products_seen(session, user.id, viewed.category)
+    return comparison.reading_for(viewed, picks[0], seen)
 
 
 async def in_context(request: Request, session, user) -> dict:
@@ -139,6 +151,7 @@ async def product(
         label=CATEGORY_LABELS[found.category],
         gallery=catalog.gallery_for(found),
         related=await catalog.related(session, found, RELATED_LIMIT),
+        reading=await reading_on(session, user, found),
         **await in_context(request, session, user),
     )
 
