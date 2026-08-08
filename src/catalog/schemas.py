@@ -74,3 +74,4 @@ class Consistency(BaseModel):
     orphaned_in_qdrant: list[int]
     never_synced: int
     in_sync: bool
+    vector_store_reachable: bool = True
