@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     langsmith_api_key: str = ""
     langsmith_project: str = "hardy"
 
+    public_base_url: str = "http://localhost:8000"
+    scheduler_enabled: bool = True
+
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""

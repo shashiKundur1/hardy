@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.auth.exceptions import AdminSignInRequired, NotAuthenticated
@@ -14,12 +15,13 @@ from src.auth.router import router as auth_router
 from src.catalog.router import api_router as catalog_api_router
 from src.catalog.router import router as catalog_router
 from src.config import settings
-from src.database import create_schema
+from src.database import SessionDep, create_schema
 from src.debug.router import router as debug_router
 from src.events.router import router as events_router
 from src.exceptions import fault_for
 from src.integrations import vectorstore
 from src.observability import configure_logging, get_logger
+from src.recommendations import schedule
 from src.recommendations.router import router as recommendations_router
 from src.rendering import page
 from src.storefront.router import router as storefront_router
@@ -37,7 +39,12 @@ async def lifespan(_: FastAPI):
         await vectorstore.ensure_collection()
     except Exception as unreachable:
         logger.warning("vector store unreachable at startup: %s", unreachable)
-    yield
+    scheduler = schedule.start_if_enabled()
+    try:
+        yield
+    finally:
+        if scheduler is not None:
+            scheduler.shutdown(wait=False)
 
 
 def wants_json(request: Request) -> bool:
@@ -86,6 +93,16 @@ async def failure_page(request: Request, exception: Exception) -> Response:
     return fault(request, status.HTTP_500_INTERNAL_SERVER_ERROR, "Something broke on our side")
 
 
+async def health(session: SessionDep) -> JSONResponse:
+    await session.execute(text("SELECT 1"))
+    try:
+        await vectorstore.count()
+        vectors = True
+    except Exception:
+        vectors = False
+    return JSONResponse({"status": "ok", "database": True, "vector_store": vectors})
+
+
 def create_app() -> FastAPI:
     configure_logging()
     if not settings.session_secret:
@@ -108,6 +125,7 @@ def create_app() -> FastAPI:
         )
     app.mount("/static", StaticFiles(directory=SRC_DIR / "static"), name="static")
     app.mount("/brand", StaticFiles(directory=BRAND_DIR), name="brand")
+    app.add_api_route("/health", health, methods=["GET"], tags=["ops"])
     app.include_router(auth_router)
     app.include_router(catalog_router)
     app.include_router(catalog_api_router)
