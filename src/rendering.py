@@ -36,9 +36,14 @@ def avatar(user, size: int = 48) -> Markup:
     return Markup(avatars.for_user(user, size))
 
 
+def full_path(request: Request) -> str:
+    return f"{request.url.path}?{request.url.query}" if request.url.query else request.url.path
+
+
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 templates.env.globals["asset_version"] = asset_version
 templates.env.globals["avatar"] = avatar
+templates.env.globals["full_path"] = full_path
 templates.env.filters["compact"] = compact
 templates.env.globals["tracking"] = {
     "endpoint": "/api/events",

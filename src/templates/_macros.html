@@ -2,6 +2,45 @@
 <span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg)" aria-hidden="true"></span>
 {%- endmacro %}
 
+{% macro nudge(recommendation, picks, because, back) -%}
+{% if recommendation %}
+<div class="container">
+<aside class="nudge" aria-labelledby="nudge-head" role="status">
+  <div class="nudge__text">
+    <p class="nudge__eyebrow" id="nudge-head">
+      Hardy read {{ recommendation.events_covered }} of your actions
+    </p>
+    <p class="nudge__why">Prompted by {{ because }}.</p>
+    <p class="nudge__narrative">{{ recommendation.narrative }}</p>
+  </div>
+  {% if picks %}
+  <ul class="nudge__picks">
+    {% for product in picks %}
+    <li>
+      <a class="nudge__pick" href="/product/{{ product.id }}" data-track="nudge-pick"
+         data-product-id="{{ product.id }}" data-category="{{ product.category }}">
+        <span class="nudge__media">{{ media(product) }}</span>
+        <span class="nudge__body">
+          <span class="nudge__title">{{ product.title }}</span>
+          <span class="nudge__rate">{{ rupees(product.cost_per_year) }} per year</span>
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <div class="nudge__actions">
+    <a class="navlink" href="/recommendations">See the full case</a>
+    <form method="post" action="/recommendations/dismiss">
+      <input type="hidden" name="back" value="{{ back }}">
+      <button class="button button--quiet" type="submit">Dismiss</button>
+    </form>
+  </div>
+</aside>
+</div>
+{% endif %}
+{%- endmacro %}
+
 {% macro auth_aside(heading, lede) -%}
 <aside class="auth-aside">
   <h2>{{ heading }}</h2>

@@ -6,6 +6,7 @@
 {% block body_data %} data-category="{{ product.category }}" data-product-id="{{ product.id }}"{% endblock %}
 
 {% block main %}
+  {{ ui.nudge(nudge, nudge_picks, nudge_because, full_path(request)) }}
 <section class="container section">
   <p class="breadcrumb">
     <a href="/">Hardy</a> <span>/</span>

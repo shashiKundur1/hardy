@@ -13,6 +13,7 @@ from src.auth.schemas import Credentials, OnboardingChoices
 from src.catalog import service as catalog
 from src.constants import Role
 from src.database import SessionDep
+from src.redirects import safe_path
 from src.rendering import page
 
 router = APIRouter(tags=["auth"])
@@ -24,11 +25,7 @@ ONBOARDING_STEPS = 3
 
 
 def safe_next(target: str | None) -> str:
-    if not target or not target.startswith("/"):
-        return SHOP_HOME
-    if len(target) > 1 and target[1] in "/\\":
-        return SHOP_HOME
-    return target
+    return safe_path(target, SHOP_HOME)
 
 
 def validated(email: str, password: str) -> Credentials:
