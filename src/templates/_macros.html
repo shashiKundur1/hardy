@@ -2,6 +2,31 @@
 <span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg)" aria-hidden="true"></span>
 {%- endmacro %}
 
+{% macro gallery(product, shots) -%}
+<div class="gallery">
+  <div class="detail__media">
+    {% if shots %}
+    <img class="gallery__hero" id="gallery-hero" src="{{ shots[0].url }}" alt="{{ shots[0].alt }}"
+         width="720" height="720" fetchpriority="high">
+    {% else %}
+    {{ icon(product.category) }}
+    {% endif %}
+  </div>
+  {% if shots|length > 1 %}
+  <ul class="gallery__strip" role="group" aria-label="Angles of {{ product.title }}">
+    {% for shot in shots %}
+    <li>
+      <button class="gallery__thumb" type="button" data-shot="{{ shot.url }}" data-alt="{{ shot.alt }}"
+              aria-pressed="{{ 'true' if loop.first else 'false' }}">
+        <img src="{{ shot.url }}" alt="{{ shot.alt }}" width="160" height="160" loading="lazy">
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+{%- endmacro %}
+
 {% macro nudge(recommendation, picks, because, back) -%}
 {% if recommendation %}
 <div class="container">

@@ -38,3 +38,61 @@ CATEGORY_BLURBS = {
     "electronics": "Devices scored on spare parts and published documentation.",
     "home-basics": "The dull things you replace least often.",
 }
+
+CATEGORY_ANGLES = {
+    "cookware": (
+        "the whole pan",
+        "the base, where the heat spreads",
+        "the handle join and its rivets",
+        "the rim and the pour edge",
+    ),
+    "tools": (
+        "the whole tool",
+        "the drive and the gearing",
+        "the grip and the trigger",
+        "the cord entry or battery seat",
+    ),
+    "kitchen-appliances": (
+        "the whole machine",
+        "the motor housing and vents",
+        "the gearbox and drive coupling",
+        "the seals and the parts that come off to clean",
+    ),
+    "footwear": (
+        "the whole boot",
+        "the welt, where the sole is joined",
+        "the heel and the counter",
+        "the eyelets and the lacing",
+    ),
+    "bags-luggage": (
+        "the whole bag",
+        "the hardware and the buckles",
+        "the stitching where the strap meets the body",
+        "the base and its corners",
+    ),
+    "outdoor-gear": (
+        "the whole piece",
+        "the seams and their taping",
+        "the zips and the storm flap",
+        "the anchor points that take the load",
+    ),
+    "electronics": (
+        "the whole device",
+        "the ports and the connectors",
+        "the back, and how it opens",
+        "the screen and its bezel",
+    ),
+    "home-basics": (
+        "the whole thing",
+        "the joints and the fixings",
+        "the surface and its finish",
+        "the underside, where the wear shows",
+    ),
+}
+
+DEFAULT_ANGLES = (
+    "the whole thing",
+    "a closer look at the construction",
+    "the join that takes the load",
+    "the underside, where the wear shows",
+)

@@ -137,6 +137,7 @@ async def product(
         categories=await catalog.navigation(session),
         product=found,
         label=CATEGORY_LABELS[found.category],
+        gallery=catalog.gallery_for(found),
         related=await catalog.related(session, found, RELATED_LIMIT),
         **await in_context(request, session, user),
     )

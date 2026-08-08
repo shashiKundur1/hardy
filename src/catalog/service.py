@@ -1,7 +1,15 @@
+import json
+
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.catalog.constants import CATEGORY_BLURBS, CATEGORY_LABELS, PAGE_SIZE
+from src.catalog.constants import (
+    CATEGORY_ANGLES,
+    CATEGORY_BLURBS,
+    CATEGORY_LABELS,
+    DEFAULT_ANGLES,
+    PAGE_SIZE,
+)
 from src.catalog.models import Product
 from src.catalog.schemas import BrowseQuery, ProductWrite
 from src.constants import CATEGORIES, CONTINUITY_OWNERSHIP, SortOrder
@@ -17,6 +25,25 @@ logger = get_logger("catalog")
 async def featured(session: AsyncSession, limit: int) -> list[Product]:
     statement = select(Product).order_by(Product.expected_life_years.desc()).limit(limit)
     return list(await session.scalars(statement))
+
+
+def gallery_for(product: Product) -> list[dict]:
+    try:
+        stored = json.loads(product.images or "[]")
+    except json.JSONDecodeError:
+        stored = []
+    urls = [url for url in stored if isinstance(url, str)] or (
+        [product.image_url] if product.image_url else []
+    )
+    angles = CATEGORY_ANGLES.get(product.category, DEFAULT_ANGLES)
+    return [
+        {
+            "url": url,
+            "alt": f"{product.title} — {angles[index % len(angles)]}",
+            "hero": index == 0,
+        }
+        for index, url in enumerate(urls)
+    ]
 
 
 def cost_per_year_column():
