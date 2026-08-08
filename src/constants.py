@@ -20,6 +20,8 @@ class EventType(StrEnum):
     SEARCH = "search"
     CLICK = "click"
     DWELL = "dwell"
+    ADD_TO_CART = "add_to_cart"
+    PURCHASE = "purchase"
 
 
 class TriggerReason(StrEnum):

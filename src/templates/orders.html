@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set page_id = "account" %}
+{% import "_macros.html" as ui %}
+
+{% block title %}Orders · Hardy{% endblock %}
+
+{% block main %}
+<section class="container section">
+  <div class="section__head">
+    <p class="eyebrow">Orders</p>
+    <h1>What you have bought</h1>
+  </div>
+
+  {% if orders %}
+  <ul class="lines">
+    {% for order in orders %}
+    <li class="line">
+      <div class="line__body">
+        <a class="line__title" href="/orders/{{ order.id }}">Order {{ "%05d"|format(order.id) }}</a>
+        <p class="line__meta">
+          {{ order.created_at.strftime("%d %B %Y") }} ·
+          {{ order.lines|length }} {{ "thing" if order.lines|length == 1 else "things" }}
+        </p>
+      </div>
+      <div class="line__figures">
+        <p class="line__rate">{{ ui.rupees(order.cost_per_year) }} <span>per year</span></p>
+        <p class="line__once">{{ ui.rupees(order.total) }} once</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">
+    Nothing yet. When you buy something, Hardy keeps what it claimed on the day, so the claim can
+    be held to account later.
+  </p>
+  <a class="button" href="/shop">Back to the shop</a>
+  {% endif %}
+</section>
+{% endblock %}

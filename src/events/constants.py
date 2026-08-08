@@ -6,5 +6,12 @@ RECENT_LIMIT = 20
 FOOTPRINT_LIMIT = 60
 
 MEANINGFUL_TYPES = frozenset(
-    {EventType.PRODUCT_VIEW, EventType.SEARCH, EventType.CLICK, EventType.DWELL}
+    {
+        EventType.PRODUCT_VIEW,
+        EventType.SEARCH,
+        EventType.CLICK,
+        EventType.DWELL,
+        EventType.ADD_TO_CART,
+        EventType.PURCHASE,
+    }
 )
