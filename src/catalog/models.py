@@ -28,6 +28,7 @@ class Product(Base):
     parts_until: Mapped[int | None]
     warranty: Mapped[str | None] = mapped_column(String(120))
     image_url: Mapped[str | None] = mapped_column(Text)
+    images: Mapped[str | None] = mapped_column(Text)
     vector_synced_at: Mapped[datetime | None] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

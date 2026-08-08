@@ -1,3 +1,30 @@
+const showShot = (thumb) => {
+  const hero = document.getElementById("gallery-hero");
+  if (!hero || !thumb) return;
+  hero.src = thumb.dataset.shot;
+  hero.alt = thumb.dataset.alt;
+  document
+    .querySelectorAll(".gallery__thumb")
+    .forEach((other) => other.setAttribute("aria-pressed", String(other === thumb)));
+};
+
+document.addEventListener("click", (event) => {
+  const thumb = event.target.closest(".gallery__thumb");
+  if (thumb) showShot(thumb);
+});
+
+document.addEventListener("keydown", (event) => {
+  const thumb = event.target.closest(".gallery__thumb");
+  if (thumb && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
+    const thumbs = Array.from(document.querySelectorAll(".gallery__thumb"));
+    const step = event.key === "ArrowRight" ? 1 : -1;
+    const next = thumbs[(thumbs.indexOf(thumb) + step + thumbs.length) % thumbs.length];
+    next.focus();
+    showShot(next);
+    event.preventDefault();
+  }
+});
+
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   const open = document.querySelector("details.menu[open]");
