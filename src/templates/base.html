@@ -14,7 +14,9 @@
   <link rel="stylesheet" href="/static/style.css?v={{ asset_version() }}">
 </head>
 {% set surface = page_id|default('') %}
-{% set marketing = surface in ('landing', 'auth') %}
+{% set marketing = surface == 'landing' %}
+{% set focused = surface in ('auth', 'onboarding') %}
+{% set plain = marketing or focused %}
 <body{% block body_data %}{% endblock %}>
   <a class="skip" href="#main">Skip to content</a>
   <header class="masthead">
@@ -26,6 +28,8 @@
         <a class="navlink" href="/#coverage">What it covers</a>
         <a class="navlink" href="/debug">Glass box</a>
       </nav>
+      {% elif focused %}
+      <p class="steer">{{ "Setting up your account" if surface == 'onboarding' else "Durable goods, argued from evidence" }}</p>
       {% else %}
       <form class="findbar" role="search" action="/search" method="get">
         <label class="skip" for="q">Search the catalog</label>
@@ -33,7 +37,7 @@
                value="{{ query if query is string else '' }}" autocomplete="off">
       </form>
       {% endif %}
-      <div class="account">
+      <div class="account{% if plain %} account--always{% endif %}">
         {% if user %}
           <details class="menu">
             <summary class="menu__trigger" aria-haspopup="menu">
@@ -62,7 +66,7 @@
       </div>
     </div>
   </header>
-  {% if categories and not marketing %}
+  {% if categories and not plain %}
   <nav class="strip" aria-label="Categories">
     <div class="strip__inner container">
       {% for entry in categories %}
@@ -79,7 +83,7 @@
   <main id="main" class="{% block main_class %}sections{% endblock %}">
     {% block main %}{% endblock %}
   </main>
-  {% if not marketing %}
+  {% if not plain %}
   <nav class="dock" aria-label="Primary">
     <a class="dock__link" href="/shop" {% if surface == 'shop' %}aria-current="page"{% endif %}
        data-track="dock-shop">
@@ -111,7 +115,7 @@
     </div>
   </footer>
   <script src="/static/ui.js?v={{ asset_version() }}" defer></script>
-  {% if not marketing %}
+  {% if not plain %}
   <script src="/static/tracker.js?v={{ asset_version() }}" defer
           data-endpoint="{{ tracking.endpoint }}"
           data-batch-size="{{ tracking.batch_size }}"

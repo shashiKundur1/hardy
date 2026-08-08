@@ -7,6 +7,8 @@
 {% block main_class %}authpage{% endblock %}
 
 {% block main %}
+<div class="auth-split">
+  {{ ui.auth_aside("Picking up where you left off", "Hardy reads what you browse and argues for the things that outlast their category. Your recommendation waits on the other side.") }}
 <div class="auth auth--login">
   <div class="auth__intro">
     <p class="eyebrow">Welcome back</p>
@@ -30,8 +32,9 @@
   <p class="auth__alternate">
     No account yet? <a href="/signup">Create one</a>
   </p>
-  <p class="auth__aside">
+  <p class="auth__admin">
     Administrators sign in at <a href="/admin/login">the admin door</a>.
   </p>
+</div>
 </div>
 {% endblock %}
