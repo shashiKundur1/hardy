@@ -7,7 +7,8 @@ from src.catalog import service as catalog
 from src.catalog.schemas import ProductWrite
 from src.constants import MAX_SQLITE_INTEGER
 from src.database import Base, session_factory
-from src.main import app
+from src.integrations import vectorstore
+from src.main import app, lifespan
 from src.models import TriggerDecision
 
 SAMPLE = ProductWrite(
@@ -61,3 +62,33 @@ async def test_every_registered_model_gets_a_table(model):
 def test_the_schema_covers_every_registered_table():
     registered = {table.name for table in Base.metadata.sorted_tables}
     assert "trigger_decisions" in registered
+
+
+async def test_the_app_boots_when_the_vector_store_is_unreachable(monkeypatch):
+    async def refuse():
+        raise ConnectionError("all connection attempts failed")
+
+    monkeypatch.setattr(vectorstore, "ensure_collection", refuse)
+    async with lifespan(app):
+        pass
+
+
+async def test_the_glass_box_renders_when_the_vector_store_is_unreachable(monkeypatch):
+    async def refuse():
+        raise ConnectionError("all connection attempts failed")
+
+    monkeypatch.setattr(vectorstore, "point_ids", refuse)
+    async with _client() as client:
+        response = await client.get("/debug")
+    assert response.status_code == 200, response.text
+
+
+async def test_consistency_reports_an_unreachable_vector_store_rather_than_raising(monkeypatch):
+    async def refuse():
+        raise ConnectionError("all connection attempts failed")
+
+    monkeypatch.setattr(vectorstore, "point_ids", refuse)
+    async with session_factory() as session:
+        state = await catalog.consistency(session)
+    assert state["vector_store_reachable"] is False
+    assert state["in_sync"] is False

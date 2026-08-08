@@ -7,8 +7,11 @@ from src.catalog.schemas import ProductWrite
 from src.constants import CATEGORIES
 from src.database import session_factory, utcnow
 from src.integrations import mesh, vectorstore
+from src.observability import get_logger
 
 EMBED_BATCH = 32
+
+logger = get_logger("catalog")
 
 
 async def featured(session: AsyncSession, limit: int) -> list[Product]:
@@ -180,15 +183,27 @@ async def remove(session: AsyncSession, product_id: int) -> bool:
 
 
 async def consistency(session: AsyncSession) -> dict:
-    await vectorstore.ensure_collection()
     stored = set(await session.scalars(select(Product.id)))
-    vectors = await vectorstore.point_ids()
     never_synced = (
         await session.scalar(
             select(func.count()).select_from(Product).where(Product.vector_synced_at.is_(None))
         )
         or 0
     )
+    try:
+        await vectorstore.ensure_collection()
+        vectors = await vectorstore.point_ids()
+    except Exception as unreachable:
+        logger.warning("vector store unreachable while reading consistency: %s", unreachable)
+        return {
+            "sqlite_count": len(stored),
+            "qdrant_count": 0,
+            "missing_from_qdrant": sorted(stored),
+            "orphaned_in_qdrant": [],
+            "never_synced": never_synced,
+            "in_sync": False,
+            "vector_store_reachable": False,
+        }
     missing = sorted(stored - vectors)
     orphaned = sorted(vectors - stored)
     return {
@@ -198,6 +213,7 @@ async def consistency(session: AsyncSession) -> dict:
         "orphaned_in_qdrant": orphaned,
         "never_synced": never_synced,
         "in_sync": not missing and not orphaned and never_synced == 0,
+        "vector_store_reachable": True,
     }
 
 

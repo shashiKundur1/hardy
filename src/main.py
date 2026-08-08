@@ -32,7 +32,10 @@ logger = get_logger("requests")
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await create_schema()
-    await vectorstore.ensure_collection()
+    try:
+        await vectorstore.ensure_collection()
+    except Exception as unreachable:
+        logger.warning("vector store unreachable at startup: %s", unreachable)
     yield
 
 
