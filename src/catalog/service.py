@@ -3,11 +3,13 @@ import json
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.agent.retrieval import hybrid
 from src.catalog.constants import (
     CATEGORY_ANGLES,
     CATEGORY_BLURBS,
     CATEGORY_LABELS,
     DEFAULT_ANGLES,
+    MEANING_READ_TOP,
     PAGE_SIZE,
 )
 from src.catalog.models import Product
@@ -114,6 +116,33 @@ async def search(session: AsyncSession, query: str, limit: int) -> list[Product]
         .limit(limit)
     )
     return list(await session.scalars(statement))
+
+
+async def semantic_search(session: AsyncSession, query: str, limit: int) -> dict:
+    try:
+        found = await hybrid(session, query, limit=limit)
+    except Exception as unreachable:
+        logger.warning("semantic search unavailable, falling back to words: %s", unreachable)
+        return {
+            "available": False,
+            "hits": [],
+            "categories": [],
+        }
+    return {
+        "available": True,
+        "hits": [
+            {
+                "product": item.product,
+                "meaning": round(item.semantic, 4),
+                "durability": round(item.durability, 4),
+                "score": round(item.score, 4),
+            }
+            for item in found
+        ],
+        "categories": list(
+            dict.fromkeys(item.product.category for item in found[:MEANING_READ_TOP])
+        ),
+    }
 
 
 async def page_of(session: AsyncSession, offset: int, limit: int) -> list[Product]:

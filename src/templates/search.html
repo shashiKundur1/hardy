@@ -1,32 +1,113 @@
 {% extends "base.html" %}
 {% set page_id = "search" %}
 {% import "_macros.html" as ui %}
+{% set by_meaning = mode == "meaning" %}
 
 {% block title %}{% if query %}{{ query }} · {% endif %}Search · Hardy{% endblock %}
 
 {% block main %}
-  {{ ui.nudge(nudge, nudge_picks, nudge_because, full_path(request)) }}
 <section class="container section">
   <div class="section__head">
     <p class="eyebrow">Search</p>
-    <h1>{% if query %}{{ results|length }} for “{{ query }}”{% else %}Search the catalog{% endif %}</h1>
-    {% if query %}
-    <p class="section__lede">Matched on title, brand and description, ordered by expected life.</p>
-    {% endif %}
+    <h1>
+      {%- if query -%}
+        {{ meaning.hits|length if by_meaning and meaning.available else results|length }} for “{{ query }}”
+      {%- else -%}
+        Search the catalog
+      {%- endif -%}
+    </h1>
   </div>
-  {% if results %}
-  <ul class="grid">
-    {% for product in results %}
-      {{ ui.card(product) }}
-    {% endfor %}
-  </ul>
+
+  <form class="seek" role="search" action="/search" method="get">
+    <label class="skip" for="seek">What are you after?</label>
+    <input class="input" id="seek" name="q" type="search" value="{{ query }}"
+           placeholder="a pan that outlives the kitchen" autocomplete="off">
+    <div class="seek__actions">
+      <button class="button button--quiet" type="submit" name="mode" value="words"
+              {% if not by_meaning %}aria-pressed="true"{% endif %}>Search</button>
+      <button class="button" type="submit" name="mode" value="meaning"
+              {% if by_meaning %}aria-pressed="true"{% endif %}>AI search</button>
+    </div>
+    <p class="seek__hint">
+      {% if by_meaning %}
+        <span aria-hidden="true">◆</span>
+        Reading what you meant, not the words you typed. Costs one embedding through Mesh.
+      {% else %}
+        <span aria-hidden="true">–</span>
+        Matching the words in the title, brand and description.
+      {% endif %}
+    </p>
+  </form>
+
+  {% if query and by_meaning and meaning.available %}
+    {% if meaning.hits %}
+    <p class="seek__reading" role="status">
+      Hardy read that as
+      {% for slug in meaning.categories %}<strong>{{ labels[slug] }}</strong>{% if not loop.last %}, {% endif %}{% endfor %},
+      ranked on meaning and then re-ranked on how long the thing lasts.
+    </p>
+    <ul class="found">
+      {% for hit in meaning.hits %}
+      <li class="found__row">
+        <a class="found__link" href="/product/{{ hit.product.id }}" data-track="meaning-hit"
+           data-product-id="{{ hit.product.id }}" data-category="{{ hit.product.category }}">
+          <span class="found__media">{{ ui.media(hit.product) }}</span>
+          <span class="found__body">
+            <span class="found__title">{{ hit.product.title }}</span>
+            <span class="found__meta">
+              {{ hit.product.brand }} · {{ labels[hit.product.category] }} ·
+              {{ hit.product.expected_life_years }} year life
+            </span>
+            {{ ui.ownership_mark(hit.product) }}
+          </span>
+          <span class="found__rate">
+            <span class="found__rate-value">{{ ui.rupees(hit.product.cost_per_year) }}</span>
+            <span class="found__rate-unit">per year</span>
+          </span>
+        </a>
+        <dl class="found__why">
+          <div><dt>Meaning</dt><dd>{{ "%.3f"|format(hit.meaning) }}</dd></div>
+          <div><dt>Durability</dt><dd>{{ "%.3f"|format(hit.durability) }}</dd></div>
+          <div><dt>Ranked</dt><dd>{{ "%.3f"|format(hit.score) }}</dd></div>
+        </dl>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">
+      <span>Nothing in the catalog comes close to “{{ query }}” in meaning.</span>
+      <span>Try describing the job you want done rather than a product name.</span>
+    </p>
+    {% endif %}
+
+  {% elif query and by_meaning and not meaning.available %}
+    <p class="notice" role="alert">
+      The vector store is not answering, so this fell back to matching words.
+    </p>
+    {% if results %}
+    <ul class="grid">
+      {% for product in results %}{{ ui.card(product) }}{% endfor %}
+    </ul>
+    {% endif %}
+
+  {% elif results %}
+    <ul class="grid">
+      {% for product in results %}{{ ui.card(product) }}{% endfor %}
+    </ul>
+
   {% elif query %}
-  <p class="empty">
-    <span>Nothing matched “{{ query }}”.</span>
-    <span>Try a brand, a material, or a category name.</span>
-  </p>
+    <p class="empty">
+      <span>Nothing matched “{{ query }}”.</span>
+      <span>Try <a href="/search?q={{ query|urlencode }}&amp;mode=meaning">AI search</a>, which reads
+        what you meant rather than the words.</span>
+    </p>
+
   {% else %}
-  <p class="empty">Type a brand, a product type, or a material into the search field above.</p>
+    <p class="empty">
+      <span>Type a brand or a product type and press Search.</span>
+      <span>Or describe what you actually want — “something to fry in that my kids will inherit”
+        — and press AI search.</span>
+    </p>
   {% endif %}
 </section>
 {% endblock %}
