@@ -49,6 +49,12 @@ class Role(StrEnum):
     ADMIN = "admin"
 
 
+class Wear(StrEnum):
+    HOLDING = "holding_up"
+    WORN = "worn"
+    FAILED = "failed"
+
+
 class SortOrder(StrEnum):
     LIFE = "life"
     RATE = "rate"

@@ -7,12 +7,12 @@ from src.auth.dependencies import CurrentUser
 from src.catalog import service as catalog
 from src.catalog.constants import CATEGORY_LABELS
 from src.catalog.schemas import ProductId
-from src.constants import EventType, TriggerReason
+from src.constants import EventType, TriggerReason, Wear
 from src.database import SessionDep
 from src.events import service as events
 from src.events.schemas import IncomingEvent
 from src.orders import service
-from src.orders.constants import CART_KEY
+from src.orders.constants import CART_KEY, MAX_REPORT_NOTE, WEAR_LABELS
 from src.orders.schemas import CartLine
 from src.recommendations import service as recommendations
 from src.redirects import safe_path
@@ -143,4 +143,21 @@ async def shelf(request: Request, session: SessionDep, user: CurrentUser) -> HTM
         categories=await catalog.navigation(session),
         owned=await service.shelf(session, user.id),
         labels=CATEGORY_LABELS,
+        wear_labels=WEAR_LABELS,
     )
+
+
+@router.post("/shelf/report")
+async def report(
+    session: SessionDep,
+    user: CurrentUser,
+    product_id: Annotated[int, Form()],
+    verdict: Annotated[Wear, Form()],
+    note: Annotated[str, Form()] = "",
+) -> RedirectResponse:
+    if not await service.owns(session, user.id, product_id):
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN, "Only an owner can report on how a thing is holding up"
+        )
+    await service.report(session, user.id, product_id, verdict, note.strip()[:MAX_REPORT_NOTE])
+    return RedirectResponse("/shelf", status.HTTP_303_SEE_OTHER)

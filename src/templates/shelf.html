@@ -38,6 +38,47 @@
             {{ entry.years_owned }} of {{ entry.line.expected_life_years }} years claimed
           </span>
         </p>
+        <ul class="upkeep">
+          <li class="upkeep__item" data-state="{{ 'due' if entry.care.services_due else 'ok' }}">
+            <span class="upkeep__label">Care</span>
+            <span class="upkeep__value">
+              Next in {{ entry.care.due_in_days }} days · every {{ entry.care.months }} months
+              {%- if entry.care.services_due %} · {{ entry.care.services_due }} due since you bought it{% endif %}
+            </span>
+            <span class="upkeep__note">{{ entry.care.task }}</span>
+          </li>
+          <li class="upkeep__item" data-state="{{ 'ok' if entry.line.warranty else 'absent' }}">
+            <span class="upkeep__label">Warranty</span>
+            <span class="upkeep__value">{{ entry.line.warranty or "Not stated when you bought it" }}</span>
+          </li>
+        </ul>
+        <details class="verdict">
+          <summary class="verdict__trigger">
+            {% if entry.report %}
+              You said: {{ wear_labels[entry.report.verdict] }}
+            {% else %}
+              How is it holding up?
+            {% endif %}
+          </summary>
+          <form class="verdict__form" method="post" action="/shelf/report">
+            <input type="hidden" name="product_id" value="{{ entry.line.product_id }}">
+            <fieldset class="verdict__options">
+              <legend class="skip">How is it holding up?</legend>
+              {% for value, label in wear_labels.items() %}
+              <label class="verdict__option">
+                <input type="radio" name="verdict" value="{{ value }}"
+                       {% if entry.report and entry.report.verdict == value %}checked{% elif not entry.report and loop.first %}checked{% endif %}>
+                {{ label }}
+              </label>
+              {% endfor %}
+            </fieldset>
+            <label class="field__label" for="note-{{ entry.line.product_id }}">What happened</label>
+            <input class="input" id="note-{{ entry.line.product_id }}" name="note" type="text"
+                   maxlength="300" placeholder="the enamel chipped at the rim after four years"
+                   value="{{ entry.report.note if entry.report and entry.report.note else '' }}">
+            <button class="button button--quiet" type="submit">Record it</button>
+          </form>
+        </details>
       </div>
       <div class="line__figures">
         <p class="line__rate">{{ ui.rupees(entry.line.cost_per_year) }} <span>per year</span></p>
