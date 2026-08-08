@@ -6,9 +6,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.catalog.models import Product
 from src.database import utcnow
-from src.orders.constants import MAX_CART_LINES, MAX_LINE_QUANTITY, ORDER_HISTORY
+from src.orders.constants import (
+    CARE_INTERVALS,
+    DAYS_PER_MONTH,
+    DEFAULT_CARE,
+    MAX_CART_LINES,
+    MAX_LINE_QUANTITY,
+    ORDER_HISTORY,
+)
 from src.orders.exceptions import CartFull, NothingToBuy
-from src.orders.models import Order, OrderLine
+from src.orders.models import Order, OrderLine, OwnerReport
 
 
 def normalise(raw: object) -> dict[int, int]:
@@ -68,6 +75,7 @@ async def place(session: AsyncSession, user_id: int, basket: dict[int, int]) -> 
             image_url=line["product"].image_url,
             price=line["product"].price,
             expected_life_years=line["product"].expected_life_years,
+            warranty=line["product"].warranty,
             quantity=line["quantity"],
         )
         for line in lines
@@ -112,7 +120,51 @@ async def shelf(session: AsyncSession, user_id: int) -> list[dict]:
                 continue
             held["quantity"] += line.quantity
             held["bought_on"] = min(held["bought_on"], order.created_at.date())
-    for entry in owned.values():
+    verdicts = await reports_for(session, user_id)
+    for product_id, entry in owned.items():
         entry["years_owned"] = years_owned(entry["bought_on"])
         entry["life_used"] = min(1.0, entry["years_owned"] / entry["line"].expected_life_years)
+        entry["care"] = care_for(entry["line"].category, entry["bought_on"])
+        entry["report"] = verdicts.get(product_id)
     return sorted(owned.values(), key=lambda entry: entry["bought_on"], reverse=True)
+
+
+def care_for(category: str, bought_on: date) -> dict:
+    months, task = CARE_INTERVALS.get(category, DEFAULT_CARE)
+    span = months * DAYS_PER_MONTH
+    elapsed = max(0, (utcnow().date() - bought_on).days)
+    return {
+        "months": months,
+        "task": task,
+        "due_in_days": round(span - (elapsed % span)),
+        "services_due": int(elapsed // span),
+    }
+
+
+async def reports_for(session: AsyncSession, user_id: int) -> dict[int, OwnerReport]:
+    rows = await session.scalars(
+        select(OwnerReport)
+        .where(OwnerReport.user_id == user_id)
+        .order_by(OwnerReport.created_at.desc(), OwnerReport.id.desc())
+    )
+    latest: dict[int, OwnerReport] = {}
+    for row in rows:
+        latest.setdefault(row.product_id, row)
+    return latest
+
+
+async def owns(session: AsyncSession, user_id: int, product_id: int) -> bool:
+    for order in await history(session, user_id):
+        if any(line.product_id == product_id for line in order.lines):
+            return True
+    return False
+
+
+async def report(
+    session: AsyncSession, user_id: int, product_id: int, verdict: str, note: str
+) -> OwnerReport:
+    row = OwnerReport(user_id=user_id, product_id=product_id, verdict=verdict, note=note or None)
+    session.add(row)
+    await session.commit()
+    await session.refresh(row)
+    return row

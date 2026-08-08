@@ -37,6 +37,7 @@ class OrderLine(Base):
     image_url: Mapped[str | None] = mapped_column(String(300))
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))
     expected_life_years: Mapped[int] = mapped_column(Integer)
+    warranty: Mapped[str | None] = mapped_column(String(120))
     quantity: Mapped[int] = mapped_column(Integer, default=1)
 
     order: Mapped[Order] = relationship(back_populates="lines")
@@ -44,3 +45,15 @@ class OrderLine(Base):
     @property
     def cost_per_year(self) -> Decimal:
         return self.price / self.expected_life_years
+
+
+class OwnerReport(Base):
+    __tablename__ = "owner_reports"
+    __table_args__ = (Index("idx_reports_owner", "user_id", "product_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    verdict: Mapped[str] = mapped_column(String(20))
+    note: Mapped[str | None] = mapped_column(String(300))
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
