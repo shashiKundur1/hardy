@@ -30,6 +30,28 @@
     <div class="panel__body">
       <p class="narrative">{{ recommendation.narrative }}</p>
     </div>
+    <dl class="panel__aside">
+      <div>
+        <dt>Actions read</dt>
+        <dd class="numeric">{{ recommendation.events_covered }}</dd>
+      </div>
+      <div>
+        <dt>Products weighed</dt>
+        <dd class="numeric">{{ chosen|length }}</dd>
+      </div>
+      <div>
+        <dt>Triggered by</dt>
+        <dd>{{ recommendation.trigger_reason.replace("_", " ") }}</dd>
+      </div>
+      <div>
+        <dt>Model</dt>
+        <dd>{{ recommendation.model_used }}</dd>
+      </div>
+      <div>
+        <dt>Every score</dt>
+        <dd><a href="/debug">On the glass box</a></dd>
+      </div>
+    </dl>
   </div>
 
   {% if chosen %}
@@ -44,10 +66,10 @@
         <span class="pick__body">
           <span class="pick__title">{{ product.title }}</span>
           <span class="pick__meta">{{ product.brand }} · {{ ui.rupees(product.price) }} once</span>
-          <span class="pick__rate">
-            <span class="pick__rate-value">{{ ui.rupees(product.cost_per_year) }}</span>
-            <span class="pick__rate-unit">per year</span>
-          </span>
+        </span>
+        <span class="pick__rate">
+          <span class="pick__rate-value">{{ ui.rupees(product.cost_per_year) }}</span>
+          <span class="pick__rate-unit">per year</span>
         </span>
       </a>
       {% if ground %}
