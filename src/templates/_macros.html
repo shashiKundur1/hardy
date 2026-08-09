@@ -13,6 +13,7 @@
   <h2 class="reading__headline">{{ verdict.headline }}</h2>
   <p class="reading__body">{{ verdict.body }}</p>
   {% if verdict.lines %}
+  <div class="reading__scroll">
   <table class="reading__table">
     <caption class="skip">This product compared with {{ verdict.pick.title }}</caption>
     <thead>
@@ -36,6 +37,7 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   <p class="reading__foot">
     <a class="navlink" href="/product/{{ verdict.pick.id }}">Look at {{ verdict.pick.title }}</a>
   </p>
