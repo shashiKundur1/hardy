@@ -132,7 +132,7 @@
       </div>
       <nav class="colophon__col" aria-label="Shop">
         <span class="colophon__title">Shop</span>
-        {% for entry in (categories or [])[:4] %}
+        {% for entry in (categories or all_categories)[:4] %}
         <a class="colophon__link" href="/category/{{ entry.slug }}">{{ entry.label }}</a>
         {% endfor %}
         <a class="colophon__link" href="/shop">Everything</a>

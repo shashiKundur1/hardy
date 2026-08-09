@@ -1124,6 +1124,7 @@ body {
   display: grid;
   place-items: center;
   flex: 1;
+  padding-block: var(--section);
 }
 
 .fault {
