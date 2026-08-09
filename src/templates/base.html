@@ -40,6 +40,13 @@
       </form>
       {% endif %}
       <div class="account{% if plain %} account--always{% endif %}">
+        {% if user and not plain %}
+        {% set basket = request.session.get('cart', {}) %}
+        <a class="basketlink" href="/cart" data-track="masthead-basket"
+           {% if surface == 'cart' %}aria-current="page"{% endif %}>
+          Basket <span class="basketlink__count numeric">({{ basket|length }})</span>
+        </a>
+        {% endif %}
         {% if user %}
           <details class="menu">
             <summary class="menu__trigger" aria-haspopup="menu">

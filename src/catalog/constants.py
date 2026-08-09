@@ -1,6 +1,7 @@
 from src.constants import SortOrder
 
 FEATURED_LIMIT = 8
+LANDING_PRODUCTS = 4
 PAGE_SIZE = 24
 SEARCH_LIMIT = 40
 MEANING_SEARCH_LIMIT = 12

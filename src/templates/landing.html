@@ -30,6 +30,28 @@
   </div>
 </section>
 
+{% if featured %}
+<section class="container section" id="goods">
+  <div class="section__head section__head--split">
+    <p class="eyebrow">What Hardy sells</p>
+    <h2>Things that outlast the reason you bought them</h2>
+    <p class="section__lede">
+      Every card leads with what the thing costs to keep, not what it costs to buy.
+    </p>
+  </div>
+  <ul class="grid">
+    {% for product in featured %}
+      {{ ui.card(product) }}
+    {% endfor %}
+  </ul>
+  <p class="section__more">
+    <a class="button button--quiet" href="{{ '/shop' if user else '/signup' }}">
+      See all {{ catalog_size }} products
+    </a>
+  </p>
+</section>
+{% endif %}
+
 <section class="container section" id="argument">
   <div class="section__head section__head--split">
     <p class="eyebrow">How Hardy argues</p>
