@@ -666,9 +666,16 @@ body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--pad-control);
+  gap: 0;
+  background: var(--surface-1);
+  border: var(--edge-soft);
   color: inherit;
   text-decoration: none;
+}
+
+.card:hover {
+  background: var(--surface-2);
+  border-color: var(--line-strong);
 }
 
 .card:hover .card__title {
@@ -683,14 +690,9 @@ body {
   background:
     radial-gradient(120% 90% at 50% 42%, rgba(255, 255, 255, 0.07), transparent 62%),
     var(--surface-2);
-  border: var(--edge-soft);
+  border-bottom: var(--edge-soft);
   color: var(--ink-quiet);
   overflow: hidden;
-  transition: border-color var(--duration) var(--ease);
-}
-
-.card:hover .card__media {
-  border-color: var(--line-strong);
 }
 
 .card__media img {
@@ -713,6 +715,7 @@ body {
   flex: 1;
   flex-direction: column;
   gap: 0.35em;
+  padding: var(--pad);
 }
 
 .card__rate {
@@ -802,7 +805,8 @@ body {
   flex-direction: column;
   align-items: flex-start;
   margin-top: auto;
-  padding-block-start: 0.35em;
+  padding: var(--pad-control);
+  border-top: var(--edge-soft);
 }
 
 .figures {
@@ -931,6 +935,7 @@ body {
 }
 
 .counter__field {
+  align-self: stretch;
   width: 100%;
   min-width: 0;
   padding: 0;
@@ -1299,6 +1304,12 @@ body {
   color: var(--white);
 }
 
+.panel__aside dd a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+}
+
 .panel__head {
   display: flex;
   align-items: center;
@@ -1371,6 +1382,9 @@ body {
 }
 
 .breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
   color: var(--steel-300);
   text-decoration: none;
 }
@@ -3672,6 +3686,7 @@ body {
 
 .trail {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--gap);
   list-style: none;
