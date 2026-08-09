@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite+aiosqlite:///./hardy.db"
     session_secret: str = ""
     session_max_age: int = 60 * 60 * 24 * 14
+    https_only: bool = False
 
     cors_origins: str = ""
 

@@ -16,6 +16,7 @@ from src.auth.router import router as auth_router
 from src.catalog.router import api_router as catalog_api_router
 from src.catalog.router import router as catalog_router
 from src.config import settings
+from src.constants import RESPONSE_GUARDS
 from src.database import SessionDep, create_schema
 from src.debug.router import router as debug_router
 from src.events.router import router as events_router
@@ -83,6 +84,17 @@ async def to_admin_sign_in(request: Request, exception: Exception) -> Response:
     return RedirectResponse("/admin/login", status.HTTP_303_SEE_OTHER)
 
 
+async def guard_headers(request: Request, call_next) -> Response:
+    written = await call_next(request)
+    for name, value in RESPONSE_GUARDS.items():
+        written.headers.setdefault(name, value)
+    if settings.https_only:
+        written.headers.setdefault(
+            "strict-transport-security", "max-age=31536000; includeSubDomains"
+        )
+    return written
+
+
 async def error_page(request: Request, exception: HTTPException) -> Response:
     return fault(request, exception.status_code, exception.detail, exception.headers)
 
@@ -100,6 +112,10 @@ async def failure_page(request: Request, exception: Exception) -> Response:
 
 async def favicon() -> FileResponse:
     return FileResponse(SRC_DIR / "static" / "favicon-32.png", media_type="image/png")
+
+
+async def design_tokens() -> FileResponse:
+    return FileResponse(BRAND_DIR / "tokens.css", media_type="text/css")
 
 
 async def health(session: SessionDep) -> JSONResponse:
@@ -123,6 +139,7 @@ def create_app() -> FastAPI:
         secret_key=settings.session_secret,
         max_age=settings.session_max_age,
         same_site="lax",
+        https_only=settings.https_only,
     )
     if settings.allowed_origins:
         app.add_middleware(
@@ -132,8 +149,9 @@ def create_app() -> FastAPI:
             allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             allow_headers=["*"],
         )
+    app.middleware("http")(guard_headers)
     app.mount("/static", StaticFiles(directory=SRC_DIR / "static"), name="static")
-    app.mount("/brand", StaticFiles(directory=BRAND_DIR), name="brand")
+    app.add_api_route("/brand/tokens.css", design_tokens, methods=["GET"], include_in_schema=False)
     app.add_api_route("/health", health, methods=["GET"], tags=["ops"])
     app.add_api_route("/favicon.ico", favicon, methods=["GET"], include_in_schema=False)
     app.include_router(auth_router)

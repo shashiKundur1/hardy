@@ -21,7 +21,9 @@
   <a class="skip" href="#main">Skip to content</a>
   <header class="masthead">
     <div class="masthead__inner container">
-      <a class="wordmark" href="{{ '/shop' if user else '/' }}"><img src="/brand/logo/hardy-wordmark.png" alt="Hardy"></a>
+      <a class="wordmark" href="{{ '/shop' if user else '/' }}" aria-label="Hardy, home">
+        <span class="wordmark__mark" aria-hidden="true"></span>
+      </a>
       {% if marketing %}
       <nav class="promo" aria-label="About Hardy">
         <a class="navlink" href="/#argument">How it argues</a>
