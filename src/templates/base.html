@@ -73,8 +73,12 @@
             </div>
           </details>
         {% else %}
+          {% if request.url.path != '/login' %}
           <a class="navlink" href="/login">Sign in</a>
+          {% endif %}
+          {% if request.url.path != '/signup' %}
           <a class="button" href="/signup" data-track="signup-masthead">Create account</a>
+          {% endif %}
         {% endif %}
       </div>
     </div>

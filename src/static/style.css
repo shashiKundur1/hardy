@@ -714,8 +714,9 @@ body {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.35em;
+  gap: var(--pad-control);
   padding: var(--pad);
+  line-height: var(--leading-snug);
 }
 
 .card__rate {
@@ -735,18 +736,16 @@ body {
 }
 
 .card__rate-unit {
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
   color: var(--steel-400);
 }
 
 .card__meta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
-  font-size: var(--text-xs);
+  gap: var(--pad-control);
+  font-size: var(--text-sm);
   color: var(--steel-400);
 }
 
@@ -791,10 +790,11 @@ body {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
-  min-height: calc(var(--leading-tight) * 2em);
+  min-height: calc(var(--leading-snug) * 2em);
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
-  line-height: var(--leading-tight);
+  line-height: var(--leading-snug);
+  letter-spacing: -0.01em;
   color: var(--white);
   transition: color var(--duration) var(--ease);
 }
@@ -2938,7 +2938,7 @@ body {
 .teach__demo {
   display: inline-flex;
   align-items: center;
-  min-width: 9rem;
+  min-width: 11rem;
 }
 
 .teach h2 {
@@ -3213,7 +3213,7 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-3);
-  align-items: center;
+  align-items: start;
   width: min(var(--container), 100% - var(--gutter) * 2);
   margin-inline: auto;
 }
@@ -4055,15 +4055,31 @@ body {
 }
 
 .reading {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
   gap: var(--gap);
-  padding: var(--pad);
+  padding: var(--space-2);
   background: var(--surface-1);
   border: var(--edge);
   border-top: 2px solid var(--steel-400);
   border-radius: var(--radius);
   animation: nudge-in var(--duration) var(--ease-enter) both;
+}
+
+.reading__head,
+.reading__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+@media (min-width: 56rem) {
+  .reading {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-2);
+  }
 }
 
 .reading[data-stance="the_pick"],
