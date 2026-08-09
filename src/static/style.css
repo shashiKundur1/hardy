@@ -2360,8 +2360,8 @@ body {
 
 .shortlist {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: var(--gap);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--pad-control);
   margin: 0;
   padding: var(--pad);
   border-top: var(--edge);
@@ -2408,8 +2408,11 @@ body {
 
 .shortlist__body {
   display: flex;
-  flex-direction: column;
-  gap: var(--gap);
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--pad-control);
+  flex: 1;
   min-width: 0;
 }
 
