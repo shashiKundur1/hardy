@@ -68,12 +68,15 @@
       <form class="buy" method="post" action="/cart/add">
         <input type="hidden" name="product_id" value="{{ product.id }}">
         <input type="hidden" name="back" value="{{ full_path(request) }}">
-        <label class="skip" for="quantity">How many</label>
-        <select class="buy__quantity input" id="quantity" name="quantity">
-          {% for count in range(1, 11) %}
-          <option value="{{ count }}">{{ count }}</option>
-          {% endfor %}
-        </select>
+        <div class="counter">
+          <button class="counter__step" type="button" data-quantity="-1" disabled
+                  aria-label="One fewer"><span aria-hidden="true">&minus;</span></button>
+          <label class="skip" for="quantity">How many</label>
+          <input class="counter__field numeric" id="quantity" name="quantity" type="number"
+                 value="1" min="1" max="10" step="1" inputmode="numeric">
+          <button class="counter__step" type="button" data-quantity="1"
+                  aria-label="One more"><span aria-hidden="true">+</span></button>
+        </div>
         <button class="button" type="submit" data-track="add-to-cart"
                 data-product-id="{{ product.id }}" data-category="{{ product.category }}">
           Add to basket
