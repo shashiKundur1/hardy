@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Hardy">
+  <rect width="512" height="512" fill="#FFB302"/>
+  <g transform="translate(14 91) scale(0.4797) translate(0 688) scale(1 -1)" fill="#100E0C">
+    <path d="M74 0 L321 0 L321 170 Q321 232 383 232 L626 232 Q688 232 688 170 L688 0 L935 0 L935 688 L688 688 L688 506 Q688 444 626 444 L383 444 Q321 444 321 506 L321 688 L74 688 Z"/>
+  </g>
+</svg>

@@ -45,23 +45,30 @@
 <section class="container section">
   <div class="section__head section__head--split">
     <p class="eyebrow">Built to outlast</p>
-    <h2>Longest service life</h2>
-    <p class="section__lede">The {{ catalog_size }} products in the catalog, ordered by expected life.</p>
+    <h2>The whole catalog</h2>
+    <p class="section__lede">Every product Hardy carries, with the evidence attached.</p>
   </div>
-  {% if featured %}
+
+  {{ ui.browse_controls("/shop", query, sort_labels, life_floors, rate_ceilings) }}
+
+  {{ ui.browse_count("/shop", query, total, pages) }}
+
+  {% if products %}
   <ul class="grid">
-    {% for product in featured %}
+    {% for product in products %}
       {{ ui.card(product) }}
     {% endfor %}
   </ul>
   {% else %}
   <p class="empty">
-    The catalog is not seeded yet. Products arrive with their evidence attached — expected life,
-    ownership, repairability and warranty — or they do not arrive at all.
+    Nothing matches that combination. Hardy would rather show you an empty grid than pad it
+    with things that do not qualify.
   </p>
   {% endif %}
+
+  {{ ui.pager("/shop", query, pages) }}
 </section>
-{% endblock %}
+
 <section class="container section">
   <div class="section__head">
     <p class="eyebrow">For you</p>
@@ -120,3 +127,4 @@
     {% endfor %}
   </ul>
 </section>
+{% endblock %}

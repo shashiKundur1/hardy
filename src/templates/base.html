@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Hardy{% endblock %}</title>
   <meta name="description" content="Durable goods, argued from evidence. Cost per year beside the price, who owns the brand now, and how long the parts stay available.">
-  <link rel="icon" href="/static/favicon-32.png" sizes="32x32" type="image/png">
-  <link rel="apple-touch-icon" href="/static/favicon-180.png">
+  <link rel="icon" href="/static/favicon.svg?v={{ asset_version() }}" type="image/svg+xml">
+  <link rel="icon" href="/static/favicon-32.png?v={{ asset_version() }}" sizes="32x32" type="image/png">
+  <link rel="icon" href="/static/favicon-16.png?v={{ asset_version() }}" sizes="16x16" type="image/png">
+  <link rel="apple-touch-icon" href="/static/favicon-180.png?v={{ asset_version() }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Encode+Sans+Expanded:wght@800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -71,8 +73,12 @@
             </div>
           </details>
         {% else %}
+          {% if request.url.path != '/login' %}
           <a class="navlink" href="/login">Sign in</a>
+          {% endif %}
+          {% if request.url.path != '/signup' %}
           <a class="button" href="/signup" data-track="signup-masthead">Create account</a>
+          {% endif %}
         {% endif %}
       </div>
     </div>
@@ -114,6 +120,8 @@
     <a class="dock__link" href="/cart" {% if surface == 'cart' %}aria-current="page"{% endif %}
        data-track="dock-cart">
       <span class="icon" style="--icon:url(/static/icons/bags-luggage.svg?v={{ asset_version() }})" aria-hidden="true"></span>
+      {% set docked = request.session.get('cart', {}) %}
+      {% if docked %}<span class="dock__count numeric">{{ docked|length }}<span class="skip"> in the basket</span></span>{% endif %}
       <span class="dock__label">Basket</span>
     </a>
     <a class="dock__link" href="{{ '/profile' if user else '/login' }}"

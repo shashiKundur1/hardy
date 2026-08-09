@@ -12,62 +12,9 @@
     <p class="section__lede">{{ blurb }}</p>
   </div>
 
-  <div class="browse">
-    <div class="browse__group">
-      <h2 class="browse__label" id="sort-label">Sort</h2>
-      <ul class="browse__options" aria-labelledby="sort-label">
-        {% for value, name in sort_labels.items() %}
-        <li>
-          <a class="chip" href="/category/{{ slug }}{{ query.link(sort=value, page=1) }}"
-             {% if query.sort == value %}aria-current="true"{% endif %}>
-            {% if query.sort == value %}<span aria-hidden="true">✓</span>{% endif %}{{ name }}
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
+  {{ ui.browse_controls("/category/" ~ slug, query, sort_labels, life_floors, rate_ceilings) }}
 
-    <div class="browse__group">
-      <h2 class="browse__label" id="filter-label">Filter</h2>
-      <ul class="browse__options" aria-labelledby="filter-label">
-        <li>
-          <a class="chip" href="/category/{{ slug }}{{ query.link(sourced=not query.sourced, page=1) }}"
-             {% if query.sourced %}aria-current="true"{% endif %}>
-            {% if query.sourced %}<span aria-hidden="true">✓</span>{% endif %}Has a source
-          </a>
-        </li>
-        <li>
-          <a class="chip" href="/category/{{ slug }}{{ query.link(continuity=not query.continuity, page=1) }}"
-             {% if query.continuity %}aria-current="true"{% endif %}>
-            {% if query.continuity %}<span aria-hidden="true">✓</span>{% endif %}Ownership continuity
-          </a>
-        </li>
-        {% for years in life_floors %}
-        <li>
-          <a class="chip" href="/category/{{ slug }}{{ query.link(min_life=0 if query.min_life == years else years, page=1) }}"
-             {% if query.min_life == years %}aria-current="true"{% endif %}>
-            {% if query.min_life == years %}<span aria-hidden="true">✓</span>{% endif %}{{ years }}+ year life
-          </a>
-        </li>
-        {% endfor %}
-        {% for ceiling in rate_ceilings %}
-        <li>
-          <a class="chip" href="/category/{{ slug }}{{ query.link(max_rate=0 if query.max_rate == ceiling else ceiling, page=1) }}"
-             {% if query.max_rate == ceiling %}aria-current="true"{% endif %}>
-            {% if query.max_rate == ceiling %}<span aria-hidden="true">✓</span>{% endif %}Under ₹{{ ceiling }}/year
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <p class="browse__count" role="status">
-    {{ total }} {{ "product" if total == 1 else "products" }}{% if query.is_filtered %} match these filters{% endif %}{% if pages > 1 %} · page {{ query.page }} of {{ pages }}{% endif %}
-    {% if query.is_filtered %}
-    <a class="navlink" href="/category/{{ slug }}">Clear filters</a>
-    {% endif %}
-  </p>
+  {{ ui.browse_count("/category/" ~ slug, query, total, pages) }}
 
   {% if products %}
   <ul class="grid">
@@ -84,16 +31,6 @@
 
   {{ ui.nudge(nudge, nudge_picks, nudge_because, full_path(request)) }}
 
-  {% if pages > 1 %}
-  <nav class="pager" aria-label="Pages">
-    {% if query.page > 1 %}
-    <a class="button button--quiet" href="/category/{{ slug }}{{ query.link(page=query.page - 1) }}" rel="prev">Previous</a>
-    {% endif %}
-    <span class="pager__state">Page {{ query.page }} of {{ pages }}</span>
-    {% if query.page < pages %}
-    <a class="button button--quiet" href="/category/{{ slug }}{{ query.link(page=query.page + 1) }}" rel="next">Next</a>
-    {% endif %}
-  </nav>
-  {% endif %}
+  {{ ui.pager("/category/" ~ slug, query, pages) }}
 </section>
 {% endblock %}
