@@ -4,10 +4,12 @@
 
 {% block main %}
 <section class="container stack">
-  <p class="eyebrow">Instrument panel</p>
-  <h1>Glass box</h1>
-  <p class="section__lede">Every claim Hardy makes about itself, with the number behind it. Nothing on this
-    page is computed for display — it is read back out of the same tables the storefront uses.</p>
+  <div class="section__head section__head--split">
+    <p class="eyebrow">Instrument panel</p>
+    <h1>Glass box</h1>
+    <p class="section__lede">Every claim Hardy makes about itself, with the number behind it. Nothing on this
+      page is computed for display — it is read back out of the same tables the storefront uses.</p>
+  </div>
   <p class="stamp">
     <span class="stamp__dot" aria-hidden="true"></span>
     <span>Snapshot at
@@ -25,8 +27,9 @@
   <div class="lead">
     <span class="lead__label">Model calls per event recorded</span>
     <span class="lead__value">{{ "%.3f"|format(efficiency.calls_per_event) }}</span>
-    <span class="lead__note">{{ efficiency.llm_calls|compact }} calls across
-      {{ efficiency.events_recorded|compact }} events</span>
+    <span class="lead__note">{{ efficiency.llm_calls|compact }} calls counted since this process
+      started, against {{ efficiency.events_recorded|compact }} events on record. The counter
+      lives in memory, so a restart returns it to zero while the decisions below do not.</span>
   </div>
   <ul class="gauges">
     <li class="gauge">

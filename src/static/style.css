@@ -1534,9 +1534,16 @@ body {
 .lane[data-lane="mesh"] { --lane: var(--lane-mesh); }
 
 .lane__head {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--gap);
+  align-items: baseline;
+}
+
+@media (min-width: 56rem) {
+  .lane__head {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    column-gap: var(--space-2);
+  }
 }
 
 .lane__head h2 {
