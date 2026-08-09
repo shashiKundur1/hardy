@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from markupsafe import Markup
 
 from src.auth import avatar as avatars
+from src.catalog.constants import CATEGORY_LABELS
 from src.constants import EVENT_BATCH_SIZE, EVENT_FLUSH_MS, SEARCH_DEBOUNCE_MS
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -44,6 +45,9 @@ templates = Jinja2Templates(directory=TEMPLATE_DIR)
 templates.env.globals["asset_version"] = asset_version
 templates.env.globals["avatar"] = avatar
 templates.env.globals["full_path"] = full_path
+templates.env.globals["all_categories"] = [
+    {"slug": slug, "label": label} for slug, label in CATEGORY_LABELS.items()
+]
 templates.env.filters["compact"] = compact
 templates.env.globals["tracking"] = {
     "endpoint": "/api/events",
