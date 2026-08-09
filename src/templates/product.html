@@ -12,7 +12,6 @@
     <a href="/category/{{ product.category }}">{{ label }}</a> <span>/</span>
     <span>{{ product.brand }}</span>
   </p>
-  {{ ui.reading(reading) }}
   <div class="detail">
     {{ ui.gallery(product, gallery) }}
     <div class="detail__body">
@@ -20,24 +19,42 @@
       <h1>{{ product.title }}</h1>
       <p class="detail__lede">{{ product.description }}</p>
       <div class="figures">
-        <div class="figure">
-          <span class="figure__label">Price</span>
-          <span class="figure__value">{{ ui.rupees(product.price) }}</span>
-        </div>
-        <div class="figure">
-          <span class="figure__label">Cost per year</span>
-          <span class="figure__value figure__value--derived">{{ ui.rupees(product.cost_per_year) }}</span>
-        </div>
+        <p class="figures__rate">
+          <span class="figures__amount numeric">{{ ui.rupees(product.cost_per_year) }}</span>
+          <span class="figures__unit">per year</span>
+        </p>
+        <p class="figures__price">
+          <span class="figures__price-label">Price</span>
+          <span class="numeric">{{ ui.rupees(product.price) }}</span>
+          <span class="figures__price-note">once, over {{ product.expected_life_years }} years</span>
+        </p>
       </div>
       <form class="buy" method="post" action="/cart/add">
         <input type="hidden" name="product_id" value="{{ product.id }}">
         <input type="hidden" name="back" value="{{ full_path(request) }}">
-        <button class="button" type="submit" data-track="add-to-cart"
+        <button class="button button--full" type="submit" data-track="add-to-cart"
                 data-product-id="{{ product.id }}" data-category="{{ product.category }}">
           Add to basket
         </button>
-        <a class="navlink" href="/cart">View basket</a>
       </form>
+      <ul class="assurance">
+        <li class="assurance__row">
+          <span class="assurance__term">Warranty</span>
+          <span class="assurance__value">{{ product.warranty or "Not stated by the brand" }}</span>
+        </li>
+        <li class="assurance__row">
+          <span class="assurance__term">Parts</span>
+          <span class="assurance__value">
+            {% if product.parts_until %}Available until {{ product.parts_until }}{% else %}Not stated by the brand{% endif %}
+          </span>
+        </li>
+        <li class="assurance__row">
+          <span class="assurance__term">Repairability</span>
+          <span class="assurance__value">
+            {% if product.repairability_score is not none %}{{ product.repairability_score }} out of 10{% else %}Not stated by the brand{% endif %}
+          </span>
+        </li>
+      </ul>
       {{ ui.ownership(product) }}
       {{ ui.evidence(product) }}
       <div class="panel">
@@ -64,6 +81,12 @@
     </div>
   </div>
 </section>
+
+{% if reading %}
+<section class="container section">
+  {{ ui.reading(reading) }}
+</section>
+{% endif %}
 
 {% if related %}
 <section class="container section">
