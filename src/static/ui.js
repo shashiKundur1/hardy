@@ -49,3 +49,20 @@ document.addEventListener("click", (event) => {
     if (!menu.contains(event.target)) menu.removeAttribute("open");
   });
 });
+
+document.addEventListener("click", (event) => {
+  const step = event.target.closest("[data-quantity]");
+  if (!step) return;
+  const field = step.parentElement.querySelector(".counter__field");
+  if (!field) return;
+  const low = Number(field.min) || 1;
+  const high = Number(field.max) || 10;
+  const next = Number(field.value) + Number(step.dataset.quantity);
+  field.value = Math.min(high, Math.max(low, next));
+  step.parentElement
+    .querySelectorAll("[data-quantity]")
+    .forEach((other) => {
+      const bound = Number(other.dataset.quantity) < 0 ? low : high;
+      other.disabled = Number(field.value) === bound;
+    });
+});
