@@ -16,6 +16,7 @@ BEHIND_SIGN_IN = (
     "/category/cookware",
     "/product/1",
     "/cart",
+    "/checkout",
     "/orders",
     "/orders/1",
     "/shelf",
@@ -28,7 +29,7 @@ public = (
     .exclude(
         path_regex=(
             r"^/(shop|search|profile|footprint|recommendations|welcome|category|product"
-            r"|cart|orders|shelf)"
+            r"|cart|checkout|orders|shelf)"
         )
     )
 )

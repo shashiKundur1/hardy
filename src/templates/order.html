@@ -30,6 +30,29 @@
     </li>
   </ul>
 
+  <ol class="whatnext" aria-label="What happens next">
+    <li class="whatnext__step" data-state="done">
+      <span class="whatnext__title">Recorded</span>
+      <span class="whatnext__note">
+        The order is on your account, with what each thing claimed on the day you bought it.
+      </span>
+    </li>
+    <li class="whatnext__step" data-state="now">
+      <span class="whatnext__title">On your shelf</span>
+      <span class="whatnext__note">
+        Every item is on the shelf now, with its care interval and how far through its claimed
+        life it has got.
+      </span>
+    </li>
+    <li class="whatnext__step" data-state="next">
+      <span class="whatnext__title">Hardy asks how it held up</span>
+      <span class="whatnext__note">
+        When the first care interval comes round, the shelf asks whether the thing is holding up.
+        Your answer is what the next shopper reads.
+      </span>
+    </li>
+  </ol>
+
   <ul class="lines">
     {% for line in order.lines %}
     <li class="line">

@@ -83,12 +83,39 @@ async def add_to_cart(
     return RedirectResponse(f"{target}{joiner}added={found.id}", status.HTTP_303_SEE_OTHER)
 
 
+@router.post("/cart/quantity")
+async def set_line_quantity(
+    request: Request,
+    user: CurrentUser,
+    product_id: Annotated[int, Form()],
+    quantity: Annotated[int, Form()],
+) -> RedirectResponse:
+    line = CartLine(product_id=product_id, quantity=max(1, quantity))
+    wanted = 0 if quantity < 1 else line.quantity
+    keep(request, service.set_quantity(basket_of(request), line.product_id, wanted))
+    return RedirectResponse("/cart", status.HTTP_303_SEE_OTHER)
+
+
 @router.post("/cart/remove")
 async def remove_from_cart(
     request: Request, user: CurrentUser, product_id: Annotated[int, Form()]
 ) -> RedirectResponse:
     keep(request, service.remove(basket_of(request), product_id))
     return RedirectResponse("/cart", status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/checkout", response_class=HTMLResponse, responses=AS_A_PAGE)
+async def review(request: Request, session: SessionDep, user: CurrentUser) -> HTMLResponse:
+    lines = await service.contents(session, basket_of(request))
+    return page(
+        request,
+        "checkout.html",
+        user=user,
+        categories=await catalog.navigation(session),
+        lines=lines,
+        total=service.total_of(lines),
+        yearly=service.yearly_of(lines),
+    )
 
 
 @router.post("/checkout")

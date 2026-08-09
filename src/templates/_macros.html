@@ -212,20 +212,16 @@
      data-product-id="{{ product.id }}" data-category="{{ product.category }}">
     <span class="card__media">{{ media(product) }}</span>
     <span class="card__body">
+      <span class="card__brand">{{ product.brand }}</span>
+      <span class="card__title">{{ product.title }}</span>
       <span class="card__rate">
         <span class="card__rate-value">{{ rupees(product.cost_per_year) }}</span>
         <span class="card__rate-unit">per year</span>
       </span>
-      <span class="card__title">{{ product.title }}</span>
       <span class="card__meta">
-        <span>{{ product.brand }}</span>
-        <span aria-hidden="true">·</span>
-        <span>{{ product.expected_life_years }} year life</span>
+        {{ rupees(product.price) }} once · {{ product.expected_life_years }} year life
       </span>
-      <span class="card__foot">
-        {{ ownership_mark(product) }}
-        <span class="card__once">{{ rupees(product.price) }} once</span>
-      </span>
+      <span class="card__foot">{{ ownership_mark(product) }}</span>
     </span>
   </a>
 </li>
