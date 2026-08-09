@@ -730,6 +730,37 @@ body {
   color: var(--steel-400);
 }
 
+.added {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  padding: var(--pad);
+  background: var(--amber-ghost);
+  border: 1px solid var(--amber);
+  border-radius: var(--radius);
+  color: var(--white);
+  font-size: var(--text-sm);
+}
+
+.added__mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: var(--amber);
+  border-radius: var(--radius-pill);
+}
+
+.added__mark::after {
+  content: "";
+  width: 0.45rem;
+  height: 0.25rem;
+  border-left: 2px solid var(--void);
+  border-bottom: 2px solid var(--void);
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
 .assurance {
   display: flex;
   flex-direction: column;
