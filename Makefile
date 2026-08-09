@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install install-pip dev seed sync agent digest verify test test-unit test-integration test-regression test-contract test-live cov load check lint format hooks docker-build docker-up docker-down docker-seed docker-digest docker-logs clean
+.PHONY: help install install-pip dev seed sync agent digest admin verify test test-unit test-integration test-regression test-contract test-live cov load check lint format hooks docker-build docker-up docker-down docker-seed docker-digest docker-logs clean
 
 PYTHON := poetry run python
 
@@ -13,6 +13,7 @@ help:
 	@echo "  make sync         embed every product and upsert it into Qdrant"
 	@echo "  make agent        run the LangGraph agent end to end"
 	@echo "  make digest       run the daily digest now, without waiting for its hour"
+	@echo "  make admin        make an administrator: make admin EMAIL=you@x PASS=secret"
 	@echo "  make verify       the ship gate: lint, every offline test, and the four CI checks"
 	@echo "  make test         unit, integration, regression and contract tests"
 	@echo "  make test-unit    pure logic only, no database and no network"
@@ -51,6 +52,9 @@ agent:
 
 digest:
 	$(PYTHON) -m scripts.send_digest
+
+admin:
+	$(PYTHON) -m scripts.make_admin $(EMAIL) $(PASS)
 
 verify: lint test check
 

@@ -132,3 +132,19 @@ async def test_every_response_carries_the_security_guards():
         response = await client.get("/")
     for name, value in RESPONSE_GUARDS.items():
         assert response.headers[name] == value
+
+
+async def test_an_administrator_can_be_made_without_hand_written_sql():
+    from scripts.make_admin import promote
+    from src.auth.service import find_by_email
+    from src.constants import Role
+
+    assert "administrator" in await promote("firstboss@hardy.test", "a-long-enough-secret")
+    async with session_factory() as session:
+        made = await find_by_email(session, "firstboss@hardy.test")
+    assert made is not None and made.role == Role.ADMIN
+
+    assert "administrator" in await promote("firstboss@hardy.test", "ignored-on-promotion")
+    async with session_factory() as session:
+        again = await find_by_email(session, "firstboss@hardy.test")
+    assert again.role == Role.ADMIN
