@@ -37,6 +37,12 @@
           Add to basket
         </button>
       </form>
+      {% if request.query_params.get('added') == product.id|string %}
+      <p class="added" role="status">
+        <span class="added__mark" aria-hidden="true"></span>
+        In your basket. <a href="/cart">Go to the basket</a>
+      </p>
+      {% endif %}
       <ul class="assurance">
         <li class="assurance__row">
           <span class="assurance__term">Warranty</span>

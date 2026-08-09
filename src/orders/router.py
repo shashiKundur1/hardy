@@ -78,7 +78,9 @@ async def add_to_cart(
             )
         ],
     )
-    return RedirectResponse(safe_path(back, "/cart"), status.HTTP_303_SEE_OTHER)
+    target = safe_path(back, "/cart")
+    joiner = "&" if "?" in target else "?"
+    return RedirectResponse(f"{target}{joiner}added={found.id}", status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/cart/remove")
