@@ -80,12 +80,12 @@
 {% macro reading(verdict) -%}
 {% if verdict %}
 <aside class="reading" data-stance="{{ verdict.stance }}" role="status">
+  <p class="reading__eyebrow">
+    <span class="reading__mark" aria-hidden="true">{{ {"the_pick": "★", "stronger": "▲", "level": "=", "weaker": "▼", "adrift": "→"}[verdict.stance] }}</span>
+    Hardy is watching this
+    {%- if verdict.seen_here %} · {{ verdict.seen_here }} in this category so far{% endif %}
+  </p>
   <div class="reading__head">
-    <p class="reading__eyebrow">
-      <span class="reading__mark" aria-hidden="true">{{ {"the_pick": "★", "stronger": "▲", "level": "=", "weaker": "▼", "adrift": "→"}[verdict.stance] }}</span>
-      Hardy is watching this
-      {%- if verdict.seen_here %} · {{ verdict.seen_here }} in this category so far{% endif %}
-    </p>
     <h2 class="reading__headline">{{ verdict.headline }}</h2>
   </div>
   <div class="reading__detail">
