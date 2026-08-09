@@ -3491,13 +3491,22 @@ body {
 }
 
 .seek {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--gap);
-  padding: var(--pad);
-  background: var(--steel-900);
-  border: var(--edge);
-  border-radius: var(--radius);
+  padding-block: var(--pad);
+  border-top: var(--edge);
+  border-bottom: var(--edge);
+}
+
+@media (min-width: 48rem) {
+  .seek {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .seek__hint {
+    grid-column: 1 / -1;
+  }
 }
 
 .seek__actions {
