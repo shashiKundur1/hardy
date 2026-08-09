@@ -6,7 +6,7 @@
 
 {% block main %}
 <section class="container section">
-  <div class="section__head">
+  <div class="section__head section__head--split">
     <p class="eyebrow">Basket</p>
     <h1>What you are about to keep</h1>
     <p class="section__lede">
@@ -16,47 +16,77 @@
   </div>
 
   {% if lines %}
-  <ul class="lines">
-    {% for line in lines %}
-    <li class="line">
-      <a class="line__media" href="/product/{{ line.product.id }}">{{ ui.media(line.product) }}</a>
-      <div class="line__body">
-        <a class="line__title" href="/product/{{ line.product.id }}">{{ line.product.title }}</a>
-        <p class="line__meta">
-          {{ line.product.brand }} · {{ line.product.expected_life_years }} year expected life
-        </p>
-        {{ ui.ownership_mark(line.product) }}
-      </div>
-      <div class="line__figures">
-        <p class="line__rate">{{ ui.rupees(line.product.cost_per_year) }} <span>per year</span></p>
-        <p class="line__once">{{ ui.rupees(line.product.price) }} once{% if line.quantity > 1 %} × {{ line.quantity }}{% endif %}</p>
-      </div>
-      <form method="post" action="/cart/remove">
-        <input type="hidden" name="product_id" value="{{ line.product.id }}">
-        <button class="button button--quiet" type="submit">Remove</button>
-      </form>
-    </li>
-    {% endfor %}
-  </ul>
+  {% set warranted = lines | selectattr('product.warranty') | list | length %}
+  {% set shortest = lines | map(attribute='product.expected_life_years') | min %}
+  <div class="checkout">
+    <ul class="lines">
+      {% for line in lines %}
+      <li class="line">
+        <a class="line__media" href="/product/{{ line.product.id }}">{{ ui.media(line.product) }}</a>
+        <div class="line__body">
+          <a class="line__title" href="/product/{{ line.product.id }}">{{ line.product.title }}</a>
+          <p class="line__meta">
+            {{ line.product.brand }} · {{ line.product.expected_life_years }} year expected life
+          </p>
+          {{ ui.ownership_mark(line.product) }}
+        </div>
+        <div class="line__figures">
+          <p class="line__rate">{{ ui.rupees(line.product.cost_per_year) }} <span>per year</span></p>
+          <p class="line__once">{{ ui.rupees(line.product.price) }} once{% if line.quantity > 1 %} × {{ line.quantity }}{% endif %}</p>
+        </div>
+        <form method="post" action="/cart/remove">
+          <input type="hidden" name="product_id" value="{{ line.product.id }}">
+          <button class="button button--quiet" type="submit">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
 
-  <div class="reckoning">
-    <div class="reckoning__figures">
+    <aside class="reckoning" aria-label="Order summary">
+      <p class="reckoning__title">The reckoning</p>
+      <dl class="reckoning__rows">
+        <div class="reckoning__row">
+          <dt>Items</dt>
+          <dd class="numeric">{{ lines | length }}</dd>
+        </div>
+        <div class="reckoning__row">
+          <dt>Paid once</dt>
+          <dd class="numeric">{{ ui.rupees(total) }}</dd>
+        </div>
+        <div class="reckoning__row">
+          <dt>Shortest life in the basket</dt>
+          <dd class="numeric">{{ shortest }} years</dd>
+        </div>
+        <div class="reckoning__row">
+          <dt>Warranty stated</dt>
+          <dd class="numeric">{{ warranted }} of {{ lines | length }}</dd>
+        </div>
+      </dl>
       <p class="reckoning__lead">
-        <span class="reckoning__value">{{ ui.rupees(yearly) }}</span>
+        <span class="reckoning__value numeric">{{ ui.rupees(yearly) }}</span>
         <span class="reckoning__unit">per year, all of it</span>
       </p>
-      <p class="reckoning__once">{{ ui.rupees(total) }} once</p>
-    </div>
-    <form method="post" action="/checkout">
-      <button class="button" type="submit">Place the order</button>
-    </form>
+      <form method="post" action="/checkout">
+        <button class="button button--full" type="submit">Place the order</button>
+      </form>
+      <p class="reckoning__note">
+        Nothing is charged. This is a demonstration order, and it records what you bought so the
+        shelf can ask how it held up.
+      </p>
+    </aside>
   </div>
   {% else %}
-  <p class="empty">
-    The basket is empty. Nothing here is urgent — the things Hardy sells are meant to be bought
-    once, so taking your time is the point.
-  </p>
-  <a class="button" href="/shop">Back to the shop</a>
+  <div class="vacancy">
+    <h2>The basket is empty</h2>
+    <p>
+      If you expected something here, it may have been added before you signed in — a basket
+      belongs to an account, not to a browser.
+    </p>
+    <div class="vacancy__actions">
+      <a class="button" href="/shop">Browse the shop</a>
+      <a class="button button--quiet" href="/recommendations">See what Hardy picked for you</a>
+    </div>
+  </div>
   {% endif %}
 </section>
 {% endblock %}

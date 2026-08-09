@@ -58,17 +58,33 @@
   --tracking-label: 0.16em;
   --measure: 66ch;
 
-  --pad: 1em;
-  --gap: 1em;
-  --space-1: 1em;
-  --space-2: 2em;
-  --space-3: 3em;
-  --space-4: 4em;
-  --space-6: 6em;
+  --pad: 1.5em;
+  --gap: 1.5em;
+  --space-1: 1.5em;
+  --space-2: 3em;
+  --space-3: 4.5em;
+  --space-4: 6em;
+  --space-6: 9em;
 
-  --radius-sm: 0.125rem;
-  --radius: 0.25rem;
-  --edge: 1px solid var(--steel-700);
+  --gutter: 1.5rem;
+  --section: 4rem;
+  --bar: 4.5rem;
+
+  --radius-sm: 0;
+  --radius: 0;
+  --radius-pill: 999px;
+
+  --line-soft: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.2);
+  --edge: 1px solid var(--line);
+  --edge-soft: 1px solid var(--line-soft);
+
+  --surface-1: #16130F;
+  --surface-2: #1B1815;
+  --surface-3: #221E19;
+
+  --control-height: 3rem;
 
   --container: 78rem;
   --dock-clearance: 8em;
@@ -78,13 +94,28 @@
 
   --ink-quiet: var(--steel-300);
 
-  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease: cubic-bezier(0.165, 0.84, 0.44, 1);
   --ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
   --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
   --duration-fast: 90ms;
   --duration: 160ms;
   --duration-slow: 260ms;
-  --lift: -2px;
+  --lift: 0px;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --gutter: 2.5rem;
+    --section: 5.5rem;
+    --bar: 5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --gutter: 3rem;
+    --section: 7rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -110,6 +141,7 @@ body {
   font-size: var(--text-base);
   font-weight: var(--weight-body);
   line-height: var(--leading-body);
+  font-feature-settings: "lnum" 1;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -124,13 +156,21 @@ h1, h2, h3 {
 }
 
 h1 {
-  font-size: clamp(2.441rem, 6vw, 4.768rem);
+  font-size: clamp(2.125rem, 1.4rem + 2.6vw, 3.5rem);
   font-weight: var(--weight-hero);
   line-height: var(--leading-hero);
+  letter-spacing: -0.035em;
 }
 
-h2 { font-size: clamp(1.953rem, 4vw, 3.052rem); }
-h3 { font-size: var(--text-xl); }
+h2 {
+  font-size: clamp(1.563rem, 1.15rem + 1.6vw, 2.441rem);
+  letter-spacing: -0.028em;
+}
+
+h3 {
+  font-size: var(--text-lg);
+  letter-spacing: -0.02em;
+}
 
 a {
   color: var(--amber);

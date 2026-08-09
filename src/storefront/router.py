@@ -83,6 +83,7 @@ async def landing(request: Request, session: SessionDep, user: OptionalUser) -> 
         request,
         "landing.html",
         user=user,
+        categories=await catalog.navigation(session),
         catalog_size=await catalog.count(session),
         sourced=await catalog.sourced_count(session),
         labels=CATEGORY_LABELS,

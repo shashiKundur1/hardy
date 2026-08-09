@@ -9,15 +9,13 @@
 {% block main %}
 <div class="onboard">
   <div class="onboard__head">
-    <p class="eyebrow">Step {{ step }} of {{ steps }}</p>
-    <ol class="progress">
-      {% for index in range(1, steps + 1) %}
-      <li class="progress__step" data-state="{{ 'done' if index < step else ('now' if index == step else 'next') }}">
-        <span class="skip">{{ "Completed" if index < step else ("Current" if index == step else "Upcoming") }}</span>
-        <span aria-hidden="true">{{ "%02d"|format(index) }}</span>
-      </li>
-      {% endfor %}
-    </ol>
+    <p class="eyebrow">Setting up</p>
+    {% if step > 1 %}
+    <div class="progress" role="progressbar" aria-valuenow="{{ step }}" aria-valuemin="1"
+         aria-valuemax="{{ steps }}" aria-label="Step {{ step }} of {{ steps }}">
+      <span class="progress__fill" style="--progress: {{ (step * 100 // steps) }}%"></span>
+    </div>
+    {% endif %}
   </div>
 
   {% if step == 1 %}
@@ -78,11 +76,12 @@
       <legend class="skip">Categories</legend>
       {% for entry in categories %}
       <label class="picker__option">
-        <input type="checkbox" name="interests" value="{{ entry.slug }}"
+        <input class="picker__input" type="checkbox" name="interests" value="{{ entry.slug }}"
                {% if entry.slug in chosen %}checked{% endif %}>
+        <span class="picker__tick" aria-hidden="true"></span>
         {{ ui.icon(entry.slug) }}
         <span class="picker__name">{{ entry.label }}</span>
-        <span class="picker__count">{{ entry.total }}</span>
+        <span class="picker__count">{{ entry.total }} products</span>
       </label>
       {% endfor %}
     </fieldset>

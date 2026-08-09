@@ -18,7 +18,20 @@
       </p>
       {% endif %}
     </div>
-    {{ avatar(user, 64) }}
+    <dl class="tally">
+      <div class="tally__cell">
+        <dt>Products</dt>
+        <dd class="numeric">{{ catalog_size }}</dd>
+      </div>
+      <div class="tally__cell">
+        <dt>Sourced owners</dt>
+        <dd class="numeric">{{ sourced }}</dd>
+      </div>
+      <div class="tally__cell">
+        <dt>Categories</dt>
+        <dd class="numeric">{{ categories|length }}</dd>
+      </div>
+    </dl>
   </div>
   {% if interests %}
   <ul class="chips">
@@ -89,7 +102,7 @@
 </section>
 
 <section class="container section">
-  <div class="section__head">
+  <div class="section__head section__head--split">
     <p class="eyebrow">Built to outlast</p>
     <h2>Longest service life</h2>
     <p class="section__lede">The {{ catalog_size }} products in the catalog, ordered by expected life.</p>
