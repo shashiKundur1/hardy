@@ -73,7 +73,6 @@
 
 {% macro nudge(recommendation, picks, because, back) -%}
 {% if recommendation %}
-<div class="container">
 <aside class="nudge" aria-labelledby="nudge-head" role="status">
   <div class="nudge__text">
     <p class="nudge__eyebrow" id="nudge-head">
@@ -106,7 +105,6 @@
     </form>
   </div>
 </aside>
-</div>
 {% endif %}
 {%- endmacro %}
 
