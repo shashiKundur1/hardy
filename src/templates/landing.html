@@ -144,11 +144,13 @@
 
 <section class="container section">
   <div class="closing">
-    <h2>See what it makes of you</h2>
-    <p class="closing__lede">
-      Create an account, browse for a few minutes, and read the case it builds. Nothing is
-      recommended until your browsing says something specific.
-    </p>
+    <div class="closing__text">
+      <h2>See what it makes of you</h2>
+      <p class="closing__lede">
+        Create an account, browse for a few minutes, and read the case it builds. Nothing is
+        recommended until your browsing says something specific.
+      </p>
+    </div>
     <a class="button" href="{{ '/shop' if user else '/signup' }}">
       {{ "Go to the shop" if user else "Create an account" }}
     </a>

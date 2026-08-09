@@ -10,7 +10,6 @@ from src.catalog import service as catalog
 from src.catalog.constants import (
     CATEGORY_BLURBS,
     CATEGORY_LABELS,
-    FEATURED_LIMIT,
     LANDING_PRODUCTS,
     LIFE_FLOORS,
     MEANING_SEARCH_LIMIT,
@@ -93,14 +92,26 @@ async def landing(request: Request, session: SessionDep, user: OptionalUser) -> 
 
 
 @router.get("/shop", response_class=HTMLResponse, responses=NEEDS_SIGN_IN)
-async def shop(request: Request, session: SessionDep, user: CurrentUser) -> HTMLResponse:
+async def shop(
+    request: Request,
+    session: SessionDep,
+    user: CurrentUser,
+    query: BrowseQuery = BrowseParams,
+) -> HTMLResponse:
     active = await recommendations.active_for(session, user.id)
+    products, total = await catalog.browse(session, None, query)
     return page(
         request,
         "shop.html",
         user=user,
         categories=await catalog.navigation(session),
-        featured=await catalog.featured(session, FEATURED_LIMIT),
+        products=products,
+        total=total,
+        query=query,
+        pages=max(1, -(-total // PAGE_SIZE)),
+        sort_labels=SORT_LABELS,
+        life_floors=LIFE_FLOORS,
+        rate_ceilings=RATE_CEILINGS,
         catalog_size=await catalog.count(session),
         sourced=await catalog.sourced_count(session),
         interests=accounts.declared_interests(user),

@@ -29,6 +29,10 @@
             {{ line.product.brand }} · {{ line.product.expected_life_years }} year expected life
           </p>
           {{ ui.ownership_mark(line.product) }}
+          <form method="post" action="/cart/remove">
+            <input type="hidden" name="product_id" value="{{ line.product.id }}">
+            <button class="linkbutton" type="submit">Remove<span class="skip"> {{ line.product.title }}</span></button>
+          </form>
         </div>
         <div class="stepper" role="group" aria-label="Quantity of {{ line.product.title }}">
           <form method="post" action="/cart/quantity">
@@ -53,10 +57,6 @@
           <p class="line__rate">{{ ui.rupees(line.product.cost_per_year * line.quantity) }} <span>per year</span></p>
           <p class="line__once">{{ ui.rupees(line.product.price * line.quantity) }} once</p>
         </div>
-        <form method="post" action="/cart/remove">
-          <input type="hidden" name="product_id" value="{{ line.product.id }}">
-          <button class="linkbutton" type="submit">Remove</button>
-        </form>
       </li>
       {% endfor %}
     </ul>
