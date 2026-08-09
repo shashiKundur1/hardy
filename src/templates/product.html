@@ -13,7 +13,43 @@
     <span>{{ product.brand }}</span>
   </p>
   <div class="detail">
-    {{ ui.gallery(product, gallery) }}
+    <div class="detail__main">
+      {{ ui.gallery(product, gallery) }}
+      <div class="folds">
+        <details class="fold" open>
+          <summary class="fold__head">
+            <span>Where the numbers come from</span>
+            <span class="fold__mark" aria-hidden="true"></span>
+          </summary>
+          <div class="fold__body">
+            <div class="spec">
+              <span class="spec__label">Expected life</span>
+              <span class="spec__value">{{ product.expected_life_years }} years</span>
+            </div>
+            <div class="spec">
+              <span class="spec__label">Cost per year</span>
+              <span class="spec__value">
+                {{ ui.rupees(product.price) }} ÷ {{ product.expected_life_years }} years
+              </span>
+            </div>
+            <p class="fold__note">
+              Expected life is what the brand states, not what Hardy estimates. Where a brand
+              states nothing, the row reads unknown rather than carrying a guess.
+            </p>
+          </div>
+        </details>
+        <details class="fold">
+          <summary class="fold__head">
+            <span>Who owns the brand</span>
+            <span class="fold__mark" aria-hidden="true"></span>
+          </summary>
+          <div class="fold__body">
+            {{ ui.ownership(product) }}
+            {{ ui.evidence(product) }}
+          </div>
+        </details>
+      </div>
+    </div>
     <div class="detail__body">
       <p class="eyebrow">{{ product.brand }}</p>
       <h1>{{ product.title }}</h1>
@@ -32,7 +68,13 @@
       <form class="buy" method="post" action="/cart/add">
         <input type="hidden" name="product_id" value="{{ product.id }}">
         <input type="hidden" name="back" value="{{ full_path(request) }}">
-        <button class="button button--full" type="submit" data-track="add-to-cart"
+        <label class="skip" for="quantity">How many</label>
+        <select class="buy__quantity input" id="quantity" name="quantity">
+          {% for count in range(1, 11) %}
+          <option value="{{ count }}">{{ count }}</option>
+          {% endfor %}
+        </select>
+        <button class="button" type="submit" data-track="add-to-cart"
                 data-product-id="{{ product.id }}" data-category="{{ product.category }}">
           Add to basket
         </button>
@@ -61,29 +103,6 @@
           </span>
         </li>
       </ul>
-      {{ ui.ownership(product) }}
-      {{ ui.evidence(product) }}
-      <div class="panel">
-        <p class="panel__head">{{ ui.icon("evidence") }} What is stated, and what is not</p>
-        <div class="spec">
-          <span class="spec__label">{{ ui.icon("cost-per-year") }} Expected life</span>
-          <span class="spec__value">{{ product.expected_life_years }} years</span>
-        </div>
-        <div class="spec">
-          <span class="spec__label">{{ ui.icon("repairability") }} Repairability</span>
-          <span class="spec__value">
-            {% if product.repairability_score is not none %}{{ product.repairability_score }} / 10{% else %}Not stated{% endif %}
-          </span>
-        </div>
-        <div class="spec">
-          <span class="spec__label">{{ ui.icon("tools") }} Parts available until</span>
-          <span class="spec__value">{% if product.parts_until %}{{ product.parts_until }}{% else %}Not stated{% endif %}</span>
-        </div>
-        <div class="spec">
-          <span class="spec__label">{{ ui.icon("ownership") }} Warranty</span>
-          <span class="spec__value">{{ product.warranty or "Not stated" }}</span>
-        </div>
-      </div>
     </div>
   </div>
 </section>
