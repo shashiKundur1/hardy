@@ -121,11 +121,22 @@ body {
   display: inline-flex;
   align-items: center;
   min-height: var(--tap-min);
+  color: var(--white);
+  text-decoration: none;
+  transition: color var(--duration) var(--ease);
 }
 
-.wordmark img {
-  width: auto;
-  height: 2rem;
+.wordmark__mark {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  background: currentColor;
+  -webkit-mask: url(/static/hardy-mark.svg) center / contain no-repeat;
+  mask: url(/static/hardy-mark.svg) center / contain no-repeat;
+}
+
+.wordmark:hover {
+  color: var(--amber);
 }
 
 .account {

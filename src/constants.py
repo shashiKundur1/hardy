@@ -113,3 +113,26 @@ WEIGHT_EVIDENCE = 0.1
 EVENT_BATCH_SIZE = 20
 EVENT_FLUSH_MS = 5000
 SEARCH_DEBOUNCE_MS = 800
+
+CONTENT_SECURITY_POLICY = "; ".join(
+    (
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data:",
+        "connect-src 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+        "base-uri 'none'",
+        "object-src 'none'",
+    )
+)
+
+RESPONSE_GUARDS = {
+    "content-security-policy": CONTENT_SECURITY_POLICY,
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "cross-origin-opener-policy": "same-origin",
+    "permissions-policy": "geolocation=(), camera=(), microphone=(), interest-cohort=()",
+}

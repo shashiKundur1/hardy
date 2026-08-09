@@ -6,7 +6,7 @@ from httpx import ASGITransport, AsyncClient
 from src.catalog import service as catalog
 from src.catalog.schemas import ProductWrite
 from src.config import settings
-from src.constants import MAX_SQLITE_INTEGER
+from src.constants import MAX_SQLITE_INTEGER, RESPONSE_GUARDS
 from src.database import Base, session_factory
 from src.integrations import vectorstore
 from src.main import app, lifespan
@@ -112,3 +112,23 @@ async def test_consistency_reports_an_unreachable_vector_store_rather_than_raisi
         state = await catalog.consistency(session)
     assert state["vector_store_reachable"] is False
     assert state["in_sync"] is False
+
+
+async def test_internal_brand_documents_are_not_served_over_http():
+    async with _client() as client:
+        for path in ("/brand/BRAND.md", "/brand/cvd.py", "/brand/research/kings-audit.md"):
+            assert (await client.get(path)).status_code == 404
+
+
+async def test_the_design_tokens_are_still_served():
+    async with _client() as client:
+        response = await client.get("/brand/tokens.css")
+    assert response.status_code == 200
+    assert "--amber" in response.text
+
+
+async def test_every_response_carries_the_security_guards():
+    async with _client() as client:
+        response = await client.get("/")
+    for name, value in RESPONSE_GUARDS.items():
+        assert response.headers[name] == value
