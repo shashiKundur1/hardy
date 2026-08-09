@@ -3467,7 +3467,6 @@ body {
 @media (min-width: 48rem) {
   .line {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
-    align-items: center;
   }
 }
 
