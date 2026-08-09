@@ -992,7 +992,8 @@ body {
 }
 
 @media (min-width: 64rem) {
-  .panel {
+  .panel:has(.shortlist),
+  .panel:has(.panel__aside) {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   }
 
@@ -1001,9 +1002,43 @@ body {
     grid-column: 1 / -1;
   }
 
-  .panel .shortlist {
+  .panel .shortlist,
+  .panel .panel__aside {
     border-left: var(--edge);
   }
+}
+
+.panel__aside {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.panel__aside div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: var(--pad);
+  font-size: var(--text-sm);
+}
+
+.panel__aside div + div {
+  border-top: var(--edge-soft);
+}
+
+.panel__aside dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--steel-400);
+}
+
+.panel__aside dd {
+  margin: 0;
+  text-align: right;
+  color: var(--white);
 }
 
 .panel__head {
@@ -1255,7 +1290,7 @@ body {
 .narrative {
   font-size: var(--text-lg);
   line-height: var(--leading-body);
-  max-width: var(--measure);
+  max-width: 78ch;
   color: var(--steel-100);
 }
 
@@ -1856,21 +1891,20 @@ body {
 .pick {
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
   border: var(--edge);
   border-radius: var(--radius);
-  background: var(--steel-900);
+  background: var(--surface-1);
   overflow: hidden;
   transition: border-color var(--duration) var(--ease);
 }
 
 .pick:hover {
-  border-color: var(--ink-quiet);
+  border-color: var(--line-strong);
 }
 
 .pick__link {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--gap);
   padding: var(--pad);
@@ -1909,9 +1943,17 @@ body {
 
 .pick__body {
   display: flex;
-  flex: 1 1 12rem;
   flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.pick__rate {
+  display: flex;
+  align-items: baseline;
   gap: var(--gap);
+  justify-self: end;
+  white-space: nowrap;
 }
 
 .pick__title {
@@ -1952,11 +1994,19 @@ body {
 }
 
 .pick__why {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--gap);
   margin: 0;
   padding: var(--pad);
-  border-top: var(--edge);
+  border-top: var(--edge-soft);
   font-size: var(--text-xs);
   color: var(--steel-300);
+}
+
+.pick__why .pick__score {
+  margin-inline-start: auto;
 }
 
 .pick__why-label {
