@@ -18,7 +18,20 @@
       </p>
       {% endif %}
     </div>
-    {{ avatar(user, 64) }}
+    <dl class="tally">
+      <div class="tally__cell">
+        <dt>Products</dt>
+        <dd class="numeric">{{ catalog_size }}</dd>
+      </div>
+      <div class="tally__cell">
+        <dt>Sourced owners</dt>
+        <dd class="numeric">{{ sourced }}</dd>
+      </div>
+      <div class="tally__cell">
+        <dt>Categories</dt>
+        <dd class="numeric">{{ categories|length }}</dd>
+      </div>
+    </dl>
   </div>
   {% if interests %}
   <ul class="chips">

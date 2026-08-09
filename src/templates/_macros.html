@@ -1,5 +1,5 @@
 {% macro icon(name, extra="") -%}
-<span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg)" aria-hidden="true"></span>
+<span class="icon {{ extra }}" style="--icon:url(/static/icons/{{ name }}.svg?v={{ asset_version() }})" aria-hidden="true"></span>
 {%- endmacro %}
 
 {% macro reading(verdict) -%}

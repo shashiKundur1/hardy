@@ -77,7 +77,7 @@
       <a class="striplink" href="/category/{{ entry.slug }}" data-track="category-strip"
          data-category="{{ entry.slug }}"
          {% if entry.slug == slug|default('') %}aria-current="page"{% endif %}>
-        <span class="icon" style="--icon:url(/static/icons/{{ entry.slug }}.svg)" aria-hidden="true"></span>
+        <span class="icon" style="--icon:url(/static/icons/{{ entry.slug }}.svg?v={{ asset_version() }})" aria-hidden="true"></span>
         {{ entry.label }}
       </a>
       {% endfor %}
@@ -91,36 +91,62 @@
   <nav class="dock" aria-label="Primary">
     <a class="dock__link" href="/shop" {% if surface == 'shop' %}aria-current="page"{% endif %}
        data-track="dock-shop">
-      <span class="icon" style="--icon:url(/static/icons/nav-home.svg)" aria-hidden="true"></span>
+      <span class="icon" style="--icon:url(/static/icons/nav-home.svg?v={{ asset_version() }})" aria-hidden="true"></span>
       <span class="dock__label">Shop</span>
     </a>
     <a class="dock__link" href="/category/tools" {% if surface == 'catalog' %}aria-current="page"{% endif %}
        data-track="dock-catalog">
-      <span class="icon" style="--icon:url(/static/icons/nav-catalog.svg)" aria-hidden="true"></span>
+      <span class="icon" style="--icon:url(/static/icons/nav-catalog.svg?v={{ asset_version() }})" aria-hidden="true"></span>
       <span class="dock__label">Catalog</span>
     </a>
     <a class="dock__link" href="/search" {% if surface == 'search' %}aria-current="page"{% endif %}
        data-track="dock-search">
-      <span class="icon" style="--icon:url(/static/icons/evidence.svg)" aria-hidden="true"></span>
+      <span class="icon" style="--icon:url(/static/icons/evidence.svg?v={{ asset_version() }})" aria-hidden="true"></span>
       <span class="dock__label">Search</span>
     </a>
     <a class="dock__link" href="/cart" {% if surface == 'cart' %}aria-current="page"{% endif %}
        data-track="dock-cart">
-      <span class="icon" style="--icon:url(/static/icons/bags-luggage.svg)" aria-hidden="true"></span>
+      <span class="icon" style="--icon:url(/static/icons/bags-luggage.svg?v={{ asset_version() }})" aria-hidden="true"></span>
       <span class="dock__label">Basket</span>
     </a>
     <a class="dock__link" href="{{ '/profile' if user else '/login' }}"
        {% if surface == 'account' %}aria-current="page"{% endif %} data-track="dock-account">
-      <span class="icon" style="--icon:url(/static/icons/nav-account.svg)" aria-hidden="true"></span>
+      <span class="icon" style="--icon:url(/static/icons/nav-account.svg?v={{ asset_version() }})" aria-hidden="true"></span>
       <span class="dock__label">{{ "Account" if user else "Sign in" }}</span>
     </a>
   </nav>
   {% endif %}
   <footer class="colophon">
+    <div class="colophon__grid container">
+      <div class="colophon__brand">
+        <span class="wordmark__mark" aria-hidden="true"></span>
+        <p>Durable goods, argued from evidence. Cost per year beside the price, who owns the
+           brand now, and how long the parts stay available.</p>
+      </div>
+      <nav class="colophon__col" aria-label="Shop">
+        <span class="colophon__title">Shop</span>
+        {% for entry in (categories or [])[:4] %}
+        <a class="colophon__link" href="/category/{{ entry.slug }}">{{ entry.label }}</a>
+        {% endfor %}
+        <a class="colophon__link" href="/shop">Everything</a>
+      </nav>
+      <nav class="colophon__col" aria-label="Your account">
+        <span class="colophon__title">Your account</span>
+        <a class="colophon__link" href="{{ '/orders' if user else '/login' }}">Orders</a>
+        <a class="colophon__link" href="{{ '/shelf' if user else '/login' }}">Your shelf</a>
+        <a class="colophon__link" href="{{ '/recommendations' if user else '/login' }}">For you</a>
+        <a class="colophon__link" href="{{ '/footprint' if user else '/login' }}">Footprint</a>
+      </nav>
+      <nav class="colophon__col" aria-label="How Hardy works">
+        <span class="colophon__title">The method</span>
+        <a class="colophon__link" href="/#argument">How Hardy argues</a>
+        <a class="colophon__link" href="/debug">Glass box</a>
+        <a class="colophon__link" href="/health">Service status</a>
+      </nav>
+    </div>
     <div class="colophon__inner container">
       <span>Hardy · durable goods, argued from evidence</span>
-      <a class="navlink" href="/debug">Glass box</a>
-      <span>Every claim carries its source</span>
+      <span>Every claim carries its source, or it is marked unknown</span>
     </div>
   </footer>
   <script src="/static/ui.js?v={{ asset_version() }}" defer></script>
