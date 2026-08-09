@@ -43,6 +43,14 @@ def remove(basket: dict[int, int], product_id: int) -> dict[int, int]:
     return {key: value for key, value in basket.items() if key != product_id}
 
 
+def set_quantity(basket: dict[int, int], product_id: int, quantity: int) -> dict[int, int]:
+    if product_id not in basket:
+        return basket
+    if quantity < 1:
+        return remove(basket, product_id)
+    return basket | {product_id: min(quantity, MAX_LINE_QUANTITY)}
+
+
 async def contents(session: AsyncSession, basket: dict[int, int]) -> list[dict]:
     if not basket:
         return []

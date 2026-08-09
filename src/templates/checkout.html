@@ -2,16 +2,22 @@
 {% set page_id = "cart" %}
 {% import "_macros.html" as ui %}
 
-{% block title %}Basket · Hardy{% endblock %}
+{% block title %}Confirm the order · Hardy{% endblock %}
 
 {% block main %}
 <section class="container section">
+  <ol class="trail" aria-label="Where you are">
+    <li class="trail__step" data-state="done"><span>Basket</span></li>
+    <li class="trail__step" data-state="now" aria-current="step"><span>Confirm</span></li>
+    <li class="trail__step" data-state="next"><span>Placed</span></li>
+  </ol>
+
   <div class="section__head section__head--split">
-    <p class="eyebrow">Basket</p>
-    <h1>What you are about to keep</h1>
+    <p class="eyebrow">Confirm</p>
+    <h1>Check it before you keep it</h1>
     <p class="section__lede">
-      Hardy shows the yearly cost of the whole basket, because that is the number that decides
-      whether this was a good idea.
+      Nothing is charged. Placing the order records what you bought so the shelf can ask, later,
+      whether the claim held.
     </p>
   </div>
 
@@ -27,46 +33,24 @@
           <a class="line__title" href="/product/{{ line.product.id }}">{{ line.product.title }}</a>
           <p class="line__meta">
             {{ line.product.brand }} · {{ line.product.expected_life_years }} year expected life
+            {%- if line.quantity > 1 %} · {{ line.quantity }} of them{% endif %}
           </p>
           {{ ui.ownership_mark(line.product) }}
-        </div>
-        <div class="stepper" role="group" aria-label="Quantity of {{ line.product.title }}">
-          <form method="post" action="/cart/quantity">
-            <input type="hidden" name="product_id" value="{{ line.product.id }}">
-            <input type="hidden" name="quantity" value="{{ line.quantity - 1 }}">
-            <button class="stepper__step" type="submit"
-                    aria-label="{{ 'Remove ' ~ line.product.title if line.quantity == 1 else 'One fewer' }}">
-              <span aria-hidden="true">&minus;</span>
-            </button>
-          </form>
-          <span class="stepper__count numeric" aria-live="polite">{{ line.quantity }}</span>
-          <form method="post" action="/cart/quantity">
-            <input type="hidden" name="product_id" value="{{ line.product.id }}">
-            <input type="hidden" name="quantity" value="{{ line.quantity + 1 }}">
-            <button class="stepper__step" type="submit" aria-label="One more"
-                    {% if line.quantity >= 10 %}disabled{% endif %}>
-              <span aria-hidden="true">+</span>
-            </button>
-          </form>
         </div>
         <div class="line__figures">
           <p class="line__rate">{{ ui.rupees(line.product.cost_per_year * line.quantity) }} <span>per year</span></p>
           <p class="line__once">{{ ui.rupees(line.product.price * line.quantity) }} once</p>
         </div>
-        <form method="post" action="/cart/remove">
-          <input type="hidden" name="product_id" value="{{ line.product.id }}">
-          <button class="linkbutton" type="submit">Remove</button>
-        </form>
       </li>
       {% endfor %}
     </ul>
 
-    <aside class="reckoning" aria-label="Order summary">
+    <aside class="reckoning" aria-label="What you are about to place">
       <p class="reckoning__title">The reckoning</p>
       <dl class="reckoning__rows">
         <div class="reckoning__row">
           <dt>Items</dt>
-          <dd class="numeric">{{ lines | length }}</dd>
+          <dd class="numeric">{{ lines | sum(attribute='quantity') }}</dd>
         </div>
         <div class="reckoning__row">
           <dt>Paid once</dt>
@@ -85,23 +69,24 @@
         <span class="reckoning__value numeric">{{ ui.rupees(yearly) }}</span>
         <span class="reckoning__unit">per year, all of it</span>
       </p>
-      <a class="button button--full" href="/checkout" data-track="to-checkout">Review the order</a>
+      <form method="post" action="/checkout">
+        <button class="button button--full" type="submit" data-track="place-order">
+          Place the order
+        </button>
+      </form>
       <p class="reckoning__note">
-        Nothing is charged. This is a demonstration order, and it records what you bought so the
-        shelf can ask how it held up.
+        No card is taken and no money moves. Hardy records the order against your account so the
+        shelf can track how each thing holds up against the life it claimed.
       </p>
+      <p class="reckoning__back"><a class="navlink" href="/cart">Back to the basket</a></p>
     </aside>
   </div>
   {% else %}
   <div class="vacancy">
-    <h2>The basket is empty</h2>
-    <p>
-      If you expected something here, it may have been added before you signed in — a basket
-      belongs to an account, not to a browser.
-    </p>
+    <h2>There is nothing to confirm</h2>
+    <p>The basket is empty, so there is no order to place.</p>
     <div class="vacancy__actions">
       <a class="button" href="/shop">Browse the shop</a>
-      <a class="button button--quiet" href="/recommendations">See what Hardy picked for you</a>
     </div>
   </div>
   {% endif %}

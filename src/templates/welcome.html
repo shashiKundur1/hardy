@@ -66,7 +66,8 @@
   </div>
 
   {% elif step == 2 %}
-  <form class="onboard__body" method="post" action="/welcome/interests">
+  <form class="onboard__body onboard__body--aside" method="post" action="/welcome/interests">
+    <div class="onboard__ask">
     <h1>What are you shopping for?</h1>
     <p class="onboard__lede">
       Pick any categories you care about. This gives Hardy somewhere to start before your
@@ -89,6 +90,14 @@
       <button class="button" type="submit">Continue</button>
       <a class="button button--quiet" href="/welcome?step=1">Back</a>
     </div>
+    </div>
+    <aside class="onboard__evidence">
+      <p class="onboard__evidence-figure numeric">{{ sourced }}</p>
+      <p class="onboard__evidence-note">
+        of the {{ catalog_size }} products in the catalog carry an ownership record with a source
+        behind it. The rest are marked unknown rather than guessed.
+      </p>
+    </aside>
   </form>
 
   {% else %}

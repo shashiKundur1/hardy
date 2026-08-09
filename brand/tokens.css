@@ -36,8 +36,8 @@
 
   --weight-body: 400;
   --weight-medium: 500;
-  --weight-display: 800;
-  --weight-hero: 900;
+  --weight-display: 700;
+  --weight-hero: 800;
 
   --text-2xs: 0.694rem;
   --text-xs: 0.8rem;
@@ -150,9 +150,9 @@ h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: var(--weight-display);
   color: var(--white);
-  text-transform: uppercase;
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-hero);
+  text-wrap: balance;
   margin: 0;
 }
 

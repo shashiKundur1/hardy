@@ -124,6 +124,8 @@ async def welcome(
         user=user,
         categories=await catalog.navigation(session),
         chosen=service.declared_interests(user),
+        catalog_size=await catalog.count(session),
+        sourced=await catalog.sourced_count(session),
     )
 
 

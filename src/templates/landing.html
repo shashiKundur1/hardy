@@ -28,6 +28,16 @@
       </p>
     </div>
   </div>
+  {% if featured %}
+  {% set shown = featured[0] %}
+  <a class="hero__tag" href="/product/{{ shown.id }}" data-track="hero-tag">
+    <span class="hero__tag-media">{{ ui.media(shown) }}</span>
+    <span class="hero__tag-body">
+      <span class="hero__tag-name">{{ shown.title }}</span>
+      <span class="hero__tag-rate">{{ ui.rupees(shown.cost_per_year) }} per year · {{ shown.expected_life_years }} year life</span>
+    </span>
+  </a>
+  {% endif %}
 </section>
 
 {% if featured %}
