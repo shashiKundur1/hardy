@@ -20,15 +20,25 @@ body {
 
 .skip {
   position: absolute;
-  left: -9999px;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .skip:focus {
   position: static;
   display: inline-flex;
   align-items: center;
+  width: auto;
+  height: auto;
   min-height: var(--tap-min);
   padding: var(--pad);
+  overflow: visible;
+  clip-path: none;
   background: var(--amber);
   color: var(--void);
   font-weight: var(--weight-medium);
@@ -228,6 +238,20 @@ body {
 @media (max-width: 47.999rem) {
   .masthead__inner {
     flex-wrap: nowrap;
+  }
+
+  .masthead__inner:has(.account--always) {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .steer {
+    display: none;
+  }
+
+  .account--always .button {
+    padding-inline: var(--gap);
+    font-size: var(--text-2xs);
   }
 
   .account {
@@ -3539,8 +3563,14 @@ body {
   font-size: var(--text-sm);
 }
 
+.reading__scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .reading__table {
   width: 100%;
+  min-width: 22rem;
   border-collapse: collapse;
   font-size: var(--text-sm);
 }

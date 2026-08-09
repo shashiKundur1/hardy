@@ -1,4 +1,5 @@
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -148,3 +149,16 @@ async def test_an_administrator_can_be_made_without_hand_written_sql():
     async with session_factory() as session:
         again = await find_by_email(session, "firstboss@hardy.test")
     assert again.role == Role.ADMIN
+
+
+def test_visually_hidden_text_cannot_widen_the_page():
+    stylesheet = (Path(__file__).resolve().parents[2] / "src" / "static" / "style.css").read_text()
+    rule = stylesheet.split(".skip {", 1)[1].split("}", 1)[0]
+    assert "clip-path: inset(50%)" in rule
+    assert "left: -9999px" not in rule
+
+
+def test_a_wide_comparison_table_scrolls_inside_its_own_box():
+    stylesheet = (Path(__file__).resolve().parents[2] / "src" / "static" / "style.css").read_text()
+    rule = stylesheet.split(".reading__scroll {", 1)[1].split("}", 1)[0]
+    assert "overflow-x: auto" in rule
