@@ -592,7 +592,7 @@ body {
 
 .tiles {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--gap);
 }
 
@@ -606,6 +606,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--gap);
+  height: 100%;
   min-height: 9.5rem;
   padding: var(--pad);
   background: var(--surface-1);
@@ -1715,9 +1716,9 @@ body {
 
 .colophon__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding-block: var(--space-3);
 }
 
 @media (min-width: 56rem) {
@@ -2284,6 +2285,33 @@ body {
   flex-direction: column;
   gap: 0;
   min-width: 0;
+}
+
+@media (max-width: 47.999rem) {
+  .pick__link {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "rank rank"
+      "media body"
+      "media rate";
+    align-items: start;
+  }
+
+  .pick__rank {
+    grid-area: rank;
+  }
+
+  .pick__media {
+    grid-area: media;
+  }
+
+  .pick__body {
+    grid-area: body;
+  }
+
+  .pick__rate {
+    grid-area: rate;
+  }
 }
 
 .pick__rate {
@@ -3192,6 +3220,14 @@ body {
   flex-wrap: wrap;
   gap: var(--gap);
   list-style: none;
+}
+
+@media (max-width: 47.999rem) {
+  .chips,
+  .browse__group,
+  .browse__options {
+    gap: var(--pad-control);
+  }
 }
 
 .browse__count {
