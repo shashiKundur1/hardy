@@ -3910,6 +3910,17 @@ body {
   gap: var(--gap);
 }
 
+@media (max-width: 47.999rem) {
+  .vacancy__actions {
+    align-self: stretch;
+  }
+
+  .vacancy__actions .button {
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+}
+
 .wear {
   display: flex;
   flex-wrap: wrap;
