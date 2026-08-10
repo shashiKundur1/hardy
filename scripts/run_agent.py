@@ -1,5 +1,7 @@
 import asyncio
 import json
+import os
+import secrets
 from uuid import uuid4
 
 from sqlalchemy import delete, select
@@ -17,7 +19,7 @@ from src.recommendations import triggers
 from src.recommendations.models import Recommendation
 
 DEMO_EMAIL = "demo@hardy.local"
-DEMO_PASSWORD = "hardy-demo-password"
+DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD") or secrets.token_urlsafe(24)
 
 
 async def demo_user(session) -> User:

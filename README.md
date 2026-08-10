@@ -11,6 +11,11 @@ rather than at the till.
 
 Built for the **SmartReco Build Challenge 2026** (Krish Naik × Mesh API).
 
+**Running live at [hardy.shashidev.me](https://hardy.shashidev.me)** — the full stack, not a
+screenshot. `GET /health` reports the database and the vector store. The agent's working is
+open at [`/debug`](https://hardy.shashidev.me/debug): model calls per event recorded, the cache
+hit ratio, and the reason the last trigger fired or was suppressed.
+
 > Every other entrant builds an agent that persuades you to buy *more*. Hardy uses the identical
 > mandated architecture — behavioural tracking, dual-write to SQL and a vector DB, agentic RAG,
 > persuasive copy, every AI call through Mesh — pointed at the buyer instead of the seller.
