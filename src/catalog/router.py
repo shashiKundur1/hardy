@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from src.auth.dependencies import AdminUser
 from src.catalog import service
 from src.catalog.constants import ADMIN_PAGE_SIZE
+from src.catalog.models import Product
 from src.catalog.schemas import Consistency, ProductId, ProductRead, ProductWrite
 from src.constants import CATEGORIES, Ownership
 from src.database import SessionDep
@@ -33,6 +34,27 @@ async def overview(
         page_number=max(page_number, 1),
         page_count=max((total + ADMIN_PAGE_SIZE - 1) // ADMIN_PAGE_SIZE, 1),
     )
+
+
+@router.get("/products/new", response_class=HTMLResponse)
+async def new_form(request: Request, session: SessionDep, user: AdminUser) -> HTMLResponse:
+    return page(
+        request,
+        "admin_product.html",
+        user=user,
+        categories=await service.navigation(session),
+        product=Product(ownership_type=Ownership.UNKNOWN),
+        ownerships=[option.value for option in Ownership],
+        slugs=CATEGORIES,
+    )
+
+
+@router.post("/products")
+async def create_from_form(
+    session: SessionDep, user: AdminUser, form: Annotated[ProductWrite, Form()]
+) -> RedirectResponse:
+    await service.create(session, form)
+    return RedirectResponse("/admin", status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/products/{product_id}", response_class=HTMLResponse)

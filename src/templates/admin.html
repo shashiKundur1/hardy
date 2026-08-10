@@ -44,12 +44,13 @@
 </section>
 
 <section class="container lane" data-lane="store">
-  <header class="lane__head">
+  <header class="lane__head lane__head--action">
     <h2>Products</h2>
     <p class="lane__note">
-      Newest first. Editing a product rewrites its vector in the same transaction, so the two
-      stores cannot drift apart.
+      Newest first. Adding or editing a product writes its vector in the same transaction, so the
+      two stores cannot drift apart.
     </p>
+    <a class="button lane__action" href="/admin/products/new">Add a product</a>
   </header>
   <div class="tablewrap">
     <table class="roster">

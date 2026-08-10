@@ -85,6 +85,56 @@ async def test_a_non_admin_never_reaches_the_catalog_table(offline_mesh):
     assert "Admin test skillet" not in response.text
 
 
+async def test_an_admin_can_reach_a_blank_product_form(offline_mesh):
+    offline_mesh()
+    async with session_factory() as session:
+        person = await _admin(session)
+
+    async with _client() as client:
+        await _signed_in(client, person.email)
+        response = await client.get("/admin/products/new")
+    assert response.status_code == 200
+    assert 'action="/admin/products"' in response.text
+    assert "Create and embed" in response.text
+
+
+async def test_adding_through_the_form_writes_the_row_and_the_vector(offline_mesh):
+    offline_mesh()
+    async with session_factory() as session:
+        person = await _admin(session)
+
+    payload = _form(SAMPLE)
+    payload["title"] = "Added by the admin form"
+
+    async with _client() as client:
+        await _signed_in(client, person.email)
+        response = await client.post("/admin/products", data=payload)
+    assert response.status_code == 303
+
+    async with session_factory() as session:
+        rows = await catalog.search(session, "Added by the admin form", 5)
+        assert [row.title for row in rows] == ["Added by the admin form"]
+        assert (await catalog.consistency(session))["in_sync"] is True
+        created_id = rows[0].id
+    assert (await vectorstore.payload_of(created_id))["title"] == "Added by the admin form"
+
+
+async def test_a_non_admin_cannot_add_a_product_through_the_form(offline_mesh):
+    offline_mesh()
+    async with session_factory() as session:
+        person = User(email="intruder@hardy.test", password_hash=hash_password(PASSWORD))
+        session.add(person)
+        await session.commit()
+
+    async with _client() as client:
+        await _signed_in(client, "intruder@hardy.test")
+        response = await client.post("/admin/products", data=_form(SAMPLE))
+    assert response.status_code in (303, 403)
+
+    async with session_factory() as session:
+        assert await catalog.search(session, SAMPLE.title, 5) == []
+
+
 async def test_saving_the_form_rewrites_the_row_and_the_vector(offline_mesh):
     offline_mesh()
     async with session_factory() as session:

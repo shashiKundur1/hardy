@@ -2,26 +2,33 @@
 {% set page_id = "account" %}
 {% import "_macros.html" as ui %}
 
-{% block title %}{{ product.title }} · Admin · Hardy{% endblock %}
+{% set is_new = product.id is none %}
+
+{% block title %}{{ product.title or "Add a product" }} · Admin · Hardy{% endblock %}
 
 {% block main %}
 <section class="container section">
   <div class="section__head section__head--split">
-    <p class="eyebrow"><a href="/admin">Admin</a> · edit</p>
-    <h1>{{ product.title }}</h1>
+    <p class="eyebrow"><a href="/admin">Admin</a> · {{ "new" if is_new else "edit" }}</p>
+    <h1>{{ product.title or "Add a product" }}</h1>
     <p class="section__lede">
+      {% if is_new %}
+      The row and its vector are written together. If the embedding fails, neither is kept.
+      {% else %}
       Saving rewrites the row and its vector together. If the embedding fails, neither changes.
+      {% endif %}
     </p>
   </div>
 
-  <form class="editor" method="post" action="/admin/products/{{ product.id }}">
+  <form class="editor" method="post"
+        action="{{ "/admin/products" if is_new else "/admin/products/" ~ product.id }}">
     <div class="field">
       <label class="field__label" for="title">Title</label>
-      <input class="input" id="title" name="title" value="{{ product.title }}" required maxlength="200">
+      <input class="input" id="title" name="title" value="{{ product.title or '' }}" required maxlength="200">
     </div>
     <div class="field">
       <label class="field__label" for="brand">Brand</label>
-      <input class="input" id="brand" name="brand" value="{{ product.brand }}" required maxlength="100">
+      <input class="input" id="brand" name="brand" value="{{ product.brand or '' }}" required maxlength="100">
     </div>
     <div class="field">
       <label class="field__label" for="category">Category</label>
@@ -34,12 +41,12 @@
     <div class="field">
       <label class="field__label" for="price">Price</label>
       <input class="input" id="price" name="price" type="number" step="0.01" min="0.01"
-             value="{{ product.price }}" required>
+             value="{{ product.price or '' }}" required>
     </div>
     <div class="field">
       <label class="field__label" for="expected_life_years">Expected life, years</label>
       <input class="input" id="expected_life_years" name="expected_life_years" type="number"
-             min="1" max="200" value="{{ product.expected_life_years }}" required>
+             min="1" max="200" value="{{ product.expected_life_years or '' }}" required>
     </div>
     <div class="field">
       <label class="field__label" for="repairability_score">Repairability, 0 to 10</label>
@@ -72,7 +79,7 @@
     </div>
     <div class="field field--wide">
       <label class="field__label" for="description">Description</label>
-      <textarea class="input" id="description" name="description" rows="4" required>{{ product.description }}</textarea>
+      <textarea class="input" id="description" name="description" rows="4" required>{{ product.description or '' }}</textarea>
     </div>
     <div class="field">
       <label class="field__label" for="warranty">Warranty</label>
@@ -88,7 +95,7 @@
       <input class="input" id="image_url" name="image_url" value="{{ product.image_url or '' }}">
     </div>
     <div class="editor__actions">
-      <button class="button" type="submit">Save and re-embed</button>
+      <button class="button" type="submit">{{ "Create and embed" if is_new else "Save and re-embed" }}</button>
       <a class="button button--quiet" href="/admin">Cancel</a>
     </div>
   </form>
