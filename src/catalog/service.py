@@ -150,6 +150,10 @@ async def page_of(session: AsyncSession, offset: int, limit: int) -> list[Produc
     return list(await session.scalars(statement))
 
 
+async def every(session: AsyncSession) -> list[Product]:
+    return list(await session.scalars(select(Product).order_by(Product.id)))
+
+
 async def count(session: AsyncSession) -> int:
     return await session.scalar(select(func.count()).select_from(Product)) or 0
 

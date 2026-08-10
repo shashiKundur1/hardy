@@ -3,7 +3,52 @@
 {% import "_macros.html" as ui %}
 
 {% block title %}{{ product.title }} · Hardy{% endblock %}
+{% block description %}{{ product.title if product.title.startswith(product.brand) else product.brand ~ " " ~ product.title }}, {{ ui.rupees(product.cost_per_year) }} per year over {{ product.expected_life_years }} years. {{ product.description|truncate(110, true) }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_image %}{{ product.image_url or '/static/img/hero.webp' }}{% endblock %}
+{% block og_image_alt %}{{ product.title }}{% endblock %}
 {% block body_data %} data-category="{{ product.category }}" data-product-id="{{ product.id }}"{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": product.title,
+  "description": product.description,
+  "sku": "hardy-" ~ product.id,
+  "category": label,
+  "brand": {"@type": "Brand", "name": product.brand},
+  "image": public_base_url ~ (product.image_url or "/static/img/hero.webp"),
+  "url": public_base_url ~ "/product/" ~ product.id,
+  "offers": {
+    "@type": "Offer",
+    "price": product.price|string,
+    "priceCurrency": product.currency,
+    "availability": "https://schema.org/InStock",
+    "url": public_base_url ~ "/product/" ~ product.id,
+    "seller": {"@type": "Organization", "name": "Hardy"}
+  },
+  "additionalProperty": [
+    {"@type": "PropertyValue", "name": "Cost per year", "value": product.cost_per_year|string, "unitText": product.currency},
+    {"@type": "PropertyValue", "name": "Expected service life", "value": product.expected_life_years, "unitText": "YEARS"}
+  ] + ([{"@type": "PropertyValue", "name": "Repairability score", "value": product.repairability_score, "maxValue": 10}] if product.repairability_score is not none else [])
+    + ([{"@type": "PropertyValue", "name": "Parts available until", "value": product.parts_until}] if product.parts_until else [])
+    + ([{"@type": "PropertyValue", "name": "Brand ownership", "value": product.ownership_type}] if product.ownership_type != "unknown" else [])
+}|tojson }}
+</script>
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Hardy", "item": public_base_url ~ "/"},
+    {"@type": "ListItem", "position": 2, "name": label, "item": public_base_url ~ "/category/" ~ product.category},
+    {"@type": "ListItem", "position": 3, "name": product.title}
+  ]
+}|tojson }}
+</script>
+{% endblock %}
 
 {% block main %}
 <section class="container section">

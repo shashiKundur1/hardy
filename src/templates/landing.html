@@ -3,6 +3,49 @@
 {% import "_macros.html" as ui %}
 
 {% block title %}Hardy · Buy it once{% endblock %}
+{% block description %}A storefront for durable goods with an agent that reads how you shop and argues for what lasts. Cost per year beside the price, who owns the brand today, and how long the parts stay available.{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Hardy",
+  "alternateName": "Hardy, buy it once",
+  "url": public_base_url ~ "/",
+  "description": "Durable goods, argued from evidence.",
+  "inLanguage": "en",
+  "datePublished": "2026-08-04",
+  "dateModified": build_date,
+  "author": {"@type": "Person", "name": "Shashidhar Kundur", "url": "https://github.com/shashiKundur1"},
+  "creator": {"@type": "Person", "name": "Shashidhar Kundur"},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Hardy",
+    "url": public_base_url ~ "/",
+    "logo": {"@type": "ImageObject", "url": public_base_url ~ "/static/hardy-lockup.svg"}
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {"@type": "EntryPoint", "urlTemplate": public_base_url ~ "/search?q={search_term_string}"},
+    "query-input": "required name=search_term_string"
+  }
+}|tojson }}
+</script>
+<script type="application/ld+json">
+{{ {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Hardy",
+  "url": public_base_url ~ "/",
+  "logo": public_base_url ~ "/static/hardy-lockup.svg",
+  "description": "A storefront for durable goods that publishes cost per year, brand ownership and serviceability beside every price.",
+  "foundingDate": "2026-08-04",
+  "founder": {"@type": "Person", "name": "Shashidhar Kundur"},
+  "sameAs": ["https://github.com/shashiKundur1/hardy"]
+}|tojson }}
+</script>
+{% endblock %}
 
 {% block main %}
 <section class="hero">

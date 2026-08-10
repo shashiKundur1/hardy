@@ -4,7 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Hardy{% endblock %}</title>
-  <meta name="description" content="Durable goods, argued from evidence. Cost per year beside the price, who owns the brand now, and how long the parts stay available.">
+  {% set canonical = public_base_url ~ request.url.path %}
+  <meta name="description" content="{% block description %}Durable goods, argued from evidence. Cost per year beside the price, who owns the brand now, and how long the parts stay available.{% endblock %}">
+  {% set description = self.description() | trim %}
+  <link rel="canonical" href="{{ canonical }}">
+  <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+  <meta name="author" content="Shashidhar Kundur">
+  <meta name="theme-color" content="#100E0C">
+  <meta name="color-scheme" content="dark">
+  <meta property="og:site_name" content="Hardy">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{{ self.title() | trim }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:image" content="{{ public_base_url }}{% block og_image %}/static/img/hero.webp{% endblock %}">
+  <meta property="og:image:alt" content="{% block og_image_alt %}Cast iron, leather boots and a steel kettle on a workbench{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ self.title() | trim }}">
+  <meta name="twitter:description" content="{{ description }}">
+  <meta name="twitter:image" content="{{ public_base_url }}{{ self.og_image() | trim }}">
+  {% block structured_data %}{% endblock %}
   <link rel="icon" href="/static/favicon.svg?v={{ asset_version() }}" type="image/svg+xml">
   <link rel="icon" href="/static/favicon-32.png?v={{ asset_version() }}" sizes="32x32" type="image/png">
   <link rel="icon" href="/static/favicon-16.png?v={{ asset_version() }}" sizes="16x16" type="image/png">

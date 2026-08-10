@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hardy, buy it once</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Encode+Sans+Expanded:wght@800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --void: #100E0C;
+  --steel-900: #1B1815;
+  --steel-800: #241F1B;
+  --steel-700: #332E28;
+  --steel-500: #6E655C;
+  --steel-400: #8E8478;
+  --steel-300: #ADA396;
+  --steel-200: #CBC3B8;
+  --steel-100: #E9E4DC;
+  --white: #FFFFFF;
+  --amber: #FFB302;
+  --state-ok: #6BE1A0;
+  --state-error: #FF6B5A;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.2);
+  --display: "Encode Sans Expanded", sans-serif;
+  --ui: "Archivo", sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+  --pad: 1em;
+  --gap: 1em;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; background: var(--void); }
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.frame {
+  width: 100%;
+  max-width: min(1280px, calc((100vh - 6rem) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  container-type: size;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.slide {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  transform: scale(calc(100cqw / 1280px));
+  transform-origin: top left;
+  padding: 4.5rem;
+  background: var(--void);
+  color: var(--steel-100);
+  font-family: var(--ui);
+  font-size: 17px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.75rem;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+}
+
+.slide:last-child { page-break-after: auto; break-after: auto; }
+
+.slide::after {
+  content: attr(data-page);
+  position: absolute;
+  right: 4.5rem;
+  bottom: 3rem;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--steel-500);
+}
+
+.rule {
+  position: absolute;
+  left: 4.5rem;
+  right: 4.5rem;
+  top: 3rem;
+  height: 1px;
+  background: var(--line);
+}
+
+.kicker {
+  position: absolute;
+  left: 4.5rem;
+  top: 3rem;
+  transform: translateY(-1.6rem);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 92px;
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  color: var(--white);
+}
+
+h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 46px;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  max-width: 22ch;
+}
+
+.lede {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.55;
+  color: var(--steel-300);
+  max-width: 62ch;
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.cols--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cols--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.card {
+  padding: 1.5rem;
+  background: var(--steel-900);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.card__label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--steel-400);
+}
+
+.card__value {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--amber);
+}
+
+.card__note {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--steel-300);
+}
+
+.card__head {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 19px;
+  line-height: 1.2;
+  color: var(--white);
+  overflow-wrap: anywhere;
+}
+
+ul.plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.85rem; }
+
+ul.plain li {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  font-size: 18px;
+  color: var(--steel-200);
+  line-height: 1.5;
+}
+
+ul.plain li::before {
+  content: "→";
+  font-family: var(--mono);
+  color: var(--amber);
+  line-height: 1.5;
+}
+
+.quote {
+  margin: 0;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--amber);
+  font-size: 25px;
+  line-height: 1.4;
+  color: var(--steel-100);
+  max-width: 46ch;
+}
+
+.quote cite {
+  display: block;
+  margin-top: 0.7rem;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--steel-400);
+}
+
+.flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.flow__step {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 1.1rem;
+  background: var(--steel-900);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--amber);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.flow__n {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--steel-500);
+}
+
+.flow__name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--white);
+}
+
+.flow__note { font-size: 13px; line-height: 1.4; color: var(--steel-400); }
+
+.stack { display: grid; gap: 0.55rem; }
+
+.row {
+  display: grid;
+  grid-template-columns: 13rem 1fr;
+  gap: 1.25rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+
+.row:last-child { border-bottom: 0; }
+
+.row__k {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--steel-400);
+}
+
+.row__v { font-size: 17px; color: var(--steel-100); }
+.row__v code {
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--amber);
+}
+
+.big {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 62px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--white);
+}
+
+.mono-note {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--steel-400);
+}
+
+.mark { color: var(--amber); }
+.ok { color: var(--state-ok); }
+
+.wordmark {
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  color: var(--white);
+}
+
+.title-foot {
+  position: absolute;
+  left: 4.5rem;
+  bottom: 3rem;
+  display: flex;
+  gap: 2rem;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--steel-400);
+}
+
+@media (max-width: 47.999rem) {
+  body { padding: 0; gap: 0; }
+
+  .frame {
+    max-width: none;
+    aspect-ratio: auto;
+    container-type: normal;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .slide {
+    width: 100%;
+    height: auto;
+    min-height: 100svh;
+    transform: none;
+    padding: 2rem 1.5rem 4rem;
+    font-size: 16px;
+    gap: 1.25rem;
+  }
+
+  .slide::after, .kicker, .rule { position: static; transform: none; }
+  .rule { display: none; }
+  .slide { justify-content: flex-start; }
+  .slide::after { margin-top: auto; padding-top: 1.5rem; }
+  .kicker { order: -1; }
+  .title-foot { position: static; flex-wrap: wrap; gap: 0.75rem; }
+
+  h1 { font-size: clamp(40px, 12vw, 64px); }
+  h2 { font-size: clamp(26px, 7.5vw, 38px); max-width: none; }
+  .lede { font-size: 17px; max-width: none; }
+  .quote { font-size: 20px; max-width: none; }
+  .big { font-size: 40px; }
+
+  .cols, .cols--3, .cols--4 { grid-template-columns: minmax(0, 1fr); }
+  .flow { flex-direction: column; }
+  .row { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; }
+  .card__value { font-size: 30px; }
+}
+
+@media print {
+  body { display: block; padding: 0; gap: 0; }
+  .frame { max-width: none; width: 1280px; aspect-ratio: auto; height: 720px; border: 0; container-type: normal; }
+  .slide { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="frame"><section class="slide" data-page="01">
+  <div class="rule"></div>
+  <span class="kicker">Durable goods, argued from evidence</span>
+  <h1>Buy it once</h1>
+  <p class="lede">
+    A storefront with an agent that watches how you shop and argues for the thing that will
+    actually last. It cites who owns the brand today, whether parts will exist in 2032, and what
+    the thing costs per year of use rather than at the till.
+  </p>
+  <div class="title-foot">
+    <span class="wordmark">HARDY</span>
+    <span>hardy.shashidev.me</span>
+    <span>SmartReco Build Challenge 2026</span>
+  </div>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="02">
+  <div class="rule"></div>
+  <span class="kicker">The problem</span>
+  <h2>You cannot tell from the product page</h2>
+  <blockquote class="quote">
+    “The market is splintered. Everyone else is in a market for lemons.”
+    <cite>Hacker News, laptop quality thread, 113 points</cite>
+  </blockquote>
+  <div class="cols cols--3">
+    <div class="card">
+      <span class="card__label">r/BuyItForLife</span>
+      <span class="card__head">“Are there any good brands left not owned by private equity?”</span>
+      <span class="card__note">Top of the month, repeatedly.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">A four-week experiment</span>
+      <span class="card__head">One person testing four T-shirts, €20 to €150, by hand</span>
+      <span class="card__note">Because the dataset does not exist.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">Invisible at the till</span>
+      <span class="card__head">Bosch 94% charitable trust · Birkenstock bought out 2021</span>
+      <span class="card__note">On no product page anywhere.</span>
+    </div>
+  </div>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="03">
+  <div class="rule"></div>
+  <span class="kicker">What a Hardy page adds</span>
+  <h2>Four fields nobody else surfaces</h2>
+  <div class="cols cols--4">
+    <div class="card">
+      <span class="card__label">Cost per year</span>
+      <span class="card__value">₹500</span>
+      <span class="card__note">Price ÷ expected service life. The honest unit of comparison.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">Ownership today</span>
+      <span class="card__value">◆</span>
+      <span class="card__note">Family, trust, employee owned, public, private equity. Graded, never a rage filter.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">Trajectory</span>
+      <span class="card__value">“…”</span>
+      <span class="card__note">Only ever a cited quote. Never Hardy's own assertion.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">Serviceability</span>
+      <span class="card__value">8.0</span>
+      <span class="card__note">Repairability, parts horizon, what the warranty really covers.</span>
+    </div>
+  </div>
+  <p class="mono-note">Where there is no record, the page says unknown instead of guessing.</p>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="04">
+  <div class="rule"></div>
+  <span class="kicker">The loop</span>
+  <h2>Behaviour in, a case out</h2>
+  <div class="flow">
+    <div class="flow__step"><span class="flow__n">01</span><span class="flow__name">Browse</span><span class="flow__note">Views, searches, dwell. Batched and non-blocking.</span></div>
+    <div class="flow__step"><span class="flow__n">02</span><span class="flow__name">Threshold</span><span class="flow__note">12 meaningful events, or a real shift in interest.</span></div>
+    <div class="flow__step"><span class="flow__n">03</span><span class="flow__name">Reason</span><span class="flow__note">Infer what this person is actually solving.</span></div>
+    <div class="flow__step"><span class="flow__n">04</span><span class="flow__name">Retrieve</span><span class="flow__note">Hybrid search over the real catalog.</span></div>
+    <div class="flow__step"><span class="flow__n">05</span><span class="flow__name">Grade</span><span class="flow__note">Is each candidate actually supported?</span></div>
+    <div class="flow__step"><span class="flow__n">06</span><span class="flow__name">Argue</span><span class="flow__note">A case citing the user's own actions.</span></div>
+  </div>
+  <p class="lede">
+    It ends in <span class="mark">buy this one</span>. Hardy never says don't buy. It redirects you
+    to the thing worth buying.
+  </p>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="05">
+  <div class="rule"></div>
+  <span class="kicker">The agent</span>
+  <h2>A graph, not a prompt chain</h2>
+  <div class="stack">
+    <div class="row"><span class="row__k">Framework</span><span class="row__v">LangGraph, six nodes, two conditional edges, a bounded refine loop <code>src/agent/graph.py</code></span></div>
+    <div class="row"><span class="row__k">Stops early</span><span class="row__v">If the signal is too thin it ends before retrieval, so there is <span class="mark">no spend on nothing</span>.</span></div>
+    <div class="row"><span class="row__k">Grades evidence</span><span class="row__v">Weak candidates send it back to refine the query. Maximum twice.</span></div>
+    <div class="row"><span class="row__k">Grounded</span><span class="row__v">Retrieval is hard-filtered to the catalog. Generation cannot invent a product.</span></div>
+    <div class="row"><span class="row__k">Every AI call</span><span class="row__v">Routes through one file, <code>src/integrations/mesh.py</code></span></div>
+  </div>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="06">
+  <div class="rule"></div>
+  <span class="kicker">Efficiency, an explicitly judged axis</span>
+  <h2>Be smart about when you call the model</h2>
+  <div class="cols">
+    <div class="card">
+      <span class="card__label">Fires when</span>
+      <span class="card__note">
+        12 meaningful events since the last recommendation, the top category shifting,
+        the 08:00 IST digest, or an admin asking
+      </span>
+    </div>
+    <div class="card">
+      <span class="card__label">Suppressed when</span>
+      <span class="card__note">
+        Fewer than 5 events, one ran in the last 10 minutes,
+        the profile hash is unchanged, which is <span class="mark">the cache hit</span>
+      </span>
+    </div>
+  </div>
+  <div class="cols cols--3">
+    <div class="card"><span class="card__label">Model calls per event</span><span class="card__value">0.700</span><span class="card__note">Live on /debug, computed from the same tables the storefront uses.</span></div>
+    <div class="card"><span class="card__label">Cache key covers</span><span class="card__value">4</span><span class="card__note">Categories, products, queries, catalog version. An edit invalidates it.</span></div>
+    <div class="card"><span class="card__label">Digest over stale behaviour</span><span class="card__value">0</span><span class="card__note">LLM calls. There is a test asserting it.</span></div>
+  </div>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="07">
+  <div class="rule"></div>
+  <span class="kicker">Dual-write</span>
+  <h2>Two stores that cannot drift</h2>
+  <div class="stack">
+    <div class="row"><span class="row__k">On write</span><span class="row__v">Create, edit and delete each write SQLite and Qdrant together. If the embedding fails, neither is kept.</span></div>
+    <div class="row"><span class="row__k">Proof, not a claim</span><span class="row__v"><code>GET /api/admin/consistency</code> counts both stores and names anything missing or orphaned.</span></div>
+    <div class="row"><span class="row__k">Live right now</span><span class="row__v"><span class="ok">136 = 136, in_sync true, 0 missing, 0 orphaned</span></span></div>
+    <div class="row"><span class="row__k">Repairable</span><span class="row__v">One button re-embeds the whole catalog and rebuilds the vector store.</span></div>
+  </div>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="08">
+  <div class="rule"></div>
+  <span class="kicker">The four highlighted bonuses</span>
+  <h2>All four, implemented and running</h2>
+  <div class="cols cols--4">
+    <div class="card">
+      <span class="card__label">⭐ Structured agent</span>
+      <span class="card__head">LangGraph</span>
+      <span class="card__note">Six nodes, conditional edges, and a bounded refine loop.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">⭐ Proactive delivery</span>
+      <span class="card__head">APScheduler</span>
+      <span class="card__note">A real cron digest at 08:00 IST, not a manual button.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">⭐ Observability</span>
+      <span class="card__head">LangSmith</span>
+      <span class="card__note">The whole graph traced end to end.</span>
+    </div>
+    <div class="card">
+      <span class="card__label">⭐ Retrieval polish</span>
+      <span class="card__head">Re-rank</span>
+      <span class="card__note">Metadata filter plus a durability re rank, shown before and after.</span>
+    </div>
+  </div>
+  <p class="mono-note">Most entries land one or two. The brief calls these the difference between solid and exceptional.</p>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="09">
+  <div class="rule"></div>
+  <span class="kicker">The stack</span>
+  <h2>Boring where it counts</h2>
+  <div class="stack">
+    <div class="row"><span class="row__k">Backend</span><span class="row__v">FastAPI · Python 3.11 · domain-driven layout</span></div>
+    <div class="row"><span class="row__k">Frontend</span><span class="row__v">Jinja2 templates and vanilla JS for tracking. One process, no CORS</span></div>
+    <div class="row"><span class="row__k">Stores</span><span class="row__v">SQLite via SQLAlchemy. Qdrant at 1536 dimensions, cosine</span></div>
+    <div class="row"><span class="row__k">LLM gateway</span><span class="row__v">Mesh API, running <code>openai/gpt-4o</code> and <code>text-embedding-3-small</code></span></div>
+    <div class="row"><span class="row__k">Running on</span><span class="row__v">One 1GB droplet, three containers behind Caddy, TLS from Let's Encrypt</span></div>
+  </div>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="10">
+  <div class="rule"></div>
+  <span class="kicker">The bet</span>
+  <h2 style="max-width: 26ch;">Same skeleton, opposite instinct</h2>
+  <p class="lede">
+    Every other entry builds an agent that persuades you to buy <span class="mark">more</span>.
+    Hardy uses the identical mandated architecture: behavioural tracking, dual write to SQL and a
+    vector database, agentic retrieval, persuasive generated copy, every call through Mesh. It points
+    that at the <span class="mark">buyer</span> instead of the seller.
+  </p>
+  <div class="cols cols--3">
+    <div class="card"><span class="card__label">Not</span><span class="card__note">An affiliate site. No commissions, no sponsored placement.</span></div>
+    <div class="card"><span class="card__label">Not</span><span class="card__note">Anti-consumption. It never says don't buy.</span></div>
+    <div class="card"><span class="card__label">Not</span><span class="card__note">A review site. Ownership, serviceability, cost per year, not stars.</span></div>
+  </div>
+</section></div>
+
+<div class="frame"><section class="slide" data-page="11">
+  <div class="rule"></div>
+  <span class="kicker">Live</span>
+  <h1 style="font-size: 68px;">hardy.shashidev.me</h1>
+  <div class="cols cols--3">
+    <div class="card"><span class="card__label">Repository</span><span class="card__head">github.com/shashiKundur1/hardy</span><span class="card__note">Every line evaluated is in it.</span></div>
+    <div class="card"><span class="card__label">Glass box</span><span class="card__head">/debug</span><span class="card__note">Call counters, cache hit ratio, and why the last trigger fired.</span></div>
+    <div class="card"><span class="card__label">Checks</span><span class="card__head"><span class="ok">4/4 critical</span></span><span class="card__note">Compiles, dependencies, Mesh used, Mesh key valid.</span></div>
+  </div>
+  <div class="title-foot">
+    <span class="wordmark">HARDY</span>
+    <span>Buy it once</span>
+  </div>
+</section></div>
+
+</body>
+</html>

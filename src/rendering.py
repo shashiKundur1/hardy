@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -8,6 +9,7 @@ from markupsafe import Markup
 
 from src.auth import avatar as avatars
 from src.catalog.constants import CATEGORY_LABELS
+from src.config import settings
 from src.constants import EVENT_BATCH_SIZE, EVENT_FLUSH_MS, SEARCH_DEBOUNCE_MS
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -21,6 +23,10 @@ def asset_version() -> int:
         for path in directory.rglob("*")
         if path.suffix in {".css", ".js"}
     )
+
+
+def build_date() -> str:
+    return datetime.fromtimestamp(asset_version(), UTC).date().isoformat()
 
 
 def compact(value: float | int | None) -> str:
@@ -49,6 +55,8 @@ templates.env.globals["all_categories"] = [
     {"slug": slug, "label": label} for slug, label in CATEGORY_LABELS.items()
 ]
 templates.env.filters["compact"] = compact
+templates.env.globals["public_base_url"] = settings.public_base_url.rstrip("/")
+templates.env.globals["build_date"] = build_date()
 templates.env.globals["tracking"] = {
     "endpoint": "/api/events",
     "batch_size": EVENT_BATCH_SIZE,

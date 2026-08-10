@@ -1,8 +1,9 @@
 import json
 from typing import Annotated
+from xml.sax.saxutils import escape
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, status
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 
 from src.auth import service as accounts
 from src.auth.dependencies import CurrentUser, OptionalUser
@@ -20,6 +21,7 @@ from src.catalog.constants import (
     SORT_LABELS,
 )
 from src.catalog.schemas import BrowseQuery, ProductId
+from src.config import settings
 from src.constants import SearchMode
 from src.database import SessionDep
 from src.debug import service as debug
@@ -30,6 +32,7 @@ from src.recommendations import service as recommendations
 from src.recommendations.constants import DISMISSED_KEY, NUDGE_PICKS, TRIGGER_PHRASES
 from src.redirects import safe_path
 from src.rendering import page
+from src.storefront.constants import PRIVATE_PATHS
 
 router = APIRouter(tags=["storefront"])
 
@@ -75,6 +78,41 @@ async def in_context(request: Request, session, user) -> dict:
         "nudge_picks": picks[:NUDGE_PICKS],
         "nudge_because": TRIGGER_PHRASES.get(active.trigger_reason, "what you have been reading"),
     }
+
+
+@router.get("/deck", response_class=HTMLResponse)
+async def deck(request: Request) -> HTMLResponse:
+    return page(request, "deck.html")
+
+
+@router.get("/robots.txt", response_class=PlainTextResponse, include_in_schema=False)
+async def robots() -> PlainTextResponse:
+    base = settings.public_base_url.rstrip("/")
+    body = "\n".join(
+        [
+            "User-agent: *",
+            *(f"Disallow: {path}" for path in PRIVATE_PATHS),
+            "",
+            f"Sitemap: {base}/sitemap.xml",
+            "",
+        ]
+    )
+    return PlainTextResponse(body)
+
+
+@router.get("/sitemap.xml", include_in_schema=False)
+async def sitemap(session: SessionDep) -> Response:
+    base = settings.public_base_url.rstrip("/")
+    urls = [f"{base}/", f"{base}/deck"]
+    urls += [f"{base}/category/{slug}" for slug in CATEGORY_LABELS]
+    urls += [f"{base}/product/{product.id}" for product in await catalog.every(session)]
+    entries = "".join(f"<url><loc>{escape(url)}</loc></url>" for url in urls)
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f"{entries}</urlset>"
+    )
+    return Response(body, media_type="application/xml")
 
 
 @router.get("/", response_class=HTMLResponse)
