@@ -88,6 +88,11 @@
 
   --control-height: 3rem;
 
+  --scrollbar-size: 0.625rem;
+  --scrollbar-track: var(--surface-1);
+  --scrollbar-thumb: var(--line-strong);
+  --scrollbar-thumb-hover: var(--steel-400);
+
   --container: 78rem;
   --dock-clearance: 5em;
   --tap-min: 2.75rem;
