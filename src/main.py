@@ -151,6 +151,8 @@ def create_app() -> FastAPI:
         )
     app.middleware("http")(guard_headers)
     app.mount("/static", StaticFiles(directory=SRC_DIR / "static"), name="static")
+    settings.media_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/media", StaticFiles(directory=settings.media_dir), name="media")
     app.add_api_route("/brand/tokens.css", design_tokens, methods=["GET"], include_in_schema=False)
     app.add_api_route("/health", health, methods=["GET"], tags=["ops"])
     app.add_api_route("/favicon.ico", favicon, methods=["GET"], include_in_schema=False)

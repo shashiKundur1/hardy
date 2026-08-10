@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,6 +12,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     database_url: str = "sqlite+aiosqlite:///./hardy.db"
+    data_dir: str = "."
     session_secret: str = ""
     session_max_age: int = 60 * 60 * 24 * 14
     https_only: bool = False
@@ -41,6 +43,10 @@ class Settings(BaseSettings):
     smtp_pass: str = ""
     digest_hour: int = 8
     digest_timezone: str = "Asia/Kolkata"
+
+    @property
+    def media_dir(self) -> Path:
+        return Path(self.data_dir) / "media"
 
     @property
     def allowed_origins(self) -> list[str]:

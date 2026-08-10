@@ -89,6 +89,10 @@ class ProductRead(BaseModel):
     vector_synced_at: datetime | None
 
 
+class Upload(BaseModel):
+    image_url: str
+
+
 class Consistency(BaseModel):
     sqlite_count: int
     qdrant_count: int

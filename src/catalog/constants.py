@@ -10,6 +10,15 @@ RELATED_LIMIT = 4
 ADMIN_PAGE_SIZE = 25
 MAX_PAGE = 500
 
+MEDIA_URL_PREFIX = "/media"
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+UPLOAD_CHUNK_BYTES = 64 * 1024
+IMAGE_SIGNATURES = (
+    (b"\x89PNG\r\n\x1a\n", (), ".png"),
+    (b"\xff\xd8\xff", (), ".jpg"),
+    (b"RIFF", ((8, b"WEBP"),), ".webp"),
+)
+
 SORT_LABELS = {
     SortOrder.LIFE: "Longest life",
     SortOrder.RATE: "Lowest cost per year",

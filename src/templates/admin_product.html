@@ -91,8 +91,27 @@
              value="{{ product.parts_until or '' }}">
     </div>
     <div class="field field--wide">
-      <label class="field__label" for="image_url">Image URL</label>
-      <input class="input" id="image_url" name="image_url" value="{{ product.image_url or '' }}">
+      <span class="field__label">Image</span>
+      <div class="dropzone" data-dropzone>
+        <input class="dropzone__input" type="file" id="image_file"
+               accept="image/png,image/jpeg,image/webp" aria-describedby="image-status">
+        <label class="dropzone__target" for="image_file">
+          <span class="dropzone__icon" aria-hidden="true"></span>
+          <span class="dropzone__lead">Drag and drop an image, or choose one</span>
+          <span class="dropzone__hint">PNG, JPEG or WebP · up to 5MB</span>
+        </label>
+        <img class="dropzone__preview" id="image-preview" alt=""
+             src="{{ product.image_url or '' }}" {% if not product.image_url %}hidden{% endif %}>
+        <button class="dropzone__clear" type="button" data-dropzone-clear
+                {% if not product.image_url %}hidden{% endif %}>Remove</button>
+      </div>
+      <p class="dropzone__status" id="image-status" role="status"></p>
+      <label class="field__label" for="image_url">Image address</label>
+      <input class="input" id="image_url" name="image_url" value="{{ product.image_url or '' }}"
+             aria-describedby="image_note">
+      <p class="field__note" id="image_note">
+        An upload fills this in. Paste an address instead if the image already lives somewhere.
+      </p>
     </div>
     <div class="editor__actions">
       <button class="button" type="submit">{{ "Create and embed" if is_new else "Save and re-embed" }}</button>

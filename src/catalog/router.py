@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Form, HTTPException, Request, Response, status
+from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from src.auth.dependencies import AdminUser
-from src.catalog import service
+from src.catalog import service, uploads
 from src.catalog.constants import ADMIN_PAGE_SIZE
 from src.catalog.models import Product
-from src.catalog.schemas import Consistency, ProductId, ProductRead, ProductWrite
+from src.catalog.schemas import Consistency, ProductId, ProductRead, ProductWrite, Upload
 from src.constants import CATEGORIES, Ownership
 from src.database import SessionDep
 from src.rendering import page
@@ -127,6 +127,11 @@ async def remove_product(session: SessionDep, user: AdminUser, product_id: Produ
     if not await service.remove(session, product_id):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No such product")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@api_router.post("/uploads", status_code=status.HTTP_201_CREATED)
+async def upload_image(user: AdminUser, file: Annotated[UploadFile, File()]) -> Upload:
+    return Upload(image_url=await uploads.store(file))
 
 
 @api_router.post("/resync")

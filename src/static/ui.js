@@ -243,3 +243,87 @@ const enhanceSelect = (select) => {
 };
 
 document.querySelectorAll("select.input").forEach(enhanceSelect);
+
+const wireDropzone = (zone) => {
+  const input = zone.querySelector(".dropzone__input");
+  const preview = zone.querySelector(".dropzone__preview");
+  const clear = zone.querySelector("[data-dropzone-clear]");
+  const status = document.getElementById(input.getAttribute("aria-describedby"));
+  const address = document.getElementById("image_url");
+
+  const say = (message, state) => {
+    status.textContent = message;
+    if (state) status.dataset.state = state;
+    else delete status.dataset.state;
+  };
+
+  const show = (url) => {
+    address.value = url;
+    preview.src = url;
+    preview.hidden = false;
+    clear.hidden = false;
+  };
+
+  const send = async (file) => {
+    if (!file) return;
+    say(`Uploading ${file.name}`);
+    const body = new FormData();
+    body.append("file", file);
+    try {
+      const response = await fetch("/api/admin/uploads", { method: "POST", body });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        say(payload.detail || "That upload failed", "error");
+        return;
+      }
+      show(payload.image_url);
+      say("Stored", "done");
+    } catch {
+      say("That upload could not reach the server", "error");
+    }
+  };
+
+  input.addEventListener("change", () => send(input.files[0]));
+
+  clear.addEventListener("click", () => {
+    address.value = "";
+    preview.hidden = true;
+    preview.removeAttribute("src");
+    clear.hidden = true;
+    input.value = "";
+    say("");
+  });
+
+  address.addEventListener("input", () => {
+    const url = address.value.trim();
+    if (!url) {
+      preview.hidden = true;
+      clear.hidden = true;
+      return;
+    }
+    preview.src = url;
+    preview.hidden = false;
+    clear.hidden = false;
+  });
+
+  ["dragenter", "dragover"].forEach((name) =>
+    zone.addEventListener(name, (event) => {
+      event.preventDefault();
+      zone.classList.add("is-over");
+    })
+  );
+
+  ["dragleave", "dragend"].forEach((name) =>
+    zone.addEventListener(name, (event) => {
+      if (event.target === zone || !zone.contains(event.relatedTarget)) zone.classList.remove("is-over");
+    })
+  );
+
+  zone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    zone.classList.remove("is-over");
+    send(event.dataTransfer.files[0]);
+  });
+};
+
+document.querySelectorAll("[data-dropzone]").forEach(wireDropzone);
