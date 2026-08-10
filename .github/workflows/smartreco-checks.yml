@@ -1,9 +1,6 @@
 name: SmartReco Checks
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+on: [push]
 
 permissions:
   id-token: write      # required — without this the OIDC env vars do not exist
